@@ -3,7 +3,8 @@ import logging
 import sys
 
 
-def logger_setup():
+def logger_setup() -> None:
+    """Setup the logger."""
     root = logging.getLogger()
     root.setLevel(logging.INFO)
 

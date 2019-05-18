@@ -1,7 +1,7 @@
 """SourceBots API."""
 
-from .robot import __version__, Robot
 from .logging import logger_setup
+from .robot import Robot, __version__
 
 logger_setup()
 
