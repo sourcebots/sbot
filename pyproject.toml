@@ -1,8 +1,19 @@
 [tool.poetry]
 name = "sbot"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "Experimental SourceBots API"
 authors = ["Dan Trickey <dan@trickey.io>"]
+readme = "README.md"
+repository = "https://github.com/sourcebots/sbot"
+homepage = "https://sourcebots.co.uk"
+documentstion = "https://docs.sourcebots.co.uk"
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Typing :: Typed",
+    "Topic :: Education",
+]
 
 [tool.poetry.dependencies]
 python = "^3.6"
