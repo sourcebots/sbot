@@ -6,7 +6,7 @@ authors = ["Dan Trickey <dan@trickey.io>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-j5 = "^0.3.0"
+j5 = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

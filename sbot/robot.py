@@ -6,12 +6,12 @@ from j5 import __version__ as j5_version
 from j5 import BaseRobot, BoardGroup
 from j5.backends.hardware import HardwareEnvironment
 from j5.boards import Board
-from j5.boards.sr.v4 import MotorBoard, PowerBoard
+from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
 
 # See https://github.com/j5api/j5/issues/149
 import j5.backends.hardware.sr.v4 # noqa: F401
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +39,9 @@ class Robot(BaseRobot):
         self._motor_boards = BoardGroup(MotorBoard, HardwareEnvironment.get_backend(MotorBoard))
         self.motor_board: MotorBoard = self._motor_boards.singular()
 
-        # Todo: Add Servo Board when j5 supports it.
+        self._servo_boards = BoardGroup(ServoBoard, HardwareEnvironment.get_backend(ServoBoard))
+        self.servo_board: ServoBoard = self._servo_boards.singular()
+
         # Todo: Add Arduino when j5 supports it.
         # Todo: Add game context when j5 supports it.
 
