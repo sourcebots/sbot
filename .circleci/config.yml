@@ -1,0 +1,38 @@
+version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-3.6
+      - test-3.7
+
+jobs:
+  test-3.6: &template
+    docker:
+      - image: j5api/ci:3.6
+    steps:
+      - checkout
+      - run:
+          name: Merge with master
+          command: |
+            git config user.name "dummy"
+            git config user.email "dummy@example.org"
+            git fetch origin master
+            git merge --squash origin/master
+      - restore_cache:
+          keys:
+            - pip-packages-{{ .Branch }}-{{ checksum "poetry.lock" }}
+            - pip-packages-{{ .Branch }}-
+            - pip-packages-
+      - run: poetry install
+      - run: poetry run flake8 sbot tests
+      - run: poetry run mypy sbot tests
+      - run: poetry run pytest
+      - save_cache:
+          paths:
+            - /root/.cache/pypoetry/virtualenvs
+          key: pip-packages-{{ .Branch }}-{{ checksum "poetry.lock" }}
+  test-3.7:
+    <<: *template
+    docker:
+      - image: j5api/ci:3.7
