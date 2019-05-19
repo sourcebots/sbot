@@ -1,5 +1,8 @@
 # sbot
 
+[![CircleCI](https://circleci.com/gh/sourcebots/sbot.svg?style=svg)](https://circleci.com/gh/sourcebots/sbot)
+[![PyPI version](https://badge.fury.io/py/sbot.svg)](https://badge.fury.io/py/sbot)
+
 `sbot` - SourceBots Robot API - Powered by j5
 
 This is an experimental API for SourceBots, based on the [j5](https://github.com/j5api/j5)
