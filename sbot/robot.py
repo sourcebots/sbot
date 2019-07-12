@@ -1,6 +1,7 @@
 """SourceBots Robot Definition."""
 
 import logging
+from typing import cast
 
 # See https://github.com/j5api/j5/issues/149
 import j5.backends.hardware.sr.v4  # noqa: F401
@@ -9,6 +10,8 @@ from j5 import __version__ as j5_version
 from j5.backends.hardware import HardwareEnvironment
 from j5.boards import Board
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
+
+from . import metadata
 
 __version__ = "0.2.0"
 
@@ -48,7 +51,8 @@ class Robot(BaseRobot):
         self.servo_board: ServoBoard = self._servo_boards.singular()
 
         # Todo: Add Arduino when j5 supports it.
-        # Todo: Add game context when j5 supports it.
+
+        self.metadata = metadata.load()
 
         for board in Board.BOARDS:
             LOGGER.info(f"Found {board.name}, serial: {board.serial}")
@@ -56,6 +60,22 @@ class Robot(BaseRobot):
 
         if wait_start:
             self.wait_start()
+
+    @property
+    def zone(self) -> int:
+        """The robot's starting zone in the arena (0, 1, 2 or 3)."""
+        try:
+            return cast(int, self.metadata["zone"])
+        except KeyError:
+            raise metadata.MetadataKeyError("zone") from None
+
+    @property
+    def is_competition(self) -> bool:
+        """Whether the robot is in a competition or development environment."""
+        try:
+            return cast(bool, self.metadata["is_competition"])
+        except KeyError:
+            raise metadata.MetadataKeyError("is_competition") from None
 
     def wait_start(self) -> None:
         """Wait for the start button to be pressed."""
