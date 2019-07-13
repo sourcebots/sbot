@@ -14,14 +14,14 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 
-from sbot import __version__
+# from sbot import __version__
 
 # -- Project information -----------------------------------------------------
 
 project = 'SBot'
 copyright = '2019, SourceBots'
 author = 'SourceBots'
-release = __version__
+release = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
 
