@@ -7,6 +7,7 @@ Kit
 
    motor-board
    power-board
+   servo-board
 
 Overview
 ------
@@ -19,18 +20,6 @@ interface with your kit.
 ================================== ================================== ================================== ========================== ==========================
 |Motor Board|                      |Power Board|                      |Servo Board|                      |Arduino|                  |Pi|
 ================================== ================================== ================================== ========================== ==========================
-
-With your kit, you should have the following boards:
-
-============================= ========
-Part                          Quantity
-============================= ========
-`Raspberry Pi <pi>`__         1
-`Motor Board <motor-board>`__ 1
-`Power Board <power-board>`__ 1
-`Servo Board <servo-board>`__ 1
-`Arduino <arduino>`__         1
-============================= ========
 
 Other Parts
 -----------
