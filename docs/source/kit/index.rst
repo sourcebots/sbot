@@ -8,6 +8,7 @@ Kit
    motor-board
    power-board
    servo-board
+   arduino
 
 Overview
 ------
