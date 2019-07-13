@@ -9,6 +9,7 @@ Kit
    power-board
    servo-board
    arduino
+   pi
 
 Overview
 ------
