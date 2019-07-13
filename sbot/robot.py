@@ -32,6 +32,16 @@ class Robot(BaseRobot):
         LOGGER.debug("Debug Mode is enabled")
         LOGGER.debug(f"j5 Version: {j5_version}")
 
+        self._init_power_board()
+        self._init_auxilliary_boards()
+        self._dump_boards()
+
+        self.metadata = metadata.load()
+
+        if wait_start:
+            self.wait_start()
+
+    def _init_power_board(self) -> None:
         self._power_boards = BoardGroup[PowerBoard](
             HardwareEnvironment.get_backend(PowerBoard),
         )
@@ -40,6 +50,7 @@ class Robot(BaseRobot):
         # Power on robot, so that we can find other boards.
         self.power_board.outputs.power_on()
 
+    def _init_auxillary_boards(self) -> None:
         self._motor_boards = BoardGroup[MotorBoard](
             HardwareEnvironment.get_backend(MotorBoard),
         )
@@ -52,14 +63,10 @@ class Robot(BaseRobot):
 
         # Todo: Add Arduino when j5 supports it.
 
-        self.metadata = metadata.load()
-
+    def _dump_boards(self) -> None:
         for board in Board.BOARDS:
             LOGGER.info(f"Found {board.name}, serial: {board.serial}")
             LOGGER.debug(f"Firmware Version of {board.serial}: {board.firmware_version}")
-
-        if wait_start:
-            self.wait_start()
 
     @property
     def zone(self) -> int:
