@@ -5,10 +5,11 @@ Kit
    :maxdepth: 1
    :caption: Quick Links:
 
+   arduino
+   battery
    motor-board
    power-board
    servo-board
-   arduino
    pi
 
 Overview
