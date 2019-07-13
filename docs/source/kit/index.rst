@@ -6,6 +6,7 @@ Kit
    :caption: Quick Links:
 
    motor-board
+   power-board
 
 Overview
 ------
