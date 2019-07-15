@@ -42,7 +42,7 @@ class Robot(BaseRobot):
 
         self._init_power_board()
         self._init_auxilliary_boards()
-        self._dump_boards()
+        self._log_connected_boards()
 
         self.metadata = metadata.load()
 
@@ -84,7 +84,7 @@ class Robot(BaseRobot):
             else:
                 return None
 
-    def _dump_boards(self) -> None:
+    def _log_connected_boards(self) -> None:
         for board in Board.BOARDS:
             LOGGER.info(f"Found {board.name}, serial: {board.serial}")
             LOGGER.debug(f"Firmware Version of {board.serial}: {board.firmware_version}")
