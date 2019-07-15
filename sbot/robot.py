@@ -1,6 +1,7 @@
 """SourceBots Robot Definition."""
 
 import logging
+from datetime import timedelta
 from typing import Optional, TypeVar, cast
 
 # See https://github.com/j5api/j5/issues/149
@@ -11,6 +12,7 @@ from j5.backends import CommunicationError
 from j5.backends.hardware import HardwareEnvironment
 from j5.boards import Board
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
+from j5.components.piezo import Note
 
 from . import metadata
 
@@ -106,4 +108,5 @@ class Robot(BaseRobot):
     def wait_start(self) -> None:
         """Wait for the start button to be pressed."""
         LOGGER.info("Waiting for start button.")
+        self.power_board.piezo.buzz(timedelta(seconds=0.1), Note.A6)
         self.power_board.wait_for_start_flash()
