@@ -48,7 +48,7 @@ pins of the Arduino respectively. The trigger and echo pins should be
 attached to two different digital IO pins. Take note of these two pins,
 you’ll need them to use the sensor.
 
-.. Hint:: If the sensor always returns a distance of zero, it means the *trigger* and *echo* pins are connected the wrong way! Either change the pin numbers in the code, or swap the connections.
+.. Hint:: If the sensor always returns a distance of zero, it might mean the *trigger* and *echo* pins are connected the wrong way! Either change the pin numbers in the code, or swap the connections.
 
 Designs
 -------
