@@ -82,6 +82,8 @@ class Robot(BaseRobot):
             if self._require_all_boards:
                 raise
             else:
+                board_name = board_group.backend_class.board.__name__
+                LOGGER.info(f"Did not find a {board_name} (not required)")
                 return None
 
     def _log_connected_boards(self) -> None:
