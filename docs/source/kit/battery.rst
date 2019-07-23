@@ -20,14 +20,8 @@ times.
 Warnings
 --------
 
--  Never leave batteries unattended when they are in use or charging.
--  Always place the batteries in the provided charging bag when charging
-   or storing.
--  Always follow the charging checklist precisely to make sure the
-   charger is correctly configured.
--  Always leave the charging leads connected to the battery charger at
-   all times.
--  Do not charge or use a damaged battery.
+-  Never leave batteries unattended when they are in use.
+-  Always place the batteries in the provided bag when not in use.
 -  If a battery has any cuts, nicks, exposed copper on wires or is
    bulging to the point of no longer being squishy, contact us
    immediately.
@@ -71,6 +65,7 @@ Flat batteries
 
 When the battery has been almost completely discharged, the Power Board
 will automatically turn off and the LED marked “Power / Flat Battery
-Indicator” in the `diagram </kit/power-board>`__ will
-flash red and green. You should immediately disconnect the battery.
-
+Indicator” in the `diagram </kit/power-board.html>`__ will
+flash red and green. You should immediately disconnect the battery. Flat
+batteries should be given to a faciliator in exchange for a freshly charged
+battery.

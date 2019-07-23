@@ -20,6 +20,6 @@ Your robot is running a customised version of the Raspbian_ operating system.
 
 When a USB stick is inserted, the SourceBots software will look for a *main.py*, and then execute it.
 
-The output of your code is logged to the *systemd journal*, and also written to a file on the USB stick.
+The output of your code is written to a ``log.txt`` on the USB stick, and also logged to the *systemd journal*.
 
 .. _Raspbian: https://www.raspbian.org/

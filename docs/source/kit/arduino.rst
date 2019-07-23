@@ -26,8 +26,6 @@ GPIO Pins
 
 The Arduino allows you to connect your kit to your own electronics. It has fourteen digital I/O pins, and six analogue. The analogue pins can read an analogue signal from 0 to 5V. The board also has a couple of ground pins, as well as some pins fixed at 3.3V and 5V output.
 
-The pin layout of the servo assembly is the same as an Arduino Uno.
-
 .. figure:: /_static/kit/arduino_pinout.png
    :alt: Pin Map
    :scale: 20%
@@ -58,6 +56,5 @@ well as the source code of the firmware on the Arduino. You do not need
 this information to use the board but it may be of interest to some
 people.
 
--  `Arduino Uno
-   Schematic <https://www.arduino.cc/en/uploads/Main/Arduino_Uno_Rev3-schematic.pdf>`__
+-  `Arduino Uno Schematic </_static/kit/arduino_schematic.pdf>`__
 -  `Firmware Source <https://github.com/sourcebots/servo-firmware>`__

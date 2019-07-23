@@ -29,8 +29,7 @@ can also be used to power other devices. These are enabled when your
 robot code is started and can also be turned on or off from your code.
 
 There are two 5V connectors that can be used to connect low-current
-devices that take 5V inputs, such as the Raspberry Pi and the servo
-shield.
+devices that take 5V inputs, such as the Raspberry Pi.
 
 There is also a Micro USB B connector which should be used to connect
 the Raspberry Pi for control of the power board.
