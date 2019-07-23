@@ -19,6 +19,7 @@ from j5.boards.zoloto import ZolotoCameraBoard
 from j5.components.piezo import Note
 
 from . import metadata
+from .vision import SbotCameraBackend
 
 __version__ = "0.2.0"
 
@@ -86,10 +87,10 @@ class Robot(BaseRobot):
         )
 
         self._cameras = BoardGroup[ZolotoCameraBoard](
-            HardwareEnvironment.get_backend(ZolotoCameraBoard),
+            SbotCameraBackend,
         )
 
-        self.camera: Optional[ZolotoCameraBoard] = (
+        self._camera: Optional[ZolotoCameraBoard] = (
             self._get_optional_board(self._cameras)
         )
 
