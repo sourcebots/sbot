@@ -5,16 +5,21 @@ from datetime import timedelta
 from typing import Optional, TypeVar, cast
 
 # See https://github.com/j5api/j5/issues/149
+import j5.backends.hardware.sb.arduino  # noqa: F401
 import j5.backends.hardware.sr.v4  # noqa: F401
+import j5.backends.hardware.zoloto  # noqa: F401
 from j5 import BaseRobot, BoardGroup
 from j5 import __version__ as j5_version
 from j5.backends import CommunicationError
 from j5.backends.hardware import HardwareEnvironment
 from j5.boards import Board
+from j5.boards.sb import SBArduinoBoard
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
+from j5.boards.zoloto import ZolotoCameraBoard
 from j5.components.piezo import Note
 
 from . import metadata
+from .vision import SbotCameraBackend
 
 __version__ = "0.2.0"
 
@@ -73,7 +78,21 @@ class Robot(BaseRobot):
             self._get_optional_board(self._servo_boards)
         )
 
-        # Todo: Add Arduino when j5 supports it.
+        self._arduinos = BoardGroup[SBArduinoBoard](
+            HardwareEnvironment.get_backend(SBArduinoBoard),
+        )
+
+        self.arduino: Optional[SBArduinoBoard] = (
+            self._get_optional_board(self._arduinos)
+        )
+
+        self._cameras = BoardGroup[ZolotoCameraBoard](
+            SbotCameraBackend,
+        )
+
+        self._camera: Optional[ZolotoCameraBoard] = (
+            self._get_optional_board(self._cameras)
+        )
 
     def _get_optional_board(self, board_group: BoardGroup[T]) -> Optional[T]:
         try:
