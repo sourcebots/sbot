@@ -1,0 +1,12 @@
+--2019-07-23 17:27:48--  https://www.arduino.cc/en/uploads/Main/Arduino_Uno_Rev3-schematic.pdf
+Resolving www.arduino.cc (www.arduino.cc)... 104.20.190.47, 104.20.191.47, 2606:4700:10::6814:be2f, ...
+Connecting to www.arduino.cc (www.arduino.cc)|104.20.190.47|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 83339 (81K) [application/pdf]
+Saving to: ‘Arduino_Uno_Rev3-schematic.pdf’
+
+     0K .......... .......... .......... .......... .......... 61% 3.08M 0s
+    50K .......... .......... .......... .                    100% 12.0M=0.02s
+
+2019-07-23 17:27:48 (4.32 MB/s) - ‘Arduino_Uno_Rev3-schematic.pdf’ saved [83339/83339]
+
