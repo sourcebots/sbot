@@ -16,6 +16,7 @@ from j5.boards import Board
 from j5.boards.sb import SBArduinoBoard
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
 from j5.boards.zoloto import ZolotoCameraBoard
+from j5.components import MarkerCamera
 from j5.components.piezo import Note
 
 from . import metadata
@@ -111,6 +112,16 @@ class Robot(BaseRobot):
             LOGGER.debug(f"Firmware Version of {board.serial}: {board.firmware_version}")
 
     @property
+    def camera(self) -> Optional[MarkerCamera]:
+        """Alias to the camera."""
+        if self._camera is None:
+            return None
+        else:
+            return self._camera.camera
+
+    # Metadata
+
+    @property
     def zone(self) -> int:
         """The robot's starting zone in the arena (0, 1, 2 or 3)."""
         try:
@@ -125,6 +136,8 @@ class Robot(BaseRobot):
             return cast(bool, self.metadata["is_competition"])
         except KeyError:
             raise metadata.MetadataKeyError("is_competition") from None
+
+    # Custom functionality
 
     def wait_start(self) -> None:
         """Wait for the start button to be pressed."""

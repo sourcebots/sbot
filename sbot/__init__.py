@@ -1,5 +1,6 @@
 """SourceBots API."""
 
+from j5.components.gpio_pin import GPIOPinMode
 from j5.components.motor import MotorSpecialState
 
 from .logging import logger_setup
@@ -14,5 +15,6 @@ __all__ = [
     "__version__",
     "BRAKE",
     "COAST",
+    "GPIOPinMode",
     "Robot",
 ]
