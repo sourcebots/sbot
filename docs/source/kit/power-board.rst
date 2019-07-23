@@ -51,8 +51,8 @@ Indicators
 |         |                                                     | power-up |
 |         |                                                     | state    |
 +=========+=====================================================+==========+
-| PWR |   | Green when poweredFlashing red and green when the   | Green    |
-| FLAT    | battery is low                                      |          |
+| PWR |   | Green when powered                                  | Green    |
+| FLAT    | Flashing red and green when the battery is low      |          |
 +---------+-----------------------------------------------------+----------+
 | 5V      | Green when 5V is being supplied                     | Green    |
 +---------+-----------------------------------------------------+----------+
@@ -68,7 +68,7 @@ On power-up, the Power Board will emit some beeps, which are related to
 the version of the firmware it has installed.
 
 If the Power Board starts beeping (and all the outputs turn off) then
-this means that the whole board’s current limit has been triggered.
+this means that the whole board's current limit has been triggered.
 
 Controls
 --------
