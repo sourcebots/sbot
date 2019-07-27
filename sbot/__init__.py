@@ -2,6 +2,7 @@
 
 from j5.components.gpio_pin import GPIOPinMode
 from j5.components.motor import MotorSpecialState
+from j5.components.piezo import Note
 
 from .logging import logger_setup
 from .robot import Robot, __version__
@@ -16,5 +17,6 @@ __all__ = [
     "BRAKE",
     "COAST",
     "GPIOPinMode",
+    "Note",
     "Robot",
 ]
