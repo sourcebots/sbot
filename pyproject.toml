@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sbot"
-version = "0.3.0"
+version = "0.4.0"
 description = "Experimental SourceBots API"
 authors = ["Dan Trickey <dan@trickey.io>"]
 readme = "README.md"
@@ -17,7 +17,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-j5 = "^0.6.0"
+j5 = "^0.7.0"
 
 
 [tool.poetry.dev-dependencies]
