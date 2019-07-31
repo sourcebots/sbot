@@ -20,6 +20,7 @@ from j5.components import MarkerCamera
 from j5.components.piezo import Note
 
 from . import metadata
+from .timeout import kill_after_delay
 from .vision import SbotCameraBackend
 
 __version__ = "0.4.0"
@@ -144,3 +145,7 @@ class Robot(BaseRobot):
         LOGGER.info("Waiting for start button.")
         self.power_board.piezo.buzz(timedelta(seconds=0.1), Note.A6)
         self.power_board.wait_for_start_flash()
+        LOGGER.info("Start button pressed.")
+
+        if self.is_competition:
+            kill_after_delay(180)
