@@ -57,7 +57,8 @@ def test_load_bad_file() -> None:
     data_path = Path(__file__).parent.joinpath("test_data", "bad")
     environ[METADATA_ENV_VAR] = str(data_path.absolute())
 
-    load()
+    with raises(RuntimeError):
+        load()
 
 
 def test_load_bad_data() -> None:

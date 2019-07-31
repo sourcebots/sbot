@@ -65,7 +65,10 @@ def _find_file(search_path: str) -> Optional[str]:
 
 def _read_file(path: str) -> Dict[str, Any]:
     with open(path) as file:
-        obj = json.load(file)
+        try:
+            obj = json.load(file)
+        except json.decoder.JSONDecodeError:
+            raise RuntimeError("Unable to decode metadata. Ask a volunteer for help.")
     if isinstance(obj, dict):
         return obj
     else:
