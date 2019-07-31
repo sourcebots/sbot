@@ -55,7 +55,7 @@ class Robot(BaseRobot):
             "zone": 0,
         }
 
-        self.metadata = metadata.load(default_metadata)
+        self.metadata = metadata.load(fallback=default_metadata)
 
         if wait_start:
             self.wait_start()

@@ -36,7 +36,7 @@ class MetadataKeyError(KeyError):
         return f"Key {self.key!r} not present in metadata, or no metadata was available"
 
 
-def load(fallback: Dict[str, Any] = {}) -> Dict[str, Any]:
+def load(*, fallback: Dict[str, Any] = {}) -> Dict[str, Any]:
     """
     Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it.
 
