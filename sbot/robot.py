@@ -27,6 +27,8 @@ __version__ = "0.4.0"
 
 LOGGER = logging.getLogger(__name__)
 
+GAME_LENGTH = 180
+
 T = TypeVar("T", bound=Board)
 
 
@@ -148,4 +150,4 @@ class Robot(BaseRobot):
         LOGGER.info("Start button pressed.")
 
         if self.is_competition:
-            kill_after_delay(180)
+            kill_after_delay(GAME_LENGTH)
