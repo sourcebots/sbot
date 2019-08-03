@@ -17,6 +17,7 @@ multiple backends, although should be more reliable as there is no `UNIX-AF` soc
 Once published:
 
 Install: `pip install sbot`
+Install with vision support: `pip install sbot j5[zoloto-vision]`
 
 ## Usage
 
