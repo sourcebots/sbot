@@ -36,8 +36,12 @@ class MetadataKeyError(KeyError):
         return f"Key {self.key!r} not present in metadata, or no metadata was available"
 
 
-def load() -> Dict[str, Any]:
-    """Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it."""
+def load(*, fallback: Dict[str, Any] = {}) -> Dict[str, Any]:
+    """
+    Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it.
+
+    If no file is found, it falls back to the `fallback` dict.
+    """
     search_path = os.environ.get(METADATA_ENV_VAR)
     if search_path:
         path = _find_file(search_path)
@@ -48,7 +52,7 @@ def load() -> Dict[str, Any]:
             LOGGER.info(f"No JSON metadata files found in {search_path}")
     else:
         LOGGER.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
-    return {}
+    return fallback
 
 
 def _find_file(search_path: str) -> Optional[str]:
@@ -61,7 +65,10 @@ def _find_file(search_path: str) -> Optional[str]:
 
 def _read_file(path: str) -> Dict[str, Any]:
     with open(path) as file:
-        obj = json.load(file)
+        try:
+            obj = json.load(file)
+        except json.decoder.JSONDecodeError:
+            raise RuntimeError("Unable to decode metadata. Ask a volunteer for help.")
     if isinstance(obj, dict):
         return obj
     else:

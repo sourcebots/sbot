@@ -2,7 +2,7 @@
 
 import logging
 from datetime import timedelta
-from typing import Optional, TypeVar, cast
+from typing import Any, Dict, Optional, TypeVar, cast
 
 # See https://github.com/j5api/j5/issues/149
 import j5.backends.hardware.sb.arduino  # noqa: F401
@@ -53,7 +53,12 @@ class Robot(BaseRobot):
         self._init_auxilliary_boards()
         self._log_connected_boards()
 
-        self.metadata = metadata.load()
+        default_metadata: Dict[str, Any] = {
+            "is_competition": False,
+            "zone": 0,
+        }
+
+        self.metadata = metadata.load(fallback=default_metadata)
 
         if wait_start:
             self.wait_start()
