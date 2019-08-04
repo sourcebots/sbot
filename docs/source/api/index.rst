@@ -5,6 +5,7 @@ API
    :titlesonly:
    :caption: Quick Links:
    
+   arduino
    motor-board
    power-board
    servo-board
