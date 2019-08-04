@@ -1,5 +1,5 @@
-Kit
-===
+Kit Documentation
+=================
 
 .. toctree::
    :maxdepth: 1

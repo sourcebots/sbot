@@ -1,5 +1,5 @@
-API
-===
+API Documentation
+=================
 
 .. toctree::
    :titlesonly:
