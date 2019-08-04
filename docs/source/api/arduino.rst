@@ -115,3 +115,20 @@ servo board. This will give you the value of all analogue pins.
 
 .. Hint:: The values are the voltages read on the pins,
    between 0 and 5.
+
+Ultrasound Sensors
+------------------
+
+You can also measure distance using an ultrasound sensor from the arduino.
+
+.. code:: python
+   
+   # TX: 4
+   # RX: 5
+   u = r.get_ultrasound(4, 5)
+
+   time_taken = u.pulse()
+
+   distance_metres = u.distance()
+
+.. Warning:: If the ultrasound signal never returns, the sensor will timeout and return ``None``.
