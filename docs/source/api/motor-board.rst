@@ -4,15 +4,15 @@ Motor Board API
 The kit can control multiple motors simultaneously. One Motor Board can
 control up to two motors.
 
-Accessing Motor Boards
-----------------------
+Accessing the Motor Board
+-------------------------
 
 The motor board can be accessed using the ``motor_board`` property of
 the ``Robot`` object.
 
 .. code:: python
 
-   motor_board = r.motor_board
+   my_motor_board = r.motor_board
 
 This board object has an array containing the motors connected to it,
 which can be accessed as ``motor[0]`` and ``motor[1]``. The Motor Board is labelled so you know which

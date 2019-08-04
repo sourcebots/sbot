@@ -7,6 +7,7 @@ API
    
    motor-board
    power-board
+   servo-board
 
 Programming your robot is done in `Python <https://www.python.org/>`__,
 specifically version 3.7.4. You can learn more about Python from their
