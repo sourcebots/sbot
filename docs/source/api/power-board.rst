@@ -80,7 +80,8 @@ The ``Note`` Enum provides notes in `Scientific Pitch Notation
 .. Hint:: Calling ``buzz`` is non-blocking. Meaning it doesn’t
    actually wait for the piezo to stop buzzing before continuing with your
    code. If you want duration to wait for the buzzing to stop, add a
-   ``sleep`` afterwards!
+   ``sleep`` afterwards! If you send more than 32 beeps to the robot too 
+   quickly, your power board will crash!
 
 .. code:: python
 
@@ -92,8 +93,6 @@ The ``Note`` Enum provides notes in `Scientific Pitch Notation
    # Buzz for 2 seconds at 400Hz
    r.power_board.piezo.buzz(2, 400)
 
-.. Warning:: Trying to play a note that isn't in the range ``C6`` - ``C8``
-   will range an ``AttributeError``. Try using frequencies instead!
 
 Start Button
 ------------
