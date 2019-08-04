@@ -2,8 +2,10 @@ API
 ===
 
 .. toctree::
-   :maxdepth: 1
+   :titlesonly:
    :caption: Quick Links:
+   
+   power-board
 
 
 Programming your robot is done in `Python <https://www.python.org/>`__,
