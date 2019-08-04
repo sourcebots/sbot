@@ -11,7 +11,7 @@ the ``Robot`` object.
 Power outputs
 -------------
 
-The six outputs of the power board are grouped together as ``power_board.outputs``
+The six outputs of the power board are grouped together as ``power_board.outputs``.
 
 The power board’s six outputs can be turned on and off using the
 ``power_on`` and ``power_off`` functions of the group respectively.
@@ -60,12 +60,12 @@ This can be useful for checking the charge status of your battery.
 Buzzing 🐝
 --------
 
-The power board has a piezo buzzer which can buzz.
+The power board has a piezo sounder which can buzz.
 
 The ``buzz`` function accepts multiple parameters, depending on what you
 want to play. The first argument is the duration of the beep, in
 seconds. The later arguments are either the note you want to play, or
-the frequency of the buzzer (in Hz). You have to specify which of note
+the frequency of the buzzer (in Hertz). You have to specify which of note
 or frequency you’re passing using a keyword argument, your code will
 fail otherwise.
 
@@ -73,13 +73,13 @@ Theoretically, the piezo buzzer will buzz at any provided frequency,
 however humans can only hear between `20Hz and
 20000Hz <https://en.wikipedia.org/wiki/Hearing_range#Humans>`__.
 
-The ``Note`` Enum provides notes in `Scientific Pitch Notation
+The ``Note`` enum provides notes in `scientific pitch notation
 <https://en.wikipedia.org/wiki/Scientific_pitch_notation>`__ between
 ``C6`` and ``C8``. You can play other tones by providing a frequency.
 
-.. Hint:: Calling ``buzz`` is non-blocking. Meaning it doesn’t
+.. Hint:: Calling ``buzz`` is non-blocking, which means it doesn’t
    actually wait for the piezo to stop buzzing before continuing with your
-   code. If you want duration to wait for the buzzing to stop, add a
+   code. If you want to wait for the buzzing to stop, add a
    ``sleep`` afterwards! If you send more than 32 beeps to the robot too 
    quickly, your power board will crash!
 

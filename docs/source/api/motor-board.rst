@@ -15,13 +15,13 @@ the ``Robot`` object.
    my_motor_board = r.motor_board
 
 This board object has an array containing the motors connected to it,
-which can be accessed as ``motor[0]`` and ``motor[1]``. The Motor Board is labelled so you know which
+which can be accessed as ``motors[0]`` and ``motors[1]``. The Motor Board is labelled so you know which
 motor is which.
 
 .. code:: python
 
-   r.motor_board.motor[0]
-   r.motor_board.motor[1]
+   r.motor_board.motors[0]
+   r.motor_board.motors[1]
 
 Powering motors
 ---------------
@@ -55,7 +55,7 @@ Special values
 
 In addition to the numeric values, there are two special constants that
 can be used: ``BRAKE`` and ``COAST``. In order to use these, they must
-be imported from the ``robot`` module like so:
+be imported from the ``sbot`` module like so:
 
 .. code:: python
 
@@ -90,4 +90,5 @@ continue moving under the momentum they had before.
 .. Warning:: Sudden large changes in the motor speed setting
    (e.g. ``-1`` to ``0``, ``1`` to ``-1`` etc.) will likely trigger the
    over-current protection and your robot will shut down with a distinct beeping
-   noise.
+   noise and/or a red light next to the power board output that is powering
+   the motor board.

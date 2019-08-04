@@ -15,7 +15,7 @@ the ``Robot`` object.
    my_servo_board = r.servo_board
 
 This board object has an array containing the servos connected to it,
-which can be accessed as ``servo[0]``, ``servo[1]``, ``servo[2]``, etc. 
+which can be accessed as ``servos[0]``, ``servos[1]``, ``servos[2]``, etc. 
 The servo board is labelled so you know which servo is which.
 
 .. Hint:: Remember that arrays start counting at 0.
