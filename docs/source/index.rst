@@ -10,6 +10,7 @@ There are a number of sections in the documentation offering help for the kit an
    :maxdepth: 1
    :caption: Contents:
 
+   api/index
    kit/index
 
 How to use the docs
