@@ -10,6 +10,8 @@ API
    power-board
    servo-board
 
+   game-state
+
 Programming your robot is done in `Python <https://www.python.org/>`__,
 specifically version 3.7.4. You can learn more about Python from their
 `docs <https://docs.python.org/3/>`__, and our whirlwind tour.
@@ -99,3 +101,13 @@ which can be read using the ``serial`` property:
    >>> 'S1'
    r.motor_board.serial
    >>> 'M1'
+
+Included Libraries
+------------------
+
+Python already comes with plenty of `built-in
+libraries <https://docs.python.org/3.7/py-modindex.html>`__
+to use. We install some extra ones which may be of use:
+
+-  `numpy <https://pypi.python.org/pypi/numpy>`__
+-  `scipy <https://pypi.python.org/pypi/scipy>`__
