@@ -18,7 +18,7 @@ The reset button
 ----------------
 
 The reset button allows you to instantly reboot the Arduino in case it
-isn’t working. This is not a guaranteed fix, but may solve some
+isn't working. This is not a guaranteed fix, but may solve some
 problems.
 
 GPIO Pins
@@ -44,7 +44,7 @@ The sensor has four pin connections: ground, 5V (sometimes labelled
 pin is which. The ground and 5V should be wired to the ground and 5V
 pins of the Arduino respectively. The trigger and echo pins should be
 attached to two different digital IO pins. Take note of these two pins,
-you’ll need them to use the sensor.
+you'll need them to use the sensor.
 
 .. Hint:: If the sensor always returns a distance of zero, it might mean the *trigger* and *echo* pins are connected the wrong way! Either change the pin numbers in the code, or swap the connections.
 

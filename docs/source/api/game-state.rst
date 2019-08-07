@@ -33,4 +33,4 @@ number, which you can access with the ``zone`` property:
    >> 2
 
 During a competition match, a USB drive will be used to tell your robot
-which corner it’s in. By default, during development, this is ``0``.
+which corner it's in. By default, during development, this is ``0``.

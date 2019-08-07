@@ -58,5 +58,5 @@ will turn to for a given pulse width. To be able to handle the widest
 range of all servos our hardware outputs a very wide range of pulse
 widths which in some cases will force the servo to try and turn past its
 internal end-stops. You should experiment and find what the actual limit
-of your servos are (it almost certainly won’t be -1 and 1) and not
+of your servos are (it almost certainly won't be -1 and 1) and not
 drive them past that.

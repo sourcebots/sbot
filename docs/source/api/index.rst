@@ -29,7 +29,7 @@ kit:
    r = Robot()
 
 Once this has been done, this ``Robot`` object can be used to control
-the robot’s functions.
+the robot's functions.
 
 The remainder of the tutorials pages will assume your ``Robot`` object
 is defined as ``r``.
@@ -50,7 +50,7 @@ You can then reinsert the USB drive into the robot and it will run your
 test them quickly.
 
 .. Hint:: If this file is missing or incorrectly named, your
-  robot won’t do anything. No log file will be created.
+  robot won't do anything. No log file will be created.
 
 Start Button
 ------------
@@ -81,7 +81,7 @@ Logs
 ----
 
 A log file is saved on the USB drive so you can see what your robot did,
-what it didn’t do, and any errors it raised. The file is saved to
+what it didn't do, and any errors it raised. The file is saved to
 ``log.txt`` in the top-level directory of the USB drive.
 
 .. Warning:: The previous log file is deleted at the start of

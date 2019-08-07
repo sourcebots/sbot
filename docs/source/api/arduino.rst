@@ -25,7 +25,7 @@ Pin mode
 --------
 
 GPIO pins have four different modes. A pin can only have one mode at a
-time, and some pins aren’t compatible with certain modes. These pin
+time, and some pins aren't compatible with certain modes. These pin
 modes are represented by an
 `enum <https://docs.python.org/3/library/enum.html>`__ which needs to be
 imported before they can be used.
