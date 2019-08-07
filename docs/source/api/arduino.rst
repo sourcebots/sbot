@@ -17,7 +17,7 @@ the ``Robot`` object.
    my_arduino = r.arduino
 
 You can use the GPIO *(General Purpose Input/Output)* pins for anything,
-from microswitches to LEDs. GPIO is only available on pins 2 to 12, and A0 to A5
+from microswitches to LEDs. GPIO is only available on pins 2 to 13 and A0 to A5
 because pins 0 and 1 are reserved for communication with the rest of our
 kit.
 
@@ -97,7 +97,7 @@ Analogue pins
 -------------
 
 Certain sensors output analogue signals rather than digital ones, and so
-have to be read differently. The servo assembly has six analogue inputs,
+have to be read differently. The arduino has six analogue inputs,
 of which four (analogue pins 4 and 5) are reserved for communication
 between the Arduino and the servo shield.
 
@@ -123,9 +123,9 @@ You can also measure distance using an ultrasound sensor from the arduino.
 
 .. code:: python
    
-   # TX: 4
-   # RX: 5
-   u = r.get_ultrasound(4, 5)
+   # Trigger pin: 4
+   # Echo pin: 5
+   u = r.arduino.ultrasound_sensors[4, 5]
 
    time_taken = u.pulse()
 

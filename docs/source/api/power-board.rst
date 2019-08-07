@@ -105,4 +105,4 @@ the start.
    r.power_board.wait_start()
 
 This may be useful for debugging, but be sure to remove it in the
-competition, as your robot can’t be interacted with!
+competition, as you won't be allowed to touch the start button after a match has begun!

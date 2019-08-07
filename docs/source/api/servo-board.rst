@@ -28,10 +28,10 @@ The position of servos can range from ``-1`` to ``1`` inclusive:
 .. code:: python
 
    # set servo 1's position to 0.2
-   r.servo_board.servos.position[1] = 0.2
+   r.servo_board.servos[1].position = 0.2
 
    # Set servo 2's position to -0.55
-   r.servo_board.servos.position[2] = -0.55
+   r.servo_board.servos[2].position = -0.55
 
 You can read the last value a servo was set to using similar code:
 

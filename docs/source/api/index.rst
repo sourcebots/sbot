@@ -65,7 +65,7 @@ Running Code before pressing the start button
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to do things before the start button press, such as setting
-up servos or motors, you can pass ``wait_start``. You will
+up servos or motors, you can pass ``wait_start`` to the ``Robot`` constructor. You will
 then need to wait for the start button 
 `manually <kit/power-board/#start-button>`__.
 
@@ -96,11 +96,11 @@ which can be read using the ``serial`` property:
 .. code:: python
 
    r.power_board.serial
-   >>> 'P1'
+   >>> 'SRO-AA2-7XS'
    r.servo_board.serial
-   >>> 'S1'
+   >>> 'SRO-AA4-LG2'
    r.motor_board.serial
-   >>> 'M1'
+   >>> 'SRO-AAO-RV2'
 
 Included Libraries
 ------------------
