@@ -57,7 +57,7 @@ Indicators
 | 5V      | Green when 5V is being supplied                     | Green    |
 +---------+-----------------------------------------------------+----------+
 | H0-1,   | Green when the corresponding output is on  [1]_Red  | Off      |
-| L0-3    | when the output’s current limit is reached          |          |
+| L0-3    | when the output's current limit is reached          |          |
 +---------+-----------------------------------------------------+----------+
 | RUN |   | Orange on power-up, or USB reset Flashing green     | Orange   |
 | ERROR   | when ready to run Solid green when running or       |          |
@@ -87,7 +87,7 @@ Controls
 Case dimensions
 ---------------
 
-The case measures 83x99x24mm. Don’t forget that the cables will stick
+The case measures 83x99x24mm. Don't forget that the cables will stick
 out.
 
 Specification
