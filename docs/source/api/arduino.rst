@@ -21,19 +21,6 @@ from microswitches to LEDs. GPIO is only available on pins 2 to 13 and A0 to A5
 because pins 0 and 1 are reserved for communication with the rest of our
 kit.
 
-Setting the pin mode
---------------------
-
-So that we can use the pins on the Arduino in different ways, it supports a number 
-of different pin modes. You will need to ensure that the pin is in the correct pin 
-mode before performing an action with that pin.
-
-.. code:: python
-
-   from robot import PinMode
-
-   r.arduino.pins[3].mode = PinMode.INPUT_PULLUP
-
 Pin mode
 --------
 
@@ -50,6 +37,18 @@ imported before they can be used.
 .. Hint:: The input modes closely resemble those of an
    Arduino. More information on them can be found in `their
    docs <https://www.arduino.cc/en/Tutorial/DigitalPins>`__.
+
+
+Setting the pin mode
+~~~~~~~~~~~~~~~~~~~~
+
+You will need to ensure that the pin is in the correct pin 
+mode before performing an action with that pin. You can read
+about the possible pin modes below.
+
+.. code:: python
+
+   r.arduino.pins[3].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
 
 
 ``GPIOPinMode.DIGITAL_INPUT``
