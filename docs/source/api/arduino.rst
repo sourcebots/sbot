@@ -61,7 +61,7 @@ can be read.
    
    r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT
 
-   pin_value = r.arduinos.pins[4].digital_state
+   pin_value = r.arduino.pins[4].digital_state
 
 
 ``GPIOPinMode.DIGITAL_INPUT_PULLUP``
@@ -75,7 +75,7 @@ enabled.
    
    r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
 
-   pin_value = r.arduinos.pins[4].digital_state
+   pin_value = r.arduino.pins[4].digital_state
 
 ``GPIOPinMode.DIGITAL_OUTPUT``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,8 +87,8 @@ In this mode, we can set binary values of ``0V`` or ``5V`` to the pin.
    r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_OUTPUT
    r.arduino.pins[6].mode = GPIOPinMode.DIGITAL_OUTPUT
 
-   r.arduinos.pins[4].digital_state = True
-   r.arduinos.pins[6].digital_state = False
+   r.arduino.pins[4].digital_state = True
+   r.arduino.pins[6].digital_state = False
 
 ``GPIOPinMode.ANALOGUE_INPUT``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,7 +107,7 @@ digital vs analogue signals `here <https://learn.sparkfun.com/tutorials/analog-v
 
    r.arduino.pins[AnaloguePin.A0].mode = GPIOPinMode.ANALOGUE_INPUT
 
-   pin_value = r.arduinos.pins[AnaloguePin.A0].analogue_value
+   pin_value = r.arduino.pins[AnaloguePin.A0].analogue_value
 
 .. Hint:: The values are the voltages read on the pins,
    between 0 and 5.
