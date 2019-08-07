@@ -34,7 +34,7 @@ in the other direction and ``0`` causes the motor to brake.
 
 .. code:: python
 
-   r.motor_board.motor[0].power  = 1
+   r.motor_board.motor[0].power = 1
    r.motor_board.motor[1].power = -1
 
 These values can also be read back:

@@ -103,7 +103,7 @@ digital vs analogue signals `here <https://learn.sparkfun.com/tutorials/analog-v
 
 .. code:: python
    
-    from sbot import AnaloguePin
+   from sbot import AnaloguePin
 
    r.arduino.pins[AnaloguePin.A0].mode = GPIOPinMode.ANALOGUE_INPUT
 
