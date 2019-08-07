@@ -21,24 +21,11 @@ from microswitches to LEDs. GPIO is only available on pins 2 to 13 and A0 to A5
 because pins 0 and 1 are reserved for communication with the rest of our
 kit.
 
-Setting the pin mode
---------------------
-
-So that we can use the pins on the Arduino in different ways, it supports a number 
-of different pin modes. You will need to ensure that the pin is in the correct pin 
-mode before performing an action with that pin.
-
-.. code:: python
-
-   from robot import PinMode
-
-   r.arduino.pins[3].mode = PinMode.INPUT_PULLUP
-
 Pin mode
 --------
 
 GPIO pins have four different modes. A pin can only have one mode at a
-time, and some pins aren’t compatible with certain modes. These pin
+time, and some pins aren't compatible with certain modes. These pin
 modes are represented by an
 `enum <https://docs.python.org/3/library/enum.html>`__ which needs to be
 imported before they can be used.
@@ -52,6 +39,18 @@ imported before they can be used.
    docs <https://www.arduino.cc/en/Tutorial/DigitalPins>`__.
 
 
+Setting the pin mode
+~~~~~~~~~~~~~~~~~~~~
+
+You will need to ensure that the pin is in the correct pin 
+mode before performing an action with that pin. You can read
+about the possible pin modes below.
+
+.. code:: python
+
+   r.arduino.pins[3].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
+
+
 ``GPIOPinMode.DIGITAL_INPUT``
 ~~~~~~~~~~~~~~~~~
 
@@ -60,7 +59,9 @@ can be read.
 
 .. code:: python
    
-   pin_value = r.arduinos.pins[4].digital_state
+   r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT
+
+   pin_value = r.arduino.pins[4].digital_state
 
 
 ``GPIOPinMode.DIGITAL_INPUT_PULLUP``
@@ -72,7 +73,9 @@ enabled.
 
 .. code:: python
    
-   pin_value = r.arduinos.pins[4].digital_state
+   r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
+
+   pin_value = r.arduino.pins[4].digital_state
 
 ``GPIOPinMode.DIGITAL_OUTPUT``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,8 +84,11 @@ In this mode, we can set binary values of ``0V`` or ``5V`` to the pin.
 
 .. code:: python
    
-   r.arduinos.pins[4].digital_state = True
-   r.arduinos.pins[6].digital_state = False
+   r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_OUTPUT
+   r.arduino.pins[6].mode = GPIOPinMode.DIGITAL_OUTPUT
+
+   r.arduino.pins[4].digital_state = True
+   r.arduino.pins[6].digital_state = False
 
 ``GPIOPinMode.ANALOGUE_INPUT``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,9 +103,11 @@ digital vs analogue signals `here <https://learn.sparkfun.com/tutorials/analog-v
 
 .. code:: python
    
-    from sbot import AnaloguePin
+   from sbot import AnaloguePin
 
-   pin_value = r.arduinos.pins[AnaloguePin.A0].analogue_value
+   r.arduino.pins[AnaloguePin.A0].mode = GPIOPinMode.ANALOGUE_INPUT
+
+   pin_value = r.arduino.pins[AnaloguePin.A0].analogue_value
 
 .. Hint:: The values are the voltages read on the pins,
    between 0 and 5.

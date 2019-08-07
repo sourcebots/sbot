@@ -13,11 +13,11 @@ Power outputs
 
 The six outputs of the power board are grouped together as ``power_board.outputs``.
 
-The power board’s six outputs can be turned on and off using the
+The power board's six outputs can be turned on and off using the
 ``power_on`` and ``power_off`` functions of the group respectively.
 
 .. Hint:: ``power_on`` is called when you setup your robot, so
-   this doesn’t need to be called manually. The ports will come on
+   this doesn't need to be called manually. The ports will come on
    automatically as soon as your robot is ready, before the start button is
    pressed.
 
@@ -42,7 +42,7 @@ An output is indexed using the appropriate ``PowerOutputPosition``.
    current_amps = r.power_board.outputs[PowerOutputPosition.H1].current
 
 .. Warning:: The motor and servo boards are powered through these
-   power outputs, whilst the power is off, you won’t be able to control
+   power outputs, whilst the power is off, you won't be able to control
    your motors or servos. They will register as a missing board and your code will
    break if you try and control them.
 
@@ -66,7 +66,7 @@ The ``buzz`` function accepts multiple parameters, depending on what you
 want to play. The first argument is the duration of the beep, in
 seconds. The later arguments are either the note you want to play, or
 the frequency of the buzzer (in Hertz). You have to specify which of note
-or frequency you’re passing using a keyword argument, your code will
+or frequency you're passing using a keyword argument, your code will
 fail otherwise.
 
 Theoretically, the piezo buzzer will buzz at any provided frequency,
@@ -77,7 +77,7 @@ The ``Note`` enum provides notes in `scientific pitch notation
 <https://en.wikipedia.org/wiki/Scientific_pitch_notation>`__ between
 ``C6`` and ``C8``. You can play other tones by providing a frequency.
 
-.. Hint:: Calling ``buzz`` is non-blocking, which means it doesn’t
+.. Hint:: Calling ``buzz`` is non-blocking, which means it doesn't
    actually wait for the piezo to stop buzzing before continuing with your
    code. If you want to wait for the buzzing to stop, add a
    ``sleep`` afterwards! If you send more than 32 beeps to the robot too 

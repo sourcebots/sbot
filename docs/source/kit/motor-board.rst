@@ -2,7 +2,7 @@ Motor Board
 ===========
 
 The Motor Board can be used to control two 12V DC motors. These can be
-used for moving your robot, although don’t feel you are limited to using
+used for moving your robot, although don't feel you are limited to using
 them for this purpose.
 
 The speed and direction of the two outputs are controlled independently
@@ -45,7 +45,7 @@ Indicators
 Case dimensions
 ---------------
 
-The case measures 70x84x20mm. Don’t forget that the cables will stick
+The case measures 70x84x20mm. Don't forget that the cables will stick
 out.
 
 Specification
