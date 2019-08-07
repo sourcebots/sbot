@@ -10,18 +10,13 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../'))
-
-# from sbot import __version__
 
 # -- Project information -----------------------------------------------------
 
-project = 'SBot'
+project = 'SourceBots Docs'
 copyright = '2019, SourceBots'
 author = 'SourceBots'
-release = '0.2.0'
+release = '0.5.0'
 
 # -- General configuration ---------------------------------------------------
 
@@ -68,4 +63,5 @@ html_theme_options = {
     'display_version': True,
     'style_nav_header_background': 'purple',
     'logo_only': True,
+    'titles_only': False,
 }
