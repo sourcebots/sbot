@@ -21,6 +21,19 @@ from microswitches to LEDs. GPIO is only available on pins 2 to 13 and A0 to A5
 because pins 0 and 1 are reserved for communication with the rest of our
 kit.
 
+Setting the pin mode
+--------------------
+
+So that we can use the pins on the Arduino in different ways, it supports a number 
+of different pin modes. You will need to ensure that the pin is in the correct pin 
+mode before performing an action with that pin.
+
+.. code:: python
+
+   from robot import PinMode
+
+   r.arduino.pins[3].mode = PinMode.INPUT_PULLUP
+
 Pin mode
 --------
 
@@ -74,44 +87,19 @@ In this mode, we can set binary values of ``0V`` or ``5V`` to the pin.
 ``GPIOPinMode.ANALOGUE_INPUT``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this mode, we can read the analogue voltage of the pin.
+Certain sensors output analogue signals rather than digital ones, and so
+have to be read differently. The arduino has six analogue inputs, which 
+are labelled ``A0`` to ``A5``.
 
-Only pins A0 - A5 support this.
+.. Hint:: Analogue signals can have any voltage, while digital
+signals can only take on one of two voltages. You can read more about
+digital vs analogue signals `here <https://learn.sparkfun.com/tutorials/analog-vs-digital>`__.
 
 .. code:: python
    
     from sbot import AnaloguePin
 
    pin_value = r.arduinos.pins[AnaloguePin.A0].analogue_value
-
-Setting the pin mode
---------------------
-
-.. code:: python
-
-   from robot import PinMode
-
-   r.arduino.pins[3].mode = PinMode.INPUT_PULLUP
-
-Analogue pins
--------------
-
-Certain sensors output analogue signals rather than digital ones, and so
-have to be read differently. The arduino has six analogue inputs,
-of which four (analogue pins 4 and 5) are reserved for communication
-between the Arduino and the servo shield.
-
-.. Hint:: Analogue signals can have any voltage, while digital
-signals can only take on one of two voltages. You can read more about
-digital vs analogue signals `here <https://learn.sparkfun.com/tutorials/analog-vs-digital>`__.
-
-To read the value of an analogue pin, call ``read_analogue()`` on the
-servo board. This will give you the value of all analogue pins.
-
-.. code:: python
-
-   r.servo_board.read_analogue()["a0"]
-   >>> 1.569
 
 .. Hint:: The values are the voltages read on the pins,
    between 0 and 5.

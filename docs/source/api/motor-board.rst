@@ -50,6 +50,12 @@ These values can also be read back:
 .. Warning:: Setting a value outside of the range ``-1`` to
    ``1`` will raise an exception and your code will crash.
 
+.. Danger:: Sudden large changes in the motor speed setting
+   (e.g. ``-1`` to ``0``, ``1`` to ``-1`` etc.) will likely trigger the
+   over-current protection and your robot will shut down with a distinct beeping
+   noise and/or a red light next to the power board output that is powering
+   the motor board.
+
 Special values
 ~~~~~~~~~~~~~~
 
@@ -86,9 +92,3 @@ continue moving under the momentum they had before.
    from sbot import COAST
 
    r.motor_board.motor[1].power = COAST
-
-.. Warning:: Sudden large changes in the motor speed setting
-   (e.g. ``-1`` to ``0``, ``1`` to ``-1`` etc.) will likely trigger the
-   over-current protection and your robot will shut down with a distinct beeping
-   noise and/or a red light next to the power board output that is powering
-   the motor board.
