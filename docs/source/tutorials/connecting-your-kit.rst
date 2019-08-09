@@ -80,7 +80,7 @@ How it all fits together
     (7.5mm) CamCons provided onto the opposite ends of a pair of wires,
     ensuring that positive connects to positive and ground to ground,
     and then plugging one end into the appropriate socket of the Motor
-    Board and the other into a high power socket (marked H0 or H1) 
+    Board and the other into a high power socket (marked ``H0`` or ``H1``) 
     on the side of the  Power Board.
 5.  Connect the Motor Board to the Pi by way of another black
     micro-USB cable; the USB A end goes into any USB socket on
@@ -94,17 +94,17 @@ How it all fits together
 .. Warning:: If the Arduino is not connected directly to the Pi, you may 
    suffer from power stability issues.
 
-4.  Connect the Servo Board to the Power Board by screwing the two large
+7.  Connect the Servo Board to the Power Board by screwing the two large
     (7.5mm) CamCons provided onto the opposite ends of a pair of wires,
     ensuring that positive connects to positive and ground to ground,
     and then plugging one end into the appropriate socket of the Motor
     Board and the other into any socket on the side of the  Power Board.
-5.  Connect the Servo Board to the Pi by way of another black
+8.  Connect the Servo Board to the Pi by way of another black
     micro-USB cable; the USB A end goes into any USB socket on
     the Pi or connected USB hub, the micro-USB end goes into the Servo
     Board.
 
-8.  To connect the motors, first screw two medium (5mm) CamCons provided 
+9.  To connect the motors, first screw two medium (5mm) CamCons provided 
     onto the opposite ends of a pair of wires. You can then use this cable
     to connect a motor to the ``M0`` or ``M1`` port on the motor board.
 
@@ -112,13 +112,13 @@ How it all fits together
     pins on the side of the servo board. The black or brown cable (negative)
     should be at the bottom.
 
-9. At this point, check that everything is connected up correctly (it
-    may be helpful to ask someone around you to check that all cables
-    are connected properly).
-10. Connect the Power Board to one of the blue LiPo batteries by
+11. At this point, check that everything is connected up correctly (it
+   may be helpful to ask someone around you to check that all cables
+   are connected properly).
+12. Connect the Power Board to one of the blue LiPo batteries by
     plugging the yellow connector on the cable connected to the Power
     Board into its counterpart on the battery.
-11. If there is not one plugged in already, a loop of wire should be
+13. If there is not one plugged in already, a loop of wire should be
     connected to the socket beneath the On|Off switch. Check that the
     Power Board works by pressing the On|Off switch and checking that
     the bright LED on the Raspberry Pi comes on green. 
