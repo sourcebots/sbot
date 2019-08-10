@@ -33,11 +33,11 @@ In addition to the boards, your kit will also contain:
 Part                                                            Quantity Specification
 =============================================================== ======== =============
 `USB Hub <https://www.amazon.co.uk/-/dp/B01DYD3Q28/>`__         1
-`Micro USB Cable <https://www.amazon.co.uk/-/dp/B01EK87T9M/>`__ 2
+`Micro USB Cable <https://www.amazon.co.uk/-/dp/B01EK87T9M/>`__ 3
 `USB B Cable <https://www.amazon.co.uk/-/dp/B00NH11KIK>`__      1
-`Large CamCon <http://uk.farnell.com/-/-/-/dp/3882275>`__       2        7.5mm
-`Medium CamCon <http://uk.farnell.com/-/-/-/dp/3881854>`__      2        5mm
-`Small CamCon <http://uk.farnell.com/-/-/-/dp/1717047>`__       3        3.81mm
+`Large CamCon <http://uk.farnell.com/-/-/-/dp/3882275>`__       4        7.5mm
+`Medium CamCon <http://uk.farnell.com/-/-/-/dp/3881854>`__      5        5mm
+`Small CamCon <http://uk.farnell.com/-/-/-/dp/1717047>`__       2        3.81mm
 =============================================================== ======== =============
  
 .. |Motor Board| image:: /_static/kit/mcv4b.png
