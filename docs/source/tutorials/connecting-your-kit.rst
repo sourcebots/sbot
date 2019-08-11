@@ -113,8 +113,8 @@ How it all fits together
     should be at the bottom.
 
 11. At this point, check that everything is connected up correctly (it
-   may be helpful to ask someone around you to check that all cables
-   are connected properly).
+    may be helpful to ask someone around you to check that all cables
+    are connected properly).
 12. Connect the Power Board to one of the blue LiPo batteries by
     plugging the yellow connector on the cable connected to the Power
     Board into its counterpart on the battery.

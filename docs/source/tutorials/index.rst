@@ -7,3 +7,4 @@ This section contains guides that will help your use your robotics kit.
    :maxdepth: 1
 
    connecting-your-kit
+   using-your-kit

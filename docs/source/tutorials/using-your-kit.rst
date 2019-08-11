@@ -1,14 +1,11 @@
 Using Your Kit
 ========================
 
-..Hint:: Throughout this tutorial, we will be using the API at
-:ref: 'api/index'
+.. Hint:: Throughout this tutorial, we will be using the API, so make sure to have a look first!
 
 Setup
 --------
-Before you start this tutorial, make sure you are familiar with
-how to 'connect your kit :ref: connecting_your_kit' and
-have read through ':ref: Setup' and ':ref: Running_your_code'
+Before you start this tutorial, make sure you are familiar with Connecting Your Kit and Setup.
 
 Basic Movement
 ----------------
@@ -18,12 +15,10 @@ Here is some demo code:
 
 .. code:: python
 
-    from sbot import Robot
+    from sbot import *
     from time import sleep
 
     r = Robot()
-
-    my_motor_board = r.motor_board
 
     r.motor_board.motors[0].power = 0.2
     r.motor_board.motors[1].power = 0.2
@@ -34,61 +29,136 @@ Here is some demo code:
     r.motor_board.motors[1].power = 0
 
 Now see if you can turn on the spot, then try driving in various shapes.
+
 Can you drive in:
 - a square?
 - an equilateral triangle?
 - a circle?
 - a wavy line?
 
-.. Hint:: Remember to refer back to ':ref: api/motor_board'
-
-
 Servos
-------------
+------
 
-Servos can be set to turn to a specific position. On your robots,
-this will be somewhere between -1 and 1. This code will turn a servo
+Servos can be set to turn to a specific position. On your robot,
+this will be somewhere between ``-1`` and ``1``. This code will turn a servo
 connected to the channel '0' back and forth forever:
 
 .. code:: python
 
-    from sbot import Robot
+    from sbot import *
     from time import sleep
 
     r = Robot()
 
-    my_servo_board = r.servo_board
     r.servo_board.servos[0].position = 1
 
-    while(True):
+    while True:
         r.servo_board.servos[0].position *= 1
         sleep(1)
 
 Now connect 2 servos to your robot. See if you can spell out
-"Hello" in 'Semaphore <https://en.wikipedia.org/wiki/Flag_semaphore>'.
+"Hello" in `Semaphore <https://en.wikipedia.org/wiki/Flag_semaphore>`__.
 You will have to think about which way to orient your servos so they
 can reach all of the positions they need to. You can add paper flags
 to your servos if you want to.
 
-.. Hint:: Don't forget about the API ':ref: api/servo_board' if you need it.
+Ultrasound
+----------
+
+An Ultrasound Sensor can be used to measure distances of objects.
+
+The sensor sends a pulse of sound at the object and then measures the time taken for the reflect
+
+.. code:: python
+
+    from sbot import *
+    from time import sleep
+
+    r = Robot()
+
+    while True:
+        distance = r.arduino.ultrasound_sensors[4, 5].distance()
+        print("Object is " + distance + "m away.")
+        sleep(1)
+
+This code will print the distances to the log.
+
+Try to spin your motors forward, but stop when a object is nearby.
+
+Buzzer
+------
+
+The power board on your kit has a `piezo
+buzzer <https://www.engineersgarage.com/insight/how-piezo-buzzer-works>`__
+onboard. We can use this to play tunes and make sounds, which can be useful 
+when debugging your code.
+
+.. code:: python
+
+    from sbot import *
+    from time import sleep
+
+    r = Robot()
+
+    # Play a tone of 1000Hz for 1 second.
+    r.power_board.piezo.buzz(1, 1000)
+
+    # Play A7 for 1 second.
+    r.power_board.piezo.buzz(1, Note.A7)
+
+.. Hint:: Notes from ``C6`` to ``C8`` are available. You can play other tones by looking up the frequency `here <https://en.wikipedia.org/wiki/Scientific_pitch_notation#Table_of_note_frequencies>`__.
 
 
-## Ultrasound
-Show some simple code + give activity
+Building a Theremin
+-------------------
 
-## Buzzer
-Play happy birthday
+A Theremin is a unusual musical instrument that is controlled by the distance your hand is from its antennae.
 
-## Theremin
-Maybe combine previous two
+.. figure:: /_static/tutorials/using-your-kit/theremin.jpg
+   :alt: Theremin
+   :scale: 75%
 
-## Metal switch detector
-how do use arduino
+   A Moog Etherwave, assembled from a theremin kit: the loop antenna on the left controls the volume while the upright antenna controls the pitch.
 
-## Maybe some advanced stuff linking together
- - Stop 10 cm from wall?
- - Car Reversing (beeps + stop)
+Can you use your ultrasound sensor and buzzer to build a basic Theremin?
 
-## Know which zone
-Mention dev mode always = 0 + how to know if in dev mode
-When in arena zone will change can be used for different straegies get it by this
+Here's some code to help you get started:
+
+.. code:: python
+
+    from sbot import *
+    from time import sleep
+
+    r = Robot()
+
+    while True:
+        distance = ???
+
+        # Remember, humans can hear between about 2000Hz and 20,000Hz
+        pitch_to_play = ???
+
+        pitch_length = ???
+
+        r.power_board.piezo.buzz(pitch_length, pitch_to_play)
+        sleep(pitch_length)
+
+Inputs and Outputs
+------------------
+
+The Arduino has some pins on it that can allow your robot to sense it's environment.
+
+We will investigate how these work in more detail in the electronics labs, but we can run some code anyway.
+
+.. code:: python
+
+    from sbot import *
+    from time import sleep
+
+    # Turn on the pins
+    for pin in r.arduino.pins:
+        pin.mode = GPIOPinMode.DIGITAL_OUTPUT
+        pin.digital_state = True
+
+    # Flash all of the pins.
+    while True:
+        pin.digital_state = not pin.digital_state
