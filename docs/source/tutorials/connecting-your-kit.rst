@@ -4,13 +4,13 @@ Connecting Your Kit
 Essential hardware
 ------------------
 
--  Raspberry Pi (the board in a plastic case with many USB ports)
--  Power Board (the board in a plastic case with many green sockets and
+-  Raspberry Pi (the board with many USB sockets, HDMI and microUSB)
+-  Power Board (the board with a fan, many green sockets and
    two buttons)
--  Motor Board (the board in a plastic case with three outputs on one end)
--  Servo Board (the board in a plastic case with many pins on the side)
+-  Motor Board (the board with three green sockets on one end)
+-  Servo Board (the board with many pins on the side)
 -  Arduino (a board with a metal USB-B connector and a long 30 pin chip)
--  Battery (will be provided later.)
+-  a Battery (will be provided later)
 -  USB Hub
 
 Connectors and cables
@@ -24,12 +24,16 @@ Connectors and cables
 -  USB-A to USB-B cable (for the Arduino)
 -  Wire
 
+.. Hint:: *CamCons* are the `green connectors </tutorials/kit-assembly.files/camcons.png>`__
+  used for power wiring within our kit.
+
 Peripherals
 -----------
 
-- Servos
-- Ultrasound Sensors
-- USB Flash Drive
+- Servo motor
+- 2 x Motors
+- Ultrasound distance sensors
+- USB memory stick
 
 Tools you’ll need
 -----------------
@@ -38,80 +42,77 @@ Tools you’ll need
 -  Wire Cutters
 -  Wire Strippers
 -  Screwdriver (2mm flat-head)
--  2 x Motor
 
-You will need to obtain any other needed tools/supplies yourself.
-
-.. Hint:: *CamCons* are the `green connectors </tutorials/kit-assembly.files/camcons.png>`__ 
-  used for power wiring within our kit.
+You will need to fetch any other needed tools/supplies yourself.
 
 Important notes before you start
 --------------------------------
 
 .. Warning:: Make sure to read all these **before** you start assembly.
 
--  Do not disassemble/reassemble your kit without first switching it off
-   and unplugging the battery and check it thoroughly before plugging it
-   in and switching it on again (don’t be afraid to ask someone to check
-   your kit before you do so). If something is connected up incorrectly when
-   the kit is powered up, it may damage the components.
+-  Do not disassemble/reassemble your kit without first switching it off by
+   pressing the red button.
 
--  When wiring CamCons (or anything at all, but CamCons in particular),
+-  Always be careful handling your battery, only ever plug it into the Power 
+   board (the board with a fan).
+   
+-  Check your kit thoroughly before switching it on again. If something is
+   connected up incorrectly when the kit is powered up, it may break the kit!
+
+-  When making your own wires CamCons (or anything at all, but CamCons in particular),
    always double-check that the correct connections are made at either
    end (positive to positive, ground to ground, etc.) before plugging in
-   the cable or plugging in the battery or switching things on..
+   the cable or plugging in the battery and switching things on.
    Don’t be afraid to ask someone to check your connections.
 
 -  Colour coding is key; please use *red* for wires connected to
-   a powered rail (say 12V or 5V), *black* for wires connected to ground
-   (0V rail) and *blue* for motors.
+   power (say 12V or 5V), *black* for wires connected to ground
+   (0V) and *any other colour* for motors.
 
 How it all fits together
 ------------------------
 
-1.  Connect the Raspberry Pi to the Power Board using two 3.81mm CamCons.
-    Please make sure that you check the polarity of the connector on the tab.
+The first step of your robot is assembly! Here we'll guide you step-by-step on
+how to connect things up. You'll be cutting your own wires here!
+
+1.  Connect the Raspberry Pi to the Power Board using two 3.81mm (small) 
+    CamCons. Please make sure that you check the polarity of the connector on 
+    the tab.
 2.  Connect the USB hub to the Pi by plugging it into any one of its
     four USB sockets.
 3.  Connect the Power Board to the Pi via one of the black micro-USB
     cables; the standard USB end goes into any USB socket on the Pi or
     connected USB hub, the micro-USB end into the Power Board.
-4.  Connect the Motor Board to the Power Board by screwing the two large
-    (7.5mm) CamCons provided onto the opposite ends of a pair of wires,
+4.  Connect the Motor Board to the Power Board by screwing the two 7.5mm (large)
+    CamCons provided onto the opposite ends of a pair of wires,
     ensuring that positive connects to positive and ground to ground,
     and then plugging one end into the appropriate socket of the Motor
     Board and the other into a high power socket (marked ``H0`` or ``H1``) 
-    on the side of the  Power Board.
-5.  Connect the Motor Board to the Pi by way of another black
-    micro-USB cable; the USB A end goes into any USB socket on
-    the Pi or connected USB hub, the micro-USB end goes into the Motor
-    Board.
-6.  Connect the Arduino to the Pi by way of the USB-A to USB-B
-    cable; the square-ish USB-B end goes into the appropriate
-    metal-cased connector on the Arduino, the standard USB end goes into
-    any free USB port on the Pi.
+    on the side of the Power Board.
+5.  Connect the Motor Board to the Pi by way of another micro-USB cable; the big
+    end goes into any USB socket on the Pi or connected USB hub, the micro-USB
+    end goes into the Motor Board.
+6.  Connect the Arduino to the Pi by way of the USB-A (rectangle) to USB-B 
+    (hexagon) cable.
 
-.. Warning:: If the Arduino is not connected directly to the Pi, you may 
-   suffer from power stability issues.
+.. Warning:: Please don't connect the Arduino to the Raspberry Pi via the
+   USB Hub. If the Arduino is not connected *directly* to the Pi, you may 
+   have issues with getting enough power to it. 
 
-7.  Connect the Servo Board to the Power Board by screwing the two large
-    (7.5mm) CamCons provided onto the opposite ends of a pair of wires,
-    ensuring that positive connects to positive and ground to ground,
-    and then plugging one end into the appropriate socket of the Motor
-    Board and the other into any socket on the side of the  Power Board.
-8.  Connect the Servo Board to the Pi by way of another black
-    micro-USB cable; the USB A end goes into any USB socket on
-    the Pi or connected USB hub, the micro-USB end goes into the Servo
-    Board.
-
-9.  To connect the motors, first screw two medium (5mm) CamCons provided 
+7.  Connect the Servo Board to the Power Board by screwing the two 7.5mm (large)
+    CamCons onto the opposite ends of a pair of wires, ensuring that positive
+    connects to positive and ground to ground, and then plugging one end into
+    the appropriate socket of the Motor Board and the other into any socket on
+    the side of the Power Board.
+8.  Connect the Servo Board to the Pi by way of another micro-USB cable; the
+    USB A (rectangle) end goes into any USB socket on the Pi or connected via 
+    the USB hub, the micro-USB end goes into the Servo Board.
+9.  To connect the motors, first screw two 5mm (medium) CamCons provided 
     onto the opposite ends of a pair of wires. You can then use this cable
     to connect a motor to the ``M0`` or ``M1`` port on the motor board.
-
 10. To connect a servo, push the three pin connector vertically into the
-    pins on the side of the servo board. The black or brown cable (negative)
+    pins on the side of the servo board. The black or brown wire (negative)
     should be at the bottom.
-
 11. At this point, check that everything is connected up correctly (it
     may be helpful to ask someone around you to check that all cables
     are connected properly).
