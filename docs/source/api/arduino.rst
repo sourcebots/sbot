@@ -95,7 +95,7 @@ In this mode, we can set binary values of ``0V`` or ``5V`` to the pin.
 
 Certain sensors output analogue signals rather than digital ones, and so
 have to be read differently. The arduino has six analogue inputs, which 
-are labelled ``A0`` to ``A3``.
+are labelled ``A0`` to ``A5``; however pins ``A4`` and ``A5`` are reserved and cannot be used.
 
 .. Hint:: Analogue signals can have any voltage, while digital
 signals can only take on one of two voltages. You can read more about
