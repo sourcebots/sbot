@@ -189,7 +189,7 @@ your sensor by experimenting with it.
 
     while True:
         distance = r.arduino.ultrasound_sensors[4, 5].distance()
-        print("Object is " + distance + "m away.")
+        print("Object is " + str(distance) + "m away.")
         sleep(1)
 
 This code will print the distance in metres to the log file every second.
