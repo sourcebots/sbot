@@ -86,23 +86,13 @@ class Robot(BaseRobot):
         self._motor_boards = BoardGroup[MotorBoard](
             HardwareEnvironment.get_backend(MotorBoard),
         )
-        self.motor_board: Optional[MotorBoard] = (
-            self._get_optional_board(self._motor_boards)
-        )
 
         self._servo_boards = BoardGroup[ServoBoard](
             HardwareEnvironment.get_backend(ServoBoard),
         )
-        self.servo_board: Optional[ServoBoard] = (
-            self._get_optional_board(self._servo_boards)
-        )
 
         self._arduinos = BoardGroup[SBArduinoBoard](
             HardwareEnvironment.get_backend(SBArduinoBoard),
-        )
-
-        self.arduino: Optional[SBArduinoBoard] = (
-            self._get_optional_board(self._arduinos)
         )
 
         if ENABLE_VISION:
@@ -130,6 +120,33 @@ class Robot(BaseRobot):
         for board in Board.BOARDS:
             LOGGER.info(f"Found {board.name}, serial: {board.serial}")
             LOGGER.debug(f"Firmware Version of {board.serial}: {board.firmware_version}")
+
+    @property
+    def motor_board(self) -> MotorBoard:
+        """
+        Get the motor board.
+
+        A CommunicationError is raised if there isn't exactly one attached.
+        """
+        return self._motor_boards.singular()
+
+    @property
+    def servo_board(self) -> ServoBoard:
+        """
+        Get the servo board.
+
+        A CommunicationError is raised if there isn't exactly one attached.
+        """
+        return self._servo_boards.singular()
+
+    @property
+    def arduino(self) -> SBArduinoBoard:
+        """
+        Get the arduino.
+
+        A CommunicationError is raised if there isn't exactly one attached.
+        """
+        return self._arduinos.singular()
 
     @property
     def camera(self) -> Optional[MarkerCamera]:
