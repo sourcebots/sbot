@@ -30,7 +30,7 @@ Forwards and Backwards
 
 Start by checking that you can drive your motors forwards and backwards.
 Doing this is actually very easy; the only thing you need to realise is that a
-positive number is forwards and a negative number is backwards.
+positive number drives the motor in one direction and a negative number drives it in the other direction.
 
 .. Warning:: Make sure your robots can turn without danger.
    If your motors aren't attached to a chassis, make sure they don't have wheels
@@ -61,7 +61,7 @@ Here's the code:
         sleep(1)
 
 You’re hopefully familiar with the first few lines; in fact, the only lines you 
-may not be familiar with are the r.motors_board.motors[0]... lines. For a
+may not be familiar with are the ``r.motor_board.motors[0]``... lines. For a
 comprehensive reference to the 'motor' object, see `the motor page 
 </en/latest/api/motor-board.html>`_. 
 
@@ -71,7 +71,7 @@ But, to summarise:
 
     r.motor_board.motors[0].power = x
 
-Will set the power of the motor connected to output will set the power of the
+will set the power of the
 motor connected to output 0 (the ``motors[0]`` part) on the motor board to 
 ``x``, where ``x`` is a value between ``-1`` and ``1``, inclusive.
 
@@ -85,13 +85,13 @@ Changing the speed
 ------------------
 
 When you move your robot, it's likely you'll want your robot to go from stand-
-still to moving at a high speed. The dumb way of doing this is to just immediately
+still to moving at a high speed. The most obvious way of doing this is to just immediately
 set the power of the motors from ``0`` to ``1``.
 
 There are 2 problems with doing this:
 
 1. Setting the power from ``0`` to ``1`` very quickly draws a very large current
-   from the motor, So much so that it might trip the safety on our power board.
+   from the motor, so much so that it might trip the over-current protection on our power board.
 2. Quickly changing the speed can cause the wheels to slip, meaning your robot
    won't necessarily go the distance or direction you expect it to.
 
@@ -110,14 +110,14 @@ It's pretty simple once you understand it:
 
     R = Robot()
 
-    for power in range(0, 101)
+    for power in range(0, 101):
           r.motor_board.motors[0].power = power / 100
           time.sleep(0.01)
 
 
 This code should smoothly speed up your motor from 0 to 1 in 1 second.
 
-The python ``range`` function takes in 2 paramters, ``from`` and ``to``. It then
+The python ``range`` function takes in 2 parameters, ``from`` and ``to``. It then
 simply returns a list of numbers between those two values. It *doesn't* give
 you the last number. (i.e. ``range(0,3)`` will give you a list containing 0, 1, 
 and 2) So if you want the last number you'll need to go one further.
@@ -131,18 +131,18 @@ Now try and write some code that:
 Servos
 ------
 
-Servos are a motor which knows what position its at. You can tell it an angle
+Servos are a motor which knows what position it's at. You can tell it an angle
 and it'll handle turning to that value! 
 
-.. Warning:: Be warened, most servos can't turn a full 360 degrees!
+.. Warning:: Be warned, most servos can't turn a full 360 degrees!
 Always check how far it can move before you design a cool robot arm!
 
 Servos can be set to turn to a specific position. Sadly you can't just tell it
-an angle to turn to in degrees' you can only tell it to go between ``-1`` and 
+an angle to turn to in degrees, you can only tell it to go between ``-1`` and 
 ``1``. You'll need to measure the angle yourself and work this out if you need
 it!
 
-If you plug a servo in chanel '0' of the servo board, this code will turn it 
+If you plug a servo in channel '0' of the servo board, this code will turn it 
 back and forth from minimum to maximum forever:
 
 .. code:: python
