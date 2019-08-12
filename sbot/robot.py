@@ -37,7 +37,7 @@ __version__ = "0.5.1"
 
 LOGGER = logging.getLogger(__name__)
 
-GAME_LENGTH = 180
+GAME_LENGTH = 120
 
 T = TypeVar("T", bound=Board)
 
