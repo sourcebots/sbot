@@ -14,6 +14,7 @@ There are a number of sections in the documentation offering help for the kit an
    kit/index
    tutorials/index
    ref/sbot
+   rules
 
 How to use the docs
 -------------------
