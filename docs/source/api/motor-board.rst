@@ -34,17 +34,17 @@ in the other direction and ``0`` causes the motor to brake.
 
 .. code:: python
 
-   r.motor_board.motor[0].power = 1
-   r.motor_board.motor[1].power = -1
+   r.motor_board.motors[0].power = 1
+   r.motor_board.motors[1].power = -1
 
 These values can also be read back:
 
 .. code:: python
 
-   r.motor_board.motor[0].power
+   r.motor_board.motors[0].power
    >>> 1
 
-   r.motor_board.motor[1].power
+   r.motor_board.motors[1].power
    >>> -1
 
 .. Warning:: Setting a value outside of the range ``-1`` to
@@ -79,7 +79,7 @@ quick as possible.
 
    from sbot import BRAKE
 
-   r.motor_board.motor[0].power = BRAKE
+   r.motor_board.motors[0].power = BRAKE
 
 ``COAST``
 ^^^^^^^^^
@@ -91,4 +91,4 @@ continue moving under the momentum they had before.
 
    from sbot import COAST
 
-   r.motor_board.motor[1].power = COAST
+   r.motor_board.motors[1].power = COAST

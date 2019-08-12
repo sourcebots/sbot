@@ -48,12 +48,12 @@ Here's the code:
 
     from sbot import *
     from time import sleep
+    r = Robot()
     while True:
-        r = Robot()
         # Set motor 0 to 20% power.
-        r.motor_board.motors[0].power = 0.2 
+        r.motor_board.motors[0].power = 0.2
         # Set motor 1 to 20% power
-        r.motor_board.motors[1].power = 0.2 
+        r.motor_board.motors[1].power = 0.2
 
         sleep(1)
 
