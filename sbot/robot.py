@@ -83,15 +83,15 @@ class Robot(BaseRobot):
         self.power_board.outputs.power_on()
 
     def _init_auxilliary_boards(self) -> None:
-        self._motor_boards = BoardGroup[MotorBoard](
+        self.motor_boards = BoardGroup[MotorBoard](
             HardwareEnvironment.get_backend(MotorBoard),
         )
 
-        self._servo_boards = BoardGroup[ServoBoard](
+        self.servo_boards = BoardGroup[ServoBoard](
             HardwareEnvironment.get_backend(ServoBoard),
         )
 
-        self._arduinos = BoardGroup[SBArduinoBoard](
+        self.arduinos = BoardGroup[SBArduinoBoard](
             HardwareEnvironment.get_backend(SBArduinoBoard),
         )
 
@@ -128,7 +128,7 @@ class Robot(BaseRobot):
 
         A CommunicationError is raised if there isn't exactly one attached.
         """
-        return self._motor_boards.singular()
+        return self.motor_boards.singular()
 
     @property
     def servo_board(self) -> ServoBoard:
@@ -137,7 +137,7 @@ class Robot(BaseRobot):
 
         A CommunicationError is raised if there isn't exactly one attached.
         """
-        return self._servo_boards.singular()
+        return self.servo_boards.singular()
 
     @property
     def arduino(self) -> SBArduinoBoard:
@@ -146,7 +146,7 @@ class Robot(BaseRobot):
 
         A CommunicationError is raised if there isn't exactly one attached.
         """
-        return self._arduinos.singular()
+        return self.arduinos.singular()
 
     @property
     def camera(self) -> Optional[MarkerCamera]:
