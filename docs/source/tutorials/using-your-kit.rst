@@ -27,6 +27,11 @@ robot.
 Any code below the line with ``r = Robot()`` won't be run until you hit the
 black 'Start' button on the power board.
 
+You can run your code by inserting the USB stick into a port onto your robot.
+The robot will flash a light next to the start button. Press the button to start your code.
+
+.. Warning:: Please ensure that you "eject" your drive from your Windows machine, as not doing this can *corrupt* your USB!
+
 Forwards and Backwards
 ----------------------
 
