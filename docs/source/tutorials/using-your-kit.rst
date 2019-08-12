@@ -279,3 +279,4 @@ we can run some code anyway.
     # Flash all of the pins.
     while True:
         pin.digital_state = not pin.digital_state
+        sleep(0.5)
