@@ -41,6 +41,12 @@ Case Dimensions
 The case measures 68x68x21mm. Don't forget that the cables will stick
 out.
 
+Range of servos
+---------------
+
+When using the majority of servos that we supply, you will find that the 
+servo will only turn about 90 degrees.
+
 Specification
 -------------
 
