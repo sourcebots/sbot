@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "sbot"
 version = "0.5.1"
-description = "Experimental SourceBots API"
-authors = ["Dan Trickey <dan@trickey.io>"]
+description = "SourceBots API"
+authors = ["SourceBots <hello@sourcebots.co.uk>"]
 readme = "README.md"
 repository = "https://github.com/sourcebots/sbot"
 homepage = "https://sourcebots.co.uk"
