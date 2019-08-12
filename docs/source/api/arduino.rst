@@ -52,7 +52,7 @@ about the possible pin modes below.
 
 
 ``GPIOPinMode.DIGITAL_INPUT``
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this mode, the digital state of the pin (whether it is high or low)
 can be read.
@@ -65,7 +65,7 @@ can be read.
 
 
 ``GPIOPinMode.DIGITAL_INPUT_PULLUP``
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Same as ``GPIOPinMode.DIGITAL_INPUT``, but with an internal `pull-up
 resistor <https://learn.sparkfun.com/tutorials/pull-up-resistors>`__
@@ -78,7 +78,7 @@ enabled.
    pin_value = r.arduino.pins[4].digital_state
 
 ``GPIOPinMode.DIGITAL_OUTPUT``
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this mode, we can set binary values of ``0V`` or ``5V`` to the pin.
 

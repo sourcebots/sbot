@@ -34,7 +34,6 @@ the robot's functions.
 The remainder of the tutorials pages will assume your ``Robot`` object
 is defined as ``r``.
 
-.. _running_your_code:
 Running your code
 -----------------
 

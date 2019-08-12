@@ -58,7 +58,7 @@ This can be useful for checking the charge status of your battery.
    battery_current_amps = r.power_board.battery_sensor.current
 
 Buzzing 🐝
---------
+----------
 
 The power board has a piezo sounder which can buzz.
 

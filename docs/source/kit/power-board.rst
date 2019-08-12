@@ -115,10 +115,6 @@ use the board but it may be of interest to some people.
 -  `Firmware Source <https://github.com/sourcebots/power-v4-fw>`__
 -  `Hardware Source <https://github.com/sourcebots/power-v4-hw>`__
 
-.. [1]
-   The outputs only turn on when your program runs (specifically, when
-   the ``Robot`` object is created).
-
 .. [2]
    If overall current limit is exceeded, the Power Board will turn off
    and start beeping.

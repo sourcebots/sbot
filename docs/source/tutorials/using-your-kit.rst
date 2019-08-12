@@ -14,7 +14,9 @@ kit together`_.
 
 There are two lines of code you must have at the very top of your code whenever 
 you want to do something with the robot, those lines are:
+
 .. code:: python
+
     from sbot import *
 
     r = Robot()
@@ -26,7 +28,7 @@ Any code below the line with ``r = Robot()`` won't be run until you hit the
 black 'Start' button on the power board.
 
 Forwards and Backwards
-----------------
+----------------------
 
 Start by checking that you can drive your motors forwards and backwards.
 Doing this is actually very easy; the only thing you need to realise is that a
