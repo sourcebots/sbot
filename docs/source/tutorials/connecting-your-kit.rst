@@ -8,7 +8,7 @@ Essential hardware
 -  Power Board (the board with a fan, many green sockets and
    two buttons)
 -  Motor Board (the board with three green sockets on one end)
--  Servo Board (the board with many pins on the side)
+-  Servo Board (the square board with many pins on the side)
 -  Arduino (a board with a metal USB-B connector)
 -  a Battery (will be provided later)
 -  USB Hub
