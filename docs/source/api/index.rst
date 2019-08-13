@@ -110,4 +110,5 @@ libraries <https://docs.python.org/3.7/py-modindex.html>`__
 to use. We install some extra ones which may be of use:
 
 -  `numpy <https://pypi.python.org/pypi/numpy>`__
--  `scipy <https://pypi.python.org/pypi/scipy>`__
+
+.. hint:: If you would like an extra library installed, go and ask a volunteer to see if we can help.
