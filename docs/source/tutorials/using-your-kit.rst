@@ -107,10 +107,10 @@ It's pretty simple once you understand it:
 
 .. code:: python
 
-    from sr.robot import *
+    from sbot import *
     import time
 
-    R = Robot()
+    r = Robot()
 
     for power in range(0, 101):
           r.motor_board.motors[0].power = power / 100
@@ -272,6 +272,8 @@ we can run some code anyway.
 
     from sbot import *
     from time import sleep
+
+    r = Robot()
 
     # Turn on the pins
     for pin in r.arduino.pins:
