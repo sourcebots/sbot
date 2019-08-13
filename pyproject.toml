@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sbot"
-version = "0.6.0"
+version = "0.6.1"
 description = "SourceBots API"
 authors = ["SourceBots <hello@sourcebots.co.uk>"]
 readme = "README.md"
