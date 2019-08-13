@@ -8,4 +8,5 @@ This section contains guides that will help your use your robotics kit.
 
    connecting-your-kit
    using-your-kit
+   electronics-labs
    python-whirlwind-tour
