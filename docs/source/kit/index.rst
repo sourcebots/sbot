@@ -43,5 +43,5 @@ Part                                                            Quantity Specifi
 .. |Motor Board| image:: /_static/kit/mcv4b.png
 .. |Power Board| image:: /_static/kit/pbv4.png
 .. |Servo Board| image:: /_static/kit/sbv4.png
-.. |Arduino| image:: /_static/kit/arduino.png
+.. |Arduino| image:: /_static/kit/arduino_headers.png
 .. |Pi| image:: /_static/kit/pi.jpg
