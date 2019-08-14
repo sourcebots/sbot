@@ -63,13 +63,6 @@ class Robot(BaseRobot):
         self._init_auxilliary_boards()
         self._log_connected_boards()
 
-        default_metadata: Dict[str, Any] = {
-            "is_competition": False,
-            "zone": 0,
-        }
-
-        self.metadata = metadata.load(fallback=default_metadata)
-
         if wait_start:
             self.wait_start()
 
@@ -185,3 +178,9 @@ class Robot(BaseRobot):
 
         if self.is_competition:
             kill_after_delay(GAME_LENGTH)
+
+        default_metadata: Dict[str, Any] = {
+            "is_competition": False,
+            "zone": 0,
+        }
+        self.metadata = metadata.load(fallback=default_metadata)
