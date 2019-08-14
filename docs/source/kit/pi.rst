@@ -27,7 +27,7 @@ Your Raspberry Pi has a Pi Power Hat mounted on the top. This allows you to conn
 Indicator LEDs
 ~~~~~~~~~~~~~~
 
-There are 4 indicator LEDs on the Power Power Hat. 
+There are 4 indicator LEDs on the Pi Power Hat.
 
 All LEDs will turn on at boot. After the Pi detects a USB stick, the LEDs work as follows:
 
