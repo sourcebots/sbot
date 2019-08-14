@@ -52,6 +52,7 @@ class Robot(BaseRobot):
             require_all_boards: bool = True,
     ) -> None:
         self._require_all_boards = require_all_boards
+        self._metadata: Optional[Dict[str, Any]] = None
 
         if debug:
             LOGGER.setLevel(logging.DEBUG)
@@ -152,6 +153,14 @@ class Robot(BaseRobot):
     # Metadata
 
     @property
+    def metadata(self) -> Dict[str, Any]:
+        """The game metadata."""
+        if self._metadata is None:
+            raise metadata.MetadataNotReadyError()
+        else:
+            return self._metadata
+
+    @property
     def zone(self) -> int:
         """The robot's starting zone in the arena (0, 1, 2 or 3)."""
         try:
@@ -183,4 +192,4 @@ class Robot(BaseRobot):
             "is_competition": False,
             "zone": 0,
         }
-        self.metadata = metadata.load(fallback=default_metadata)
+        self._metadata = metadata.load(fallback=default_metadata)
