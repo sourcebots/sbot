@@ -185,11 +185,11 @@ class Robot(BaseRobot):
         self.power_board.wait_for_start_flash()
         LOGGER.info("Start button pressed.")
 
-        if self.is_competition:
-            kill_after_delay(GAME_LENGTH)
-
         default_metadata: Dict[str, Any] = {
             "is_competition": False,
             "zone": 0,
         }
         self._metadata = metadata.load(fallback=default_metadata)
+
+        if self.is_competition:
+            kill_after_delay(GAME_LENGTH)
