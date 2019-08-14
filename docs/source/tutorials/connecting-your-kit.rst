@@ -25,7 +25,14 @@ Connectors and cables
 -  Wire
 
 .. Hint:: *CamCons* are the `green connectors </tutorials/kit-assembly.files/camcons.png>`__
-  used for power wiring within our kit.
+   used for power wiring within our kit.
+
+   .. figure:: /_static/tutorials/connecting-your-kit/camcon-connector.jpg
+      :alt: A CamCon connector
+      :scale: 50%
+
+      A CamCon connector (`more information <https://uk.farnell.com/-/ctb92he-2/-/dp/1717047>`__).
+
 
 Peripherals
 -----------
