@@ -16,7 +16,7 @@
 project = 'SourceBots Docs'
 copyright = '2019, SourceBots'
 author = 'SourceBots'
-release = '0.5.0'
+release = '0.7.0'
 
 # -- General configuration ---------------------------------------------------
 
