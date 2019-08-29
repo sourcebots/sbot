@@ -34,7 +34,7 @@ pytest = "^5.1"
 pytest-cov = "^2.7"
 rope = "^0.14.0"
 isort = {version = "^4.3",extras = ["pyproject"]}
-sphinx = "^2.1"
+sphinx = "^2.2"
 sphinx-rtd-theme = "^0.4.3"
 recommonmark = "^0.5.0"
 sphinx-markdown-tables = "^0.0.9"
