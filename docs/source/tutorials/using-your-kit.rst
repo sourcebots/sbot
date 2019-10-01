@@ -229,6 +229,12 @@ when trying to figure out what your code is doing live.
  looking up the frequency 
  `here <https://en.wikipedia.org/wiki/Scientific_pitch_notation#Table_of_note_frequencies>`__.
 
+.. Warning:: Calling ``buzz`` is non-blocking, which means it doesn't
+   actually wait for the piezo to stop buzzing before continuing with your
+   code. If you want to wait for the buzzing to stop, add a
+   ``sleep`` afterwards. If you send more than 32 beeps to the robot too
+   quickly, your power board will crash!
+
 Building a Theremin
 -------------------
 
