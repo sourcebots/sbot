@@ -543,15 +543,18 @@ Average calculator
 ~~~~~~~~~~~~~~~~~~
 
 The first two lines of this program put two numbers entered by the user
-into variables ``a`` and ``b``. (The ``input`` function is like
-``input``, but returns a number (e.g. ``42``) when you enter one, rather
-than a string (like ``"42"``).) Replace the comment with code that
+into variables ``a`` and ``b``. The ``int`` function converts a string
+(a piece of text like the ones returned by ``input`` e.g. ``"42"``)
+into a number (e.g. ``42``). Replace the comment with code that
 averages the numbers and puts them in a variable called ``average``.
 
 .. code:: python
 
-    a = input("Enter first number: ")
-    b = input("Enter second number: ")
+    string1 = input("Enter first number: ")
+    string2 = input("Enter second number: ")
+
+    a = int(string1)
+    b = int(string2)
 
     # Store the average of a and b in the variable `average`
 
