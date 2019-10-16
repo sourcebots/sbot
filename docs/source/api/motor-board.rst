@@ -7,12 +7,27 @@ control up to two motors.
 Accessing the Motor Board
 -------------------------
 
-The motor board can be accessed using the ``motor_board`` property of
-the ``Robot`` object.
+If there is exactly one motor board attached to your robot, it can be accessed 
+using the ``motor_board`` property of the ``Robot`` object.
 
 .. code:: python
 
    my_motor_board = r.motor_board
+
+.. Warning:: If there is more than one motor board on your kit, you *must* use the
+  ``motor_boards`` property. ``r.motor_board`` *will cause an error*. This is because 
+  the kit doesn't know which motor board you want to access.
+
+Motor boards attached to your robot  can be accessed under the ``motor_boards`` 
+property of the ``Robot``. The boards are indexed by serial number, will be written on the board.
+
+.. code:: python
+  
+  my_motor_board = r.motor_boards["SRO-AAD-GBH"]
+  my_other_motor_board = r.motor_boards["SR08U6"]
+
+Controlling the Motor Board
+---------------------------
 
 This board object has an array containing the motors connected to it,
 which can be accessed as ``motors[0]`` and ``motors[1]``. The Motor Board is labelled so you know which
@@ -20,8 +35,8 @@ motor is which.
 
 .. code:: python
 
-   r.motor_board.motors[0]
-   r.motor_board.motors[1]
+   my_motor_board.motors[0]
+   my_motor_board.motors[1]
 
 Powering motors
 ---------------
@@ -34,17 +49,17 @@ in the other direction and ``0`` causes the motor to brake.
 
 .. code:: python
 
-   r.motor_board.motors[0].power = 1
-   r.motor_board.motors[1].power = -1
+   my_motor_board.motors[0].power = 1
+   my_motor_board.motors[1].power = -1
 
 These values can also be read back:
 
 .. code:: python
 
-   r.motor_board.motors[0].power
+   my_motor_board.motors[0].power
    >>> 1
 
-   r.motor_board.motors[1].power
+   my_motor_board.motors[1].power
    >>> -1
 
 .. Warning:: Setting a value outside of the range ``-1`` to
@@ -79,7 +94,7 @@ quick as possible.
 
    from sbot import BRAKE
 
-   r.motor_board.motors[0].power = BRAKE
+   my_motor_board.motors[0].power = BRAKE
 
 ``COAST``
 ^^^^^^^^^
@@ -91,4 +106,4 @@ continue moving under the momentum they had before.
 
    from sbot import COAST
 
-   r.motor_board.motors[1].power = COAST
+   my_motor_board.motors[1].power = COAST
