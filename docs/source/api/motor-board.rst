@@ -19,7 +19,7 @@ using the ``motor_board`` property of the ``Robot`` object.
   the kit doesn't know which motor board you want to access.
 
 Motor boards attached to your robot can be accessed under the ``motor_boards`` 
-property of the ``Robot``. The boards are indexed by serial number, will be written on the board.
+property of the ``Robot``. The boards are indexed by their serial number, which is written on the board.
 
 .. code:: python
   
