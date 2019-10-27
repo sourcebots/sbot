@@ -26,9 +26,9 @@ jobs:
             - pip-packages-{{ .Branch }}-
             - pip-packages-
       - run: poetry install
-      - run: poetry run flake8 sbot tests
-      - run: poetry run mypy sbot tests
-      - run: poetry run pytest
+      - run: make lint
+      - run: make type
+      - run: make test
       - save_cache:
           paths:
             - /root/.cache/pypoetry/virtualenvs
