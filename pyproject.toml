@@ -6,7 +6,7 @@ authors = ["SourceBots <hello@sourcebots.co.uk>"]
 readme = "README.md"
 repository = "https://github.com/sourcebots/sbot"
 homepage = "https://sourcebots.co.uk"
-documentstion = "https://docs.sourcebots.co.uk"
+documentation = "https://docs.sourcebots.co.uk"
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Operating System :: OS Independent",
