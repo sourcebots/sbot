@@ -5,6 +5,7 @@ workflows:
     jobs:
       - test-3.6
       - test-3.7
+      - test-3.8
 
 jobs:
   test-3.6: &template
@@ -25,9 +26,9 @@ jobs:
             - pip-packages-{{ .Branch }}-
             - pip-packages-
       - run: poetry install
-      - run: poetry run flake8 sbot tests
-      - run: poetry run mypy sbot tests
-      - run: poetry run pytest
+      - run: make lint
+      - run: make type
+      - run: make test
       - save_cache:
           paths:
             - /root/.cache/pypoetry/virtualenvs
@@ -36,3 +37,7 @@ jobs:
     <<: *template
     docker:
       - image: j5api/ci:3.7
+  test-3.8:
+    <<: *template
+    docker:
+      - image: j5api/ci:3.8
