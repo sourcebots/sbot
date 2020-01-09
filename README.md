@@ -3,6 +3,8 @@
 [![CircleCI](https://circleci.com/gh/sourcebots/sbot.svg?style=svg)](https://circleci.com/gh/sourcebots/sbot)
 [![PyPI version](https://badge.fury.io/py/sbot.svg)](https://badge.fury.io/py/sbot)
 [![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=stable)](http://pip.pypa.io/en/stable/?badge=stable)
+[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://opensource.org/licenses/MIT)
+![Bees](https://img.shields.io/badge/bees-110%25-yellow.svg)
 
 `sbot` - SourceBots Robot API - Powered by j5
 
