@@ -501,7 +501,7 @@ description = "a python refactoring library..."
 name = "rope"
 optional = false
 python-versions = "*"
-version = "0.14.0"
+version = "0.16.0"
 
 [[package]]
 category = "dev"
@@ -685,7 +685,7 @@ python-versions = ">=2.7"
 version = "0.5.2"
 
 [metadata]
-content-hash = "0e1e2e9c09b603859c21f4055d3fd73a2fe745e4d42c2f69b062b0e4597c4b8f"
+content-hash = "67423bfe526e055b0757061e2974cdef2fc3d2c8cff9a46f74d23db6a43dcbd8"
 python-versions = "^3.6"
 
 [metadata.hashes]
@@ -738,7 +738,7 @@ pytz = ["26c0b32e437e54a18161324a2fca3c4b9846b74a8dccddd843113109e1116b32", "c89
 pyusb = ["4e9b72cc4a4205ca64fbf1f3fff39a335512166c151ad103e55c8223ac147362"]
 recommonmark = ["29cd4faeb6c5268c633634f2d69aef9431e0f4d347f90659fd0aab20e541efeb", "2ec4207a574289355d5b6ae4ae4abb29043346ca12cdd5f07d374dc5987d2852"]
 requests = ["11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4", "9cf5292fcd0f598c671cfc1e0d7d1a7f13bb8085e9a590f48c010551dc6c4b31"]
-rope = ["6b728fdc3e98a83446c27a91fc5d56808a004f8beab7a31ab1d7224cecc7d969", "c5c5a6a87f7b1a2095fb311135e2a3d1f194f5ecb96900fdd0a9100881f48aaf", "f0dcf719b63200d492b85535ebe5ea9b29e0d0b8aebeb87fe03fc1a65924fdaf"]
+rope = ["52423a7eebb5306a6d63bdc91a7c657db51ac9babfb8341c9a1440831ecf3203", "ae1fa2fd56f64f4cc9be46493ce54bed0dd12dee03980c61a4393d89d84029ad", "d2830142c2e046f5fc26a022fe680675b6f48f81c7fc1f03a950706e746e9dfe"]
 six = ["3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c", "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"]
 snowballstemmer = ["9f3b9ffe0809d174f7047e121431acf99c89a7040f0ca84f94ba53a498e6d0c9"]
 sphinx = ["298537cb3234578b2d954ff18c5608468229e116a9757af3b831c2b2b4819159", "e6e766b74f85f37a5f3e0773a1e1be8db3fcb799deb58ca6d18b70b0b44542a5"]
