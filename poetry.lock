@@ -552,7 +552,7 @@ description = "A Sphinx extension for rendering tables written in markdown"
 name = "sphinx-markdown-tables"
 optional = false
 python-versions = "*"
-version = "0.0.10"
+version = "0.0.12"
 
 [package.dependencies]
 markdown = "3.0.1"
@@ -685,7 +685,7 @@ python-versions = ">=2.7"
 version = "0.5.2"
 
 [metadata]
-content-hash = "67423bfe526e055b0757061e2974cdef2fc3d2c8cff9a46f74d23db6a43dcbd8"
+content-hash = "f8a516263902c820db64391973922365518846acc0ca427b9e3c50c4f55dd121"
 python-versions = "^3.6"
 
 [metadata.hashes]
@@ -742,7 +742,7 @@ rope = ["52423a7eebb5306a6d63bdc91a7c657db51ac9babfb8341c9a1440831ecf3203", "ae1
 six = ["3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c", "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"]
 snowballstemmer = ["9f3b9ffe0809d174f7047e121431acf99c89a7040f0ca84f94ba53a498e6d0c9"]
 sphinx = ["298537cb3234578b2d954ff18c5608468229e116a9757af3b831c2b2b4819159", "e6e766b74f85f37a5f3e0773a1e1be8db3fcb799deb58ca6d18b70b0b44542a5"]
-sphinx-markdown-tables = ["64ec956f13606e175e77d1db0edbbcfece40e2bd58b02f59d5cce223ef94a0b4", "a8047eea1375206bec91bf425fd8cad04a8a039047039953235b20b1a70cbe21"]
+sphinx-markdown-tables = ["08779e77832b6562b6b86e4270ae50b0b10010fdd35cf9aadcb5b8246571b933", "ecfc7fd2e02c339fcf12eb9cbcf59fedeb5ff54b6fe666df6e0791a03ece9b05"]
 sphinx-rtd-theme = ["00cf895504a7895ee433807c62094cf1e95f065843bf3acd17037c3e9a2becd4", "728607e34d60456d736cc7991fd236afb828b21b82f956c5ea75f94c8414040a"]
 sphinxcontrib-applehelp = ["edaa0ab2b2bc74403149cb0209d6775c96de797dfd5b5e2a71981309efab3897", "fb8dee85af95e5c30c91f10e7eb3c8967308518e0f7488a2828ef7bc191d0d5d"]
 sphinxcontrib-devhelp = ["6c64b077937330a9128a4da74586e8c2130262f014689b4b89e2d08ee7294a34", "9512ecb00a2b0821a146736b39f7aeb90759834b07e81e8cc23a9c70bacb9981"]
