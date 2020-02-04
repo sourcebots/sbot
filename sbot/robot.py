@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, TypeVar, cast
 
 from j5 import BaseRobot, BoardGroup
 from j5 import __version__ as j5_version
-from j5.backends import Backend, CommunicationError
+from j5.backends import Backend, CommunicationError, Environment
 from j5.boards import Board
 from j5.boards.sb import SBArduinoBoard
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
@@ -45,12 +45,15 @@ class Robot(BaseRobot):
 
     def __init__(
             self,
+            *,
             debug: bool = False,
             wait_start: bool = True,
             require_all_boards: bool = True,
+            environment: Environment = HardwareEnvironment,
     ) -> None:
         self._require_all_boards = require_all_boards
         self._metadata: Optional[Dict[str, Any]] = None
+        self._environment = environment
 
         if debug:
             LOGGER.setLevel(logging.DEBUG)
@@ -68,7 +71,7 @@ class Robot(BaseRobot):
     def _init_power_board(self) -> None:
         self._power_boards = BoardGroup.get_board_group(
             PowerBoard,
-            HardwareEnvironment.get_backend(PowerBoard),
+            self._environment.get_backend(PowerBoard),
         )
         self.power_board: PowerBoard = self._power_boards.singular()
 
@@ -78,17 +81,17 @@ class Robot(BaseRobot):
     def _init_auxilliary_boards(self) -> None:
         self.motor_boards = BoardGroup.get_board_group(
             MotorBoard,
-            HardwareEnvironment.get_backend(MotorBoard),
+            self._environment.get_backend(MotorBoard),
         )
 
         self.servo_boards = BoardGroup.get_board_group(
             ServoBoard,
-            HardwareEnvironment.get_backend(ServoBoard),
+            self._environment.get_backend(ServoBoard),
         )
 
         self.arduinos = BoardGroup.get_board_group(
             SBArduinoBoard,
-            HardwareEnvironment.get_backend(SBArduinoBoard),
+            self._environment.get_backend(SBArduinoBoard),
         )
 
         if ENABLE_VISION:

@@ -9,6 +9,10 @@ from j5.backends.hardware.sr.v4 import (
     SRV4ServoBoardHardwareBackend,
 )
 
+__all__ = [
+    "HardwareEnvironment",
+]
+
 HardwareEnvironment = Environment("Hardware Environment")
 
 HardwareEnvironment.register_backend(cast(Type[Backend], SRV4PowerBoardHardwareBackend))
