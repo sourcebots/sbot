@@ -17,7 +17,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-j5 = "^0.7.6"
+j5 = "^0.8.0"
 
 
 [tool.poetry.dev-dependencies]
