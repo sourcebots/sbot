@@ -36,8 +36,8 @@ LOGGER = logging.getLogger(__name__)
 
 GAME_LENGTH = 120
 
-T = TypeVar("T", bound=Board)
-U = TypeVar("U", bound=Backend)
+BoardT = TypeVar("BoardT", bound=Board)
+BackendT = TypeVar("BackendT", bound=Backend)
 
 
 class Robot(BaseRobot):
@@ -105,7 +105,10 @@ class Robot(BaseRobot):
                 self._get_optional_board(self._cameras)
             )
 
-    def _get_optional_board(self, board_group: BoardGroup[T, U]) -> Optional[T]:
+    def _get_optional_board(
+            self,
+            board_group: BoardGroup[BoardT, BackendT],
+    ) -> Optional[BoardT]:
         try:
             return board_group.singular()
         except CommunicationError:
