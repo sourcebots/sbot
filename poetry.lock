@@ -712,7 +712,7 @@ description = "A collection of helpers and mock objects for unit tests and doc t
 name = "testfixtures"
 optional = false
 python-versions = "*"
-version = "6.11.0"
+version = "6.12.0"
 
 [package.extras]
 build = ["setuptools-git", "wheel", "twine"]
@@ -798,7 +798,7 @@ viewer = ["Pillow (>=7.0.0)"]
 vision = ["zoloto"]
 
 [metadata]
-content-hash = "dff5c12f715261d69f911781b21acd38548c04dd7ec9288d3be6fdacae95b245"
+content-hash = "a55a992da39c3a522cc12755a327f6b66b7fb81bc391c2a79a2e187586d9c06c"
 python-versions = "^3.6"
 
 [metadata.files]
@@ -1161,8 +1161,8 @@ sphinxcontrib-serializinghtml = [
     {file = "sphinxcontrib_serializinghtml-1.1.3-py2.py3-none-any.whl", hash = "sha256:db6615af393650bf1151a6cd39120c29abaf93cc60db8c48eb2dddbfdc3a9768"},
 ]
 testfixtures = [
-    {file = "testfixtures-6.11.0-py2.py3-none-any.whl", hash = "sha256:bde48b041bfe2bf41c0da85af0d04536bed6caf79275ad1a2a2d153c79b5a839"},
-    {file = "testfixtures-6.11.0.tar.gz", hash = "sha256:1ef5c8e57b75883593b21c9bd9bd5a5ce7bbd852fc71486dd3c6b913b697b046"},
+    {file = "testfixtures-6.12.0-py2.py3-none-any.whl", hash = "sha256:76eef0c048d6c1ad28bb74ae2b28fa9e3ea3a2f42a56715a4102480b8188e588"},
+    {file = "testfixtures-6.12.0.tar.gz", hash = "sha256:c352760016f0e5579a3e5565387e6d582ccad4db9791b6a293fdfc59d4591b97"},
 ]
 toml = [
     {file = "toml-0.10.0-py2.7.egg", hash = "sha256:f1db651f9657708513243e61e6cc67d101a39bad662eaa9b5546f789338e07a3"},
