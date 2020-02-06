@@ -5,13 +5,9 @@ import warnings
 from datetime import timedelta
 from typing import Any, Dict, Optional, TypeVar, cast
 
-# See https://github.com/j5api/j5/issues/149
-import j5.backends.hardware.sb.arduino  # noqa: F401
-import j5.backends.hardware.sr.v4  # noqa: F401
 from j5 import BaseRobot, BoardGroup
 from j5 import __version__ as j5_version
-from j5.backends import CommunicationError
-from j5.backends.hardware import HardwareEnvironment
+from j5.backends import Backend, CommunicationError, Environment
 from j5.boards import Board
 from j5.boards.sb import SBArduinoBoard
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
@@ -19,6 +15,7 @@ from j5.components import MarkerCamera
 from j5.components.piezo import Note
 
 from . import metadata
+from .env import HardwareEnvironment
 from .timeout import kill_after_delay
 
 try:
@@ -33,13 +30,14 @@ except ImportError:
     )
     ENABLE_VISION = False
 
-__version__ = "0.7.0"
+__version__ = "0.8.0dev"
 
 LOGGER = logging.getLogger(__name__)
 
 GAME_LENGTH = 120
 
-T = TypeVar("T", bound=Board)
+BoardT = TypeVar("BoardT", bound=Board)
+BackendT = TypeVar("BackendT", bound=Backend)
 
 
 class Robot(BaseRobot):
@@ -47,12 +45,15 @@ class Robot(BaseRobot):
 
     def __init__(
             self,
+            *,
             debug: bool = False,
             wait_start: bool = True,
             require_all_boards: bool = True,
+            environment: Environment = HardwareEnvironment,
     ) -> None:
         self._require_all_boards = require_all_boards
         self._metadata: Optional[Dict[str, Any]] = None
+        self._environment = environment
 
         if debug:
             LOGGER.setLevel(logging.DEBUG)
@@ -68,8 +69,9 @@ class Robot(BaseRobot):
             self.wait_start()
 
     def _init_power_board(self) -> None:
-        self._power_boards = BoardGroup[PowerBoard](
-            HardwareEnvironment.get_backend(PowerBoard),
+        self._power_boards = BoardGroup.get_board_group(
+            PowerBoard,
+            self._environment.get_backend(PowerBoard),
         )
         self.power_board: PowerBoard = self._power_boards.singular()
 
@@ -77,21 +79,25 @@ class Robot(BaseRobot):
         self.power_board.outputs.power_on()
 
     def _init_auxilliary_boards(self) -> None:
-        self.motor_boards = BoardGroup[MotorBoard](
-            HardwareEnvironment.get_backend(MotorBoard),
+        self.motor_boards = BoardGroup.get_board_group(
+            MotorBoard,
+            self._environment.get_backend(MotorBoard),
         )
 
-        self.servo_boards = BoardGroup[ServoBoard](
-            HardwareEnvironment.get_backend(ServoBoard),
+        self.servo_boards = BoardGroup.get_board_group(
+            ServoBoard,
+            self._environment.get_backend(ServoBoard),
         )
 
-        self.arduinos = BoardGroup[SBArduinoBoard](
-            HardwareEnvironment.get_backend(SBArduinoBoard),
+        self.arduinos = BoardGroup.get_board_group(
+            SBArduinoBoard,
+            self._environment.get_backend(SBArduinoBoard),
         )
 
         if ENABLE_VISION:
 
-            self._cameras = BoardGroup[ZolotoCameraBoard](
+            self._cameras = BoardGroup.get_board_group(
+                ZolotoCameraBoard,
                 SbotCameraBackend,
             )
 
@@ -99,7 +105,10 @@ class Robot(BaseRobot):
                 self._get_optional_board(self._cameras)
             )
 
-    def _get_optional_board(self, board_group: BoardGroup[T]) -> Optional[T]:
+    def _get_optional_board(
+            self,
+            board_group: BoardGroup[BoardT, BackendT],
+    ) -> Optional[BoardT]:
         try:
             return board_group.singular()
         except CommunicationError:
