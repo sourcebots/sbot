@@ -798,7 +798,7 @@ viewer = ["Pillow (>=7.0.0)"]
 vision = ["zoloto"]
 
 [metadata]
-content-hash = "5de33ead784ed7ae025e852622ca23e722a20c5941084db8694ad9c43dab2cbf"
+content-hash = "d24d4a11c5f2694b58d9cefddb8b43979d13b9a91c418e38ae1d7d9f9ea5a469"
 python-versions = "^3.6"
 
 [metadata.files]
