@@ -14,11 +14,12 @@ from zoloto.cameras import Camera
 class SbotCamera(Camera):
     """Camera definition for SourceBots kit."""
 
+    marker_dict = MarkerDict.DICT_APRILTAG_36H11
+
     def __init__(self, camera_id: int):
 
         super().__init__(
             camera_id,
-            marker_dict=MarkerDict.DICT_APRILTAG_36H11,
             calibration_file=Path(__file__).parent.joinpath('C270.xml'),
         )
 
