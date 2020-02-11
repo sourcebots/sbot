@@ -79,19 +79,16 @@ class Robot(BaseRobot):
         self.power_board.outputs.power_on()
 
     def _init_auxilliary_boards(self) -> None:
-        self.motor_boards = BoardGroup.get_board_group(
+        self.motor_boards = self._environment.get_board_group(
             MotorBoard,
-            self._environment.get_backend(MotorBoard),
         )
 
-        self.servo_boards = BoardGroup.get_board_group(
+        self.servo_boards = self._environment.get_board_group(
             ServoBoard,
-            self._environment.get_backend(ServoBoard),
         )
 
-        self.arduinos = BoardGroup.get_board_group(
+        self.arduinos = self._environment.get_board_group(
             SBArduinoBoard,
-            self._environment.get_backend(SBArduinoBoard),
         )
 
         if ENABLE_VISION:
