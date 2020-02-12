@@ -17,8 +17,8 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-j5 = "^0.8.0"
-zoloto = {version = ">=0.5,<0.6", optional = true}
+j5 = "^0.9.0"
+zoloto = {version = ">=0.5.2,<0.6", optional = true}
 
 
 [tool.poetry.dev-dependencies]
