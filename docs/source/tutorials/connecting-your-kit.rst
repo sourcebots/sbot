@@ -110,7 +110,7 @@ how to connect things up. You'll be cutting your own wires here!
     CamCons onto the opposite ends of a pair of wires, ensuring that positive
     connects to positive and ground to ground, and then plugging one end into
     a low power socket on the side of the Power Board and the other into the 12V
-     socket on the servo board.
+    socket on the servo board.
 8.  Connect the Servo Board to the Pi by way of another micro-USB cable; the
     USB A (rectangle) end goes into any USB socket on the Pi or connected via 
     the USB hub, the micro-USB end goes into the Servo Board.

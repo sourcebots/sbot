@@ -98,8 +98,8 @@ have to be read differently. The arduino has six analogue inputs, which
 are labelled ``A0`` to ``A5``; however pins ``A4`` and ``A5`` are reserved and cannot be used.
 
 .. Hint:: Analogue signals can have any voltage, while digital
-signals can only take on one of two voltages. You can read more about
-digital vs analogue signals `here <https://learn.sparkfun.com/tutorials/analog-vs-digital>`__.
+   signals can only take on one of two voltages. You can read more about
+   digital vs analogue signals `here <https://learn.sparkfun.com/tutorials/analog-vs-digital>`__.
 
 .. code:: python
    

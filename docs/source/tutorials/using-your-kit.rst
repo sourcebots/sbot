@@ -142,7 +142,7 @@ Servos are a motor which knows what position it's at. You can tell it an angle
 and it'll handle turning to that value! 
 
 .. Warning:: Be warned, most servos can't turn a full 360 degrees!
-Always check how far it can move before you design a cool robot arm!
+   Always check how far it can move before you design a cool robot arm!
 
 Servos can be set to turn to a specific position. Sadly you can't just tell it
 an angle to turn to in degrees, you can only tell it to go between ``-1`` and 
