@@ -30,7 +30,7 @@ except ImportError:
     )
     ENABLE_VISION = False
 
-__version__ = "0.8.0dev"
+__version__ = "0.8.0"
 
 LOGGER = logging.getLogger(__name__)
 
