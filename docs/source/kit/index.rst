@@ -12,8 +12,7 @@ Kit Documentation
    servo-board
    pi
 
-Overview
---------
+.. rubric:: Overview
 
 Besides the Raspberry Pi, there are 4 main controller boards to
 interface with your kit.
