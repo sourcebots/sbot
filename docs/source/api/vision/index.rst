@@ -44,7 +44,7 @@ Snapshots are saved to your USB drive, and can be viewed on another computer.
 
 .. code:: python
 
-   r.camera.save("snapshot.png")
+   r.camera.save("snapshot.jpg")
 
 .. figure:: /_static/api/arena_marker_annotated.jpg
    :alt: An annotated arena with Fiducial Markers.
