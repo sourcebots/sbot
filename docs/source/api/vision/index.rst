@@ -51,3 +51,58 @@ Snapshots are saved to your USB drive, and can be viewed on another computer.
    :scale: 30%
 
    An annotated arena with Fiducial Markers.
+
+Markers
+-------
+
+The marker objects in the list expose data that may be useful to your robot.
+
+Marker ID
+~~~~~~~~~
+
+Every marker has a numeric identifier that can be used to determine what object it represents.
+
+.. code:: python
+
+   markers = r.camera.see()
+
+   for m in markers:
+       print(m.id)
+
+Position
+~~~~~~~~
+
+Each marker has a position in 3D space, relative to your webcam.
+
+You can access the position using ``m.bearing`` and ``m.distance``.
+
+.. code:: python
+
+   markers = r.camera.see()
+
+   for m in markers:
+       print(m.bearing)  # Bearing to the marker from the origin, in radians
+       print(m.distance)  # Bearing to the marker from the origin, in radians
+
+For further information on position, including how to use ``m.position`` and the coordinate systems,
+see `Position <position.html>`__.
+
+It is also possible to look at the `Orientation <orientation.html>`__ of the marker.
+
+Pixel Positions
+~~~~~~~~~~~~~~~
+
+The positions of various points on the marker within the image are exposed over the API. This is useful
+if you would like to perform your own Computer Vision calculations.
+
+The corners are specified in clockwise order, starting from the top left corner of the
+marker. Pixels are counted from the origin of the image, which
+conventionally is in the top left corner of the image.
+
+.. code:: python
+
+   markers = r.camera.see()
+
+   for m in markers:
+       print(m.pixel_corners)  #  Pixel positions of the marker corners within the image.
+       print(m.pixel_centre)  # Pixel positions of the centre of the marker within the image.
