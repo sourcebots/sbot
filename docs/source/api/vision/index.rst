@@ -37,7 +37,7 @@ Saving camera output
 --------------------
 
 You can also save a snapshot of what your webcam is currently seeing. This can be useful to debug your code.
-Every marker that your robot can see will have a square annotated around it, with a red dot indicating the top left
+Every marker that your robot can see will have a square annotated around it, with a red dot indicating the bottom right
 corner of the marker. The ID of every marker is also written next to it.
 
 Snapshots are saved to your USB drive, and can be viewed on another computer.
@@ -104,5 +104,5 @@ conventionally is in the top left corner of the image.
    markers = r.camera.see()
 
    for m in markers:
-       print(m.pixel_corners)  #  Pixel positions of the marker corners within the image.
+       print(m.pixel_corners)  # Pixel positions of the marker corners within the image.
        print(m.pixel_centre)  # Pixel positions of the centre of the marker within the image.
