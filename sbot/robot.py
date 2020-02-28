@@ -151,7 +151,7 @@ class Robot(BaseRobot):
     @property
     def camera(self) -> Optional[MarkerCamera]:
         """Alias to the camera."""
-        if self._camera is None:
+        if not ENABLE_VISION or self._camera is None:
             return None
         else:
             return self._camera.camera
