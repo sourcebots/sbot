@@ -84,6 +84,9 @@ You can access the position using ``m.bearing`` and ``m.distance``.
        print(m.bearing)  # Bearing to the marker from the origin, in radians
        print(m.distance)  # Bearing to the marker from the origin, in radians
 
+* ``m.bearing`` is equivalent to ``m.position.cylindrical.phi``.
+* ``m.distance`` is equivalent to ``m.position.cylindrical.p``.
+
 For further information on position, including how to use ``m.position`` and the coordinate systems,
 see `Position <position.html>`__.
 
