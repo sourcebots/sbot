@@ -26,6 +26,7 @@ release = '0.8.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    "sphinx_autodoc_typehints",
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -62,4 +63,15 @@ html_theme_options = {
     'style_nav_header_background': 'purple',
     'logo_only': True,
     'titles_only': False,
+}
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "cv2": (
+        "https://docs.opencv.org/3.0-last-rst/",
+        None,
+    ),  # This is the most recent version with intersphinx support.
+    "numpy": ("https://docs.scipy.org/doc/numpy", None),
+    "zoloto": ("https://zoloto.readthedocs.org/en/latest", None),
+    "j5": ("https://j5.readthedocs.org/en/master", None),
 }

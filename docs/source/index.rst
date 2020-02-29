@@ -13,6 +13,7 @@ There are a number of sections in the documentation offering help for the kit an
    tutorials/index
    api/index
    kit/index
+   module/index
 
 How to use the docs
 -------------------
