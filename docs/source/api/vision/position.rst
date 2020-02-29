@@ -48,7 +48,7 @@ Spherical
 The `spherical coordinates system <https://en.wikipedia.org/wiki/Spherical_coordinate_system>`_ has
 three values to specify a specific point in space.
 
-* ``r`` - The `radial distance`, the distance from the origin to the point.
+* ``r`` - The `radial distance`, the distance from the origin to the point, in metres.
 * ``θ`` (theta) -  The angle from the azimuth to the point, in radians.
 * ``φ`` (phi)   -  The polar angle from the plane of the camera to the point, in radians.
 
@@ -60,10 +60,37 @@ The camera is located at the origin, where the coordinates are ``(0, 0, 0)``.
 
    for m in markers:
        print(m.position.spherical.r)  # Distance from the origin in metres
-       print(m.position.cartesian.theta)  # The angle from the azimuth to the point, in radians.
-       print(m.position.cartesian.phi)  # The polar angle from the plane of the camera to the point, in radians.
+       print(m.position.spherical.theta)  # The angle from the azimuth to the point, in radians.
+       print(m.position.spherical.phi)  # The polar angle from the plane of the camera to the point, in radians.
 
 .. Hint:: You can use the ``math.degrees`` function to convert from radians to degrees.
 
 .. Note:: When searching for spherical coordinates, you may find a references with phi and theta the other way around.
     This is due to there being *two* conventions for this. We use the ISO 80000-2 16.3 system, as often found in physics.
+
+Cylindrical
+-----------
+
+.. figure:: /_static/api/vision/cylindrical.png
+   :alt: The cylindrical coordinates system
+   :scale: 40%
+
+   The cylindrical coordinates system
+
+The `cylindrical coordinates system <https://en.wikipedia.org/wiki/Cylindrical_coordinate_system>`_ has three values
+to specify a point in space.
+
+* ``ρ`` (rho) - The axial distance from the origin, in metres.
+* ``φ`` (phi) - The polar angle from the plane of the camera to the point, in radians.
+* ``z`` - The height of the point from the plane of the camera.
+
+.. code:: python
+
+   markers = r.camera.see()
+
+   for m in markers:
+       print(m.position.cylindrical.p)  # The axial distance from the origin.
+       print(m.position.cylindrical.phi)  # The polar angle from the plane of the camera to the point, in radians.
+       print(m.position.cylindrical.z)  # The height of the point from the plane of the camera, in metres.
+
+.. Note:: Whilst ``ρ`` is technically rho, we denote it as ``p`` in the API to make it easier to type.
