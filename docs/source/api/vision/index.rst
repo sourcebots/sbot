@@ -8,7 +8,7 @@ Vision
    orientation
    position
 
-.. figure:: /_static/api/arena_marker.jpg
+.. figure:: /_static/api/vision/arena_marker.jpg
    :alt: An arena with Fiducial Markers.
    :scale: 30%
 
@@ -46,7 +46,7 @@ Snapshots are saved to your USB drive, and can be viewed on another computer.
 
    r.camera.save("snapshot.jpg")
 
-.. figure:: /_static/api/arena_marker_annotated.jpg
+.. figure:: /_static/api/vision/arena_marker_annotated.jpg
    :alt: An annotated arena with Fiducial Markers.
    :scale: 30%
 
