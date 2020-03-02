@@ -92,6 +92,10 @@ see `Position <position.html>`__.
 
 It is also possible to look at the `Orientation <orientation.html>`__ of the marker.
 
+Hint
+
+You can use the math.degrees function to convert from radians to degrees
+
 Pixel Positions
 ~~~~~~~~~~~~~~~
 
