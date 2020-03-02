@@ -82,7 +82,7 @@ You can access the position using ``m.bearing`` and ``m.distance``.
 
    for m in markers:
        print(m.bearing)  # Bearing to the marker from the origin, in radians
-       print(m.distance)  # distance to the marker from the origin, in meters
+       print(m.distance)  # Distance to the marker from the origin, in metres
 
 * ``m.bearing`` is equivalent to ``m.position.cylindrical.phi``.
 * ``m.distance`` is equivalent to ``m.position.cylindrical.p``.
