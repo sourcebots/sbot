@@ -14,14 +14,22 @@ Kit Documentation
 
 .. rubric:: Overview
 
-Besides the Raspberry Pi, there are 4 main controller boards to
-interface with your kit.
+Your kit consists of 6 main "boards".
 
-================================== ================================== ================================== ========================== ==========================
-`Motor Board <motor-board.html>`__ `Power Board <power-board.html>`__ `Servo Board <servo-board.html>`__ `Arduino <arduino.html>`__ `Raspberry Pi <pi.html>`__
-================================== ================================== ================================== ========================== ==========================
-|Motor Board|                      |Power Board|                      |Servo Board|                      |Arduino|                  |Pi|
-================================== ================================== ================================== ========================== ==========================
++------------------------------------+------------------------------------+------------------------------------+
+| `Motor Board <motor-board.html>`__ | `Power Board <power-board.html>`__ | `Servo Board <servo-board.html>`__ |
++------------------------------------+------------------------------------+------------------------------------+
+| |Motor Board|                      | |Power Board|                      | |Servo Board|                      |
++------------------------------------+------------------------------------+------------------------------------+
+| `Arduino <arduino.html>`__         | `Raspberry Pi <pi.html>`__         | Webcam                             |
++------------------------------------+------------------------------------+------------------------------------+
+| |Arduino|                          | |Pi|                               | |Webcam|                           |
++------------------------------------+------------------------------------+------------------------------------+
+
+It should be noted that only the Raspberry Pi and Power Board are required for your kit to work.
+The other boards will provide useful features to help your robot work.
+
+You will also need a `Battery <battery.html>`__ to use your kit, although this may not be supplied to you immediately.
 
 Other Parts
 -----------
@@ -40,7 +48,25 @@ Part                                                            Quantity Specifi
 =============================================================== ======== =============
  
 .. |Motor Board| image:: /_static/kit/mcv4b.png
+                    :width: 120
+                    :align: middle
+
 .. |Power Board| image:: /_static/kit/pbv4.png
+                    :width: 120
+                    :align: middle
+
 .. |Servo Board| image:: /_static/kit/sbv4.png
+                    :width: 120
+                    :align: middle
+
 .. |Arduino| image:: /_static/kit/arduino_headers.png
+                    :width: 120
+                    :align: middle
+
 .. |Pi| image:: /_static/kit/pi.jpg
+                    :width: 120
+                    :align: middle
+
+.. |Webcam| image:: /_static/kit/webcam.png
+                    :width: 120
+                    :align: middle

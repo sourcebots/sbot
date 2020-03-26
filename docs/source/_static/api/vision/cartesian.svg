@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 71.673561 62.570404"
+   height="62.570404mm"
+   width="71.673561mm">
+  <defs
+     id="defs2">
+    <marker
+       style="overflow:visible"
+       id="marker5211"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path5209" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1Lend"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path4606" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker5047"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path5045" />
+    </marker>
+    <marker
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4989"
+       style="overflow:visible">
+      <path
+         id="path4987"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(0.8,0,0,0.8,10,0)" />
+    </marker>
+    <marker
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4931"
+       style="overflow:visible">
+      <path
+         id="path4929"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(0.8,0,0,0.8,10,0)" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1Lstart"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path4603" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1Lstart-4"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path4603-3" />
+    </marker>
+  </defs>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-17.663389,-11.354948)"
+     id="layer1">
+    <text
+       id="text5971"
+       y="109.19308"
+       x="130.68526"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.8777771px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       xml:space="preserve"><tspan
+         style="font-size:4.23333311px;stroke-width:0.26458332"
+         y="118.27168"
+         x="130.68526"
+         id="tspan5969" /></text>
+    <g
+       transform="translate(-51.315749,-55.592062)"
+       id="g7873">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.479;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-mid:url(#Arrow1Lstart)"
+         d="M 69.784466,83.366553 116.5991,110.39496"
+         id="path70" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.47899044px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker5211);marker-end:url(#marker5211)"
+         d="m 116.49122,128.58752 -2e-5,-54.056897"
+         id="path70-3" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.43650937px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker4931);marker-end:url(#marker5047)"
+         d="M 139.91881,96.796532 97.25612,121.42787"
+         id="path70-6" />
+      <ellipse
+         style="fill:#ff0000;fill-rule:evenodd;stroke-width:0.1134204"
+         id="path3796"
+         cx="116.48958"
+         cy="110.13196"
+         rx="1.6544334"
+         ry="1.8200223" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.8777771px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="118.36891"
+         y="77.764153"
+         id="text5971-6"><tspan
+           id="tspan5969-2"
+           x="118.36891"
+           y="77.764153"
+           style="font-size:4.23333311px;stroke-width:0.26458332">Y</tspan><tspan
+           x="118.36891"
+           y="90.111374"
+           style="font-size:4.23333311px;stroke-width:0.26458332"
+           id="tspan5991" /></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.8777771px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="77.607277"
+         y="95.750198"
+         id="text5971-6-8"><tspan
+           id="tspan5969-2-0"
+           x="77.607277"
+           y="95.750198"
+           style="font-size:4.23333311px;stroke-width:0.26458332">Z</tspan><tspan
+           x="77.607277"
+           y="108.09742"
+           style="font-size:4.23333311px;stroke-width:0.26458332"
+           id="tspan5991-8" /></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.8777771px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="132.15704"
+         y="105.98079"
+         id="text5971-6-6"><tspan
+           id="tspan5969-2-1"
+           x="132.15704"
+           y="105.98079"
+           style="font-size:4.23333311px;stroke-width:0.26458332">X</tspan><tspan
+           x="132.15704"
+           y="118.32801"
+           style="font-size:4.23333311px;stroke-width:0.26458332"
+           id="tspan5991-4" /></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="118.35124"
+         y="113.25378"
+         id="text6026"><tspan
+           id="tspan6024"
+           x="118.35124"
+           y="113.25378"
+           style="stroke-width:0.26458332">Camera</tspan></text>
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.11158227;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart-4);marker-mid:url(#Arrow1Lstart-4)"
+         d="m 83.026553,86.413917 10.905394,6.296224"
+         id="path70-5" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.8777771px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="90.334801"
+         y="89.610527"
+         id="text5971-6-8-0"><tspan
+           id="tspan5969-2-0-5"
+           x="90.334801"
+           y="89.610527"
+           style="font-size:4.23333311px;stroke-width:0.26458332">Forwards</tspan><tspan
+           x="90.334801"
+           y="101.95775"
+           style="font-size:4.23333311px;stroke-width:0.26458332"
+           id="tspan5991-8-9" /></text>
+    </g>
+  </g>
+</svg>

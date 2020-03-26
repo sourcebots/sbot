@@ -10,6 +10,7 @@ API Documentation
    power-board
    servo-board
 
+   vision/index
    game-state
    advanced
 
@@ -17,8 +18,7 @@ Programming your robot is done in `Python <https://www.python.org/>`__,
 specifically version 3.7.4. You can learn more about Python from their
 `docs <https://docs.python.org/3/>`__, and our whirlwind tour.
 
-Setup
------
+.. rubric:: Setup
 
 The following two lines are required to complete initialisation of the
 kit:
@@ -35,8 +35,7 @@ the robot's functions.
 The remainder of the tutorials pages will assume your ``Robot`` object
 is defined as ``r``.
 
-Running your code
------------------
+.. rubric:: Running your code
 
 Your code needs to be put on a USB drive in a file called ``main.py``.
 On insertion into the robot, this file will be executed. The file is
@@ -53,8 +52,7 @@ test them quickly.
 .. Hint:: If this file is missing or incorrectly named, your
   robot won't do anything. No log file will be created.
 
-Start Button
-------------
+.. rubric:: Start Button
 
 After the robot has finished starting up, it will wait for the *Start
 Button* on the power board to be pressed before continuing with your
@@ -62,8 +60,7 @@ code, so that you can control when it starts moving. There is a green
 LED next to the start button which flashes when the robot is finished
 setting up and the start button can be pressed.
 
-Running Code before pressing the start button
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. rubric:: Running Code before pressing the start button
 
 If you want to do things before the start button press, such as setting
 up servos or motors, you can pass ``wait_start`` to the ``Robot`` constructor. You will
@@ -78,8 +75,7 @@ then need to wait for the start button
 
    r.wait_start()
 
-Logs
-----
+.. rubric:: Logs
 
 A log file is saved on the USB drive so you can see what your robot did,
 what it didn't do, and any errors it raised. The file is saved to
@@ -88,8 +84,7 @@ what it didn't do, and any errors it raised. The file is saved to
 .. Warning:: The previous log file is deleted at the start of
    each run, so copy it elsewhere if you need to keep hold of it!
 
-Serial number
--------------
+.. rubric:: Serial number
 
 All kit boards have a serial number, unique to that specific board,
 which can be read using the ``serial`` property:
@@ -103,8 +98,7 @@ which can be read using the ``serial`` property:
    r.motor_board.serial
    >>> 'SRO-AAO-RV2'
 
-Included Libraries
-------------------
+.. rubric:: Included Libraries
 
 Python already comes with plenty of `built-in
 libraries <https://docs.python.org/3.7/py-modindex.html>`__
