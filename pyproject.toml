@@ -22,7 +22,7 @@ zoloto = {version = ">=0.5.2,<0.6", optional = true}
 
 
 [tool.poetry.dev-dependencies]
-flake8 = "^3.7"
+flake8 = "^3.8"
 flake8-commas = "^2.0"
 flake8-comprehensions = "^3.2"
 flake8-debugger = "^3.2"
