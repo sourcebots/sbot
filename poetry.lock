@@ -603,14 +603,14 @@ test = ["pytest (<5.3.3)", "pytest-cov", "html5lib", "flake8 (>=3.5.0)", "flake8
 
 [[package]]
 name = "sphinx-markdown-tables"
-version = "0.0.12"
+version = "0.0.15"
 description = "A Sphinx extension for rendering tables written in markdown"
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-markdown = "3.0.1"
+markdown = ">=3.0.1"
 
 [[package]]
 name = "sphinx-rtd-theme"
@@ -787,7 +787,7 @@ vision = ["zoloto"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "bcafbb8cf8b817bce2648b603415d0fcdbba34442df18000d576a0bd072733b6"
+content-hash = "9fa1569db23646d310b28ce8e856919fbbbfd8890fbe590e981235cc44c34626"
 
 [metadata.files]
 alabaster = [
@@ -1123,8 +1123,8 @@ sphinx = [
     {file = "Sphinx-2.4.4.tar.gz", hash = "sha256:b4c750d546ab6d7e05bdff6ac24db8ae3e8b8253a3569b754e445110a0a12b66"},
 ]
 sphinx-markdown-tables = [
-    {file = "sphinx-markdown-tables-0.0.12.tar.gz", hash = "sha256:08779e77832b6562b6b86e4270ae50b0b10010fdd35cf9aadcb5b8246571b933"},
-    {file = "sphinx_markdown_tables-0.0.12-py3-none-any.whl", hash = "sha256:ecfc7fd2e02c339fcf12eb9cbcf59fedeb5ff54b6fe666df6e0791a03ece9b05"},
+    {file = "sphinx-markdown-tables-0.0.15.linux-x86_64.tar.gz", hash = "sha256:c5f423a018aed9447aad1fbbada32c21c7565183aaf2da3c7fdb7bf4dffa3a0b"},
+    {file = "sphinx_markdown_tables-0.0.15-py3-none-any.whl", hash = "sha256:24a37662d86ee8bceb7d4f7003df0b25bc52401369d1ddc40d13ae7b58697031"},
 ]
 sphinx-rtd-theme = [
     {file = "sphinx_rtd_theme-0.4.3-py2.py3-none-any.whl", hash = "sha256:00cf895504a7895ee433807c62094cf1e95f065843bf3acd17037c3e9a2becd4"},
