@@ -1,7 +1,6 @@
 """SourceBots Robot Definition."""
 
 import logging
-import warnings
 from datetime import timedelta
 from typing import Any, Dict, Optional, TypeVar, cast
 
@@ -11,24 +10,11 @@ from j5.backends import Backend, CommunicationError, Environment
 from j5.boards import Board
 from j5.boards.sb import SBArduinoBoard
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
-from j5.components import MarkerCamera
 from j5.components.piezo import Note
 
 from . import metadata
 from .env import HardwareEnvironment
 from .timeout import kill_after_delay
-
-try:
-    import j5.backends.hardware.zoloto  # noqa: F401
-    from j5.boards.zoloto import ZolotoCameraBoard
-    from .vision import SbotCameraBackend
-    ENABLE_VISION = True
-except ImportError:
-    warnings.warn(
-        "Zoloto not installed, disabling vision support",
-        category=ImportWarning,
-    )
-    ENABLE_VISION = False
 
 __version__ = "0.8.0"
 
@@ -91,17 +77,6 @@ class Robot(BaseRobot):
             SBArduinoBoard,
         )
 
-        if ENABLE_VISION:
-
-            self._cameras = BoardGroup.get_board_group(
-                ZolotoCameraBoard,
-                SbotCameraBackend,
-            )
-
-            self._camera: Optional[ZolotoCameraBoard] = (
-                self._get_optional_board(self._cameras)
-            )
-
     def _get_optional_board(
             self,
             board_group: BoardGroup[BoardT, BackendT],
@@ -118,8 +93,10 @@ class Robot(BaseRobot):
 
     def _log_connected_boards(self) -> None:
         for board in Board.BOARDS:
-            LOGGER.info(f"Found {board.name}, serial: {board.serial}")
-            LOGGER.debug(f"Firmware Version of {board.serial}: {board.firmware_version}")
+            LOGGER.info(f"Found {board.name}, serial: {board.serial_number}")
+            LOGGER.debug(
+                f"Firmware Version of {board.serial_number}: {board.firmware_version}",
+            )
 
     @property
     def motor_board(self) -> MotorBoard:
@@ -147,14 +124,6 @@ class Robot(BaseRobot):
         A CommunicationError is raised if there isn't exactly one attached.
         """
         return self.arduinos.singular()
-
-    @property
-    def camera(self) -> Optional[MarkerCamera]:
-        """Alias to the camera."""
-        if not ENABLE_VISION or self._camera is None:
-            return None
-        else:
-            return self._camera.camera
 
     # Metadata
 
