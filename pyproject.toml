@@ -10,7 +10,7 @@ documentation = "https://docs.sourcebots.co.uk"
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Operating System :: OS Independent",
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Typing :: Typed",
     "Topic :: Education",
 ]
