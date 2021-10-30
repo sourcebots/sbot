@@ -79,12 +79,9 @@ class Robot(BaseRobot):
             SBArduinoBoard,
         )
 
-    def _init_cameras(self) -> None:
-        """Initialise vision system for a single camera."""
-        backend_class = self._environment.get_backend(ZolotoCameraBoard)
-        backend = backend_class(0)  # type: ignore
-
-        self._camera = ZolotoCameraBoard("ZOLOTOCAM", backend)
+        self._cameras = self._environment.get_board_group(
+            ZolotoCameraBoard,
+        )
 
     def _get_optional_board(
             self,
@@ -141,7 +138,7 @@ class Robot(BaseRobot):
 
         :returns: a :class:`j5_zoloto.board.ZolotoCameraBoard`.
         """
-        return self._camera
+        return self._cameras.singular()
 
     # Metadata
 

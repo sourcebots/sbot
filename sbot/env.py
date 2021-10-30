@@ -1,7 +1,6 @@
 """Environment definitions."""
-from typing import Type, cast
 
-from j5.backends import Backend, Environment
+from j5.backends import Environment
 from j5.backends.console.sb.arduino import SBArduinoConsoleBackend
 from j5.backends.console.sr.v4 import (
     SRV4MotorBoardConsoleBackend,
