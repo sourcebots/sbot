@@ -21,6 +21,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install Poetry
         run: pip install poetry
+      - name: Install OpenCV from PyPI
+        run: poetry run pip install opencv-contrib-python-headless
       - name: Use in-project virtualenv
         run: poetry config virtualenvs.in-project true
       - uses: actions/cache@v2
