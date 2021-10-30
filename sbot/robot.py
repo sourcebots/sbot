@@ -11,6 +11,7 @@ from j5.boards import Board
 from j5.boards.sb import SBArduinoBoard
 from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
 from j5.components.piezo import Note
+from j5_zoloto import ZolotoCameraBoard
 
 from . import metadata
 from .env import HardwareEnvironment
@@ -50,6 +51,7 @@ class Robot(BaseRobot):
         self._init_power_board()
         self._init_auxilliary_boards()
         self._log_connected_boards()
+        self._init_cameras()
 
         if wait_start:
             self.wait_start()
@@ -76,6 +78,13 @@ class Robot(BaseRobot):
         self.arduinos = self._environment.get_board_group(
             SBArduinoBoard,
         )
+
+    def _init_cameras(self) -> None:
+        """Initialise vision system for a single camera."""
+        backend_class = self._environment.get_backend(ZolotoCameraBoard)
+        backend = backend_class(0)  # type: ignore
+
+        self._camera = ZolotoCameraBoard("ZOLOTOCAM", backend)
 
     def _get_optional_board(
             self,
@@ -124,6 +133,15 @@ class Robot(BaseRobot):
         A CommunicationError is raised if there isn't exactly one attached.
         """
         return self.arduinos.singular()
+
+    @property
+    def camera(self) -> ZolotoCameraBoard:
+        """
+        Get the robot's camera interface.
+
+        :returns: a :class:`j5_zoloto.board.ZolotoCameraBoard`.
+        """
+        return self._camera
 
     # Metadata
 
