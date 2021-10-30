@@ -51,7 +51,6 @@ class Robot(BaseRobot):
         self._init_power_board()
         self._init_auxilliary_boards()
         self._log_connected_boards()
-        self._init_cameras()
 
         if wait_start:
             self.wait_start()
@@ -79,7 +78,7 @@ class Robot(BaseRobot):
             SBArduinoBoard,
         )
 
-        self._cameras = self._environment.get_board_group(
+        self.cameras = self._environment.get_board_group(
             ZolotoCameraBoard,
         )
 
@@ -138,7 +137,7 @@ class Robot(BaseRobot):
 
         :returns: a :class:`j5_zoloto.board.ZolotoCameraBoard`.
         """
-        return self._cameras.singular()
+        return self.cameras.singular()
 
     # Metadata
 
