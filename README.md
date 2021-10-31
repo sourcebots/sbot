@@ -55,6 +55,6 @@ Replace GRID_SIZE with the length of one of the larger squares (in mm) from the 
 Use `-ci=1` for specifying camera index if multiple cameras are connected.
 
 Point the camera at the marker grid. Until DF is at or below 30 then press S to save.
-This will output a `cameraParameters.xml` file. Place this file in `sr/robot3/vision/calibrations` named by the camera model.
+This will output a `cameraParameters.xml` file. Place this file in `sbot/vision/calibrations` named after the camera model.
 
-You will need to add a detection strategy for the camera in to `sr/robot3/vision/backend.py`.
+You will need to edit the calibration file used in `sbot/vision/backend.py`.
