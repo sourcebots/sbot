@@ -17,7 +17,7 @@ from . import metadata
 from .env import HardwareEnvironment
 from .timeout import kill_after_delay
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 LOGGER = logging.getLogger(__name__)
 
