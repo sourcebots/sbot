@@ -68,7 +68,7 @@ def load(*, fallback: Dict[str, Any] = {}) -> Dict[str, Any]:
 def _find_file(search_path: str) -> Optional[str]:
     for dir_path, dir_names, file_names in os.walk(search_path):
         for file_name in file_names:
-            if file_name.endswith(".json"):
+            if file_name == "sbot-metadata.json":
                 return os.path.join(dir_path, file_name)
     return None
 
