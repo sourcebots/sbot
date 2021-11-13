@@ -43,3 +43,18 @@ r = Robot(wait_start=False)
 r.wait_start()
 
 ```
+
+## Adding camera calibrations
+
+You will need to print off a [chAruco marker grid](https://docs.opencv.org/4.5.3/charuco_board.png).
+
+`opencv_interactive-calibration -t=charuco -sz=GRID_SIZE`
+
+Replace GRID_SIZE with the length of one of the larger squares (in mm) from the printed marker grid.
+
+Use `-ci=1` for specifying camera index if multiple cameras are connected.
+
+Point the camera at the marker grid. Until DF is at or below 30 then press S to save.
+This will output a `cameraParameters.xml` file. Place this file in `sbot/vision/calibrations` named after the camera model.
+
+You will need to edit the calibration file used in `sbot/vision/backend.py`.

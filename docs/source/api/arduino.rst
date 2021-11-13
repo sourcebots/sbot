@@ -3,8 +3,7 @@ Arduino API
 
 The `Arduino <https://store.arduino.cc/arduino-uno-rev3>`__
 provides a total of 18 pins for either digital input or output (labelled
-2 to 13 and A0 to A5), including 6 for analogue input (labelled A0 to
-A5).
+2 to 13) and 6 for analogue input (labelled A0 to A5).
 
 Accessing the Arduino
 ---------------------
@@ -42,13 +41,14 @@ imported before they can be used.
 Setting the pin mode
 ~~~~~~~~~~~~~~~~~~~~
 
-You will need to ensure that the pin is in the correct pin 
-mode before performing an action with that pin. You can read
-about the possible pin modes below.
+You will need to ensure that the pin is in the correct pin mode before
+performing an action with that pin.
 
 .. code:: python
 
    r.arduino.pins[3].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
+
+You can readabout the possible pin modes below.
 
 
 ``GPIOPinMode.DIGITAL_INPUT``
@@ -61,7 +61,7 @@ can be read.
    
    r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT
 
-   pin_value = r.arduino.pins[4].digital_state
+   pin_value = r.arduino.pins[4].digital_read()
 
 
 ``GPIOPinMode.DIGITAL_INPUT_PULLUP``
@@ -75,20 +75,27 @@ enabled.
    
    r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
 
-   pin_value = r.arduino.pins[4].digital_state
+   pin_value = r.arduino.pins[4].digital_read()
 
 ``GPIOPinMode.DIGITAL_OUTPUT``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this mode, we can set binary values of ``0V`` or ``5V`` to the pin.
+In this mode, you can set binary values of ``0V`` or ``5V`` to the pin.
 
 .. code:: python
    
    r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_OUTPUT
    r.arduino.pins[6].mode = GPIOPinMode.DIGITAL_OUTPUT
 
-   r.arduino.pins[4].digital_state = True
-   r.arduino.pins[6].digital_state = False
+   r.arduino.pins[4].digital_write(True)
+   r.arduino.pins[6].digital_write(False)
+
+You can get the last value you digitally wrote using ``last_digital_write``.
+
+.. code:: python
+
+    pin_state = r.arduino.pins[4].last_digita_write
+
 
 ``GPIOPinMode.ANALOGUE_INPUT``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,7 +114,7 @@ are labelled ``A0`` to ``A5``; however pins ``A4`` and ``A5`` are reserved and c
 
    r.arduino.pins[AnaloguePin.A0].mode = GPIOPinMode.ANALOGUE_INPUT
 
-   pin_value = r.arduino.pins[AnaloguePin.A0].analogue_value
+   pin_value = r.arduino.pins[AnaloguePin.A0].analogue_read
 
 .. Hint:: The values are the voltages read on the pins,
    between 0 and 5.
