@@ -262,7 +262,7 @@ colors = ["colorama (>=0.4.3,<0.5.0)"]
 
 [[package]]
 name = "j5"
-version = "0.13.0"
+version = "0.13.1"
 description = "j5 Robotics Framework"
 category = "main"
 optional = false
@@ -941,8 +941,8 @@ isort = [
     {file = "isort-5.8.0.tar.gz", hash = "sha256:0a943902919f65c5684ac4e0154b1ad4fac6dcaa5d9f3426b732f1c8b5419be6"},
 ]
 j5 = [
-    {file = "j5-0.13.0-py3-none-any.whl", hash = "sha256:0d6513e6959e16304ae99efd6edf9b621a1457af3acc9226239203d537b75ecd"},
-    {file = "j5-0.13.0.tar.gz", hash = "sha256:069a98ad6f0dbf9f38bd3af7d0a114c9dca1427820c8978fe95012f97ea21a32"},
+    {file = "j5-0.13.1-py3-none-any.whl", hash = "sha256:c567f5367393619f08c87635d7680c688a2ab1c91443229ad729e19d5715de2b"},
+    {file = "j5-0.13.1.tar.gz", hash = "sha256:02bd201fbd57fbe7d90c0fc6314b7280741151505aecb2a518fc73c57bef0a90"},
 ]
 j5-zoloto = [
     {file = "j5_zoloto-0.1.0-py3-none-any.whl", hash = "sha256:cae0b60a3441ee4ef378aca7b87c65d018dd05d58dde2fd8c6bcf87894a0118e"},
