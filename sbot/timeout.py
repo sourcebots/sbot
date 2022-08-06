@@ -14,5 +14,5 @@ def timeout_handler(signal_type: Signals, stack_frame: FrameType) -> None:
 def kill_after_delay(timeout_seconds: int) -> None:
     """Interrupts main process after the given delay."""
     LOGGER.debug(f"Kill Signal Timeout set: {timeout_seconds}s")
-    signal(SIGALRM, timeout_handler)
+    signal(SIGALRM, timeout_handler)  # type: ignore
     alarm(timeout_seconds)
