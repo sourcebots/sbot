@@ -9,6 +9,6 @@ def get_marker_size(marker_id: int) -> int:
     :returns: Size of the marker in millimetres.
     """
     if marker_id in range(0, 100):
-        return 250
+        return 80
     else:
-        return 100
+        return 200
