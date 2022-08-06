@@ -6,9 +6,9 @@ SourceBots custom behaviour for Zoloto.
 """
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
-from j5_zoloto import ZolotoSingleHardwareBackend
+from j5_zoloto import ZolotoHardwareBackend
 from zoloto.cameras import Camera
 from zoloto.marker_type import MarkerType
 
@@ -30,7 +30,7 @@ class SBZolotoCamera(Camera):
         return get_marker_size(marker_id)
 
 
-class SBZolotoSingleHardwareBackend(ZolotoSingleHardwareBackend):
+class SBZolotoHardwareBackend(ZolotoHardwareBackend):
     """A camera backend which automatically finds camera calibration data."""
 
     camera_class = SBZolotoCamera
