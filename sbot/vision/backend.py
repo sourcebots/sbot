@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from j5_zoloto import ZolotoHardwareBackend
+from zoloto.calibration import parse_calibration_file
 from zoloto.cameras import Camera
 from zoloto.marker_type import MarkerType
 
@@ -19,6 +20,26 @@ LOGGER = logging.getLogger(__name__)
 
 class SBZolotoCamera(Camera):
     """A Zoloto camera that correctly captures markers for SourceBots."""
+
+    def __init__(
+            self,
+            camera_id: int,
+            *,
+            marker_size: Optional[int] = None,
+            marker_type: MarkerType,
+            calibration_file: Optional[Path] = None,
+    ) -> None:
+        resolution: Optional[Tuple[int, int]] = None
+        if calibration_file is not None:
+            resolution = parse_calibration_file(calibration_file).resolution
+
+        super().__init__(
+            camera_id,
+            marker_size=marker_size,
+            marker_type=marker_type,
+            calibration_file=calibration_file,
+            resolution=resolution,
+        )
 
     def get_marker_size(self, marker_id: int) -> int:
         """
