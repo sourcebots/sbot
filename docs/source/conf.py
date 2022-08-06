@@ -14,9 +14,9 @@
 # -- Project information -----------------------------------------------------
 
 project = 'SourceBots Docs'
-copyright = '2020, SourceBots'
+copyright = '2019-22, SourceBots'
 author = 'SourceBots'
-release = '0.8.0'
+release = '0.9.0'
 
 # -- General configuration ---------------------------------------------------
 
