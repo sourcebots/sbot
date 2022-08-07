@@ -2,6 +2,7 @@
 
 import logging
 from datetime import timedelta
+from time import sleep
 from typing import Any, Dict, Optional, TypeVar, cast
 
 from j5 import BaseRobot, BoardGroup
@@ -164,6 +165,10 @@ class Robot(BaseRobot):
             return cast(bool, self.metadata["is_competition"])
         except KeyError:
             raise metadata.MetadataKeyError("is_competition") from None
+
+    def sleep(self, secs: float) -> None:
+        """Pause the program for secs seconds."""
+        sleep(secs)
 
     # Custom functionality
 
