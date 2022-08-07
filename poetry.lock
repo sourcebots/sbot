@@ -262,11 +262,11 @@ plugins = ["setuptools"]
 
 [[package]]
 name = "j5"
-version = "0.13.1"
+version = "1.0.0rc1"
 description = "j5 Robotics Framework"
 category = "main"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
 pyserial = ">=3.4,<4.0"
@@ -274,14 +274,14 @@ pyusb = ">=1.0,<2.0"
 
 [[package]]
 name = "j5-zoloto"
-version = "0.2.0"
+version = "0.3.0"
 description = "j5 integration for Zoloto computer vision"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
-j5 = ">=0.13.0,<0.14.0"
+j5 = ">=1.0.0.rc1,<2.0.0"
 zoloto = ">=0.8.0,<0.9.0"
 
 [[package]]
@@ -797,7 +797,7 @@ cli = ["tqdm", "pillow"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "97d5a1287764def26a0b17546706af8ed7cf42d715334572aa5c413f4673c3aa"
+content-hash = "06b71195a0aa8419dedcdd5529a232576dc2cca804be19999fc0fc4e8fa5109e"
 
 [metadata.files]
 alabaster = [
@@ -934,12 +934,12 @@ isort = [
     {file = "isort-5.10.1.tar.gz", hash = "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"},
 ]
 j5 = [
-    {file = "j5-0.13.1-py3-none-any.whl", hash = "sha256:c567f5367393619f08c87635d7680c688a2ab1c91443229ad729e19d5715de2b"},
-    {file = "j5-0.13.1.tar.gz", hash = "sha256:02bd201fbd57fbe7d90c0fc6314b7280741151505aecb2a518fc73c57bef0a90"},
+    {file = "j5-1.0.0rc1-py3-none-any.whl", hash = "sha256:8a97d53e357af12a1157b77f297fe43b3fd2233c37eaf538279c9cbc0b1183a2"},
+    {file = "j5-1.0.0rc1.tar.gz", hash = "sha256:7b935e6349a106922ec8841f52446afdffd3992f114d468f8376f026a514f716"},
 ]
 j5-zoloto = [
-    {file = "j5_zoloto-0.2.0-py3-none-any.whl", hash = "sha256:73f2e2a38ec64b81d94f320ce1fc204e3d827f02aae16e39cf2a11ab9e4178d7"},
-    {file = "j5_zoloto-0.2.0.tar.gz", hash = "sha256:e7040a14bb5b73b5c847de66e07037505c01810640ab7e7dc6e36e7adaf5e260"},
+    {file = "j5_zoloto-0.3.0-py3-none-any.whl", hash = "sha256:3c8657d05cba973332d184b2ef250fd76644b5b7301e0cc3e3e786560b7c3341"},
+    {file = "j5_zoloto-0.3.0.tar.gz", hash = "sha256:c7dce9afd793c496bcbb1d0f1a0d659164158326e546ca49c10667f65d400421"},
 ]
 jinja2 = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
