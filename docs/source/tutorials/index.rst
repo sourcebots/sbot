@@ -9,5 +9,5 @@ This section contains guides that will help your use your robotics kit.
    connecting-your-kit
    setting-up-pycharm
    using-your-kit
-   electronics-labs
+   electronics-lab
    python-whirlwind-tour
