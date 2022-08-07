@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sbot"
-version = "0.9.1"
+version = "0.9.0"
 description = "SourceBots API"
 authors = ["SourceBots <hello@sourcebots.co.uk>"]
 readme = "README.md"
@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.10"
+python = "^3.7"
 j5 = "^0.13.1"
 j5-zoloto = "^0.2.0"
 

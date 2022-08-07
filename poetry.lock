@@ -796,8 +796,8 @@ cli = ["tqdm", "pillow"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.7,<3.10"
-content-hash = "5a5f940014c30ce86eb861adaad93bf68ba33394b0a7c720cc59d3d70d451ed0"
+python-versions = "^3.7"
+content-hash = "97d5a1287764def26a0b17546706af8ed7cf42d715334572aa5c413f4673c3aa"
 
 [metadata.files]
 alabaster = [
