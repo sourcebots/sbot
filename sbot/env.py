@@ -14,7 +14,7 @@ from j5.backends.hardware.sr.v4 import (
     SRV4ServoBoardHardwareBackend,
 )
 
-from sbot.vision.backend import SBZolotoSingleHardwareBackend
+from sbot.vision.backend import SBZolotoHardwareBackend
 
 __all__ = [
     "HardwareEnvironment",
@@ -26,7 +26,7 @@ HardwareEnvironment.register_backend(SRV4PowerBoardHardwareBackend)
 HardwareEnvironment.register_backend(SRV4ServoBoardHardwareBackend)
 HardwareEnvironment.register_backend(SRV4MotorBoardHardwareBackend)
 HardwareEnvironment.register_backend(SBArduinoHardwareBackend)
-HardwareEnvironment.register_backend(SBZolotoSingleHardwareBackend)
+HardwareEnvironment.register_backend(SBZolotoHardwareBackend)
 
 ConsoleEnvironment = Environment("Console Environment")
 
@@ -41,4 +41,4 @@ CONSOLE_ENVIRONMENT_WITH_VISION.register_backend(SRV4PowerBoardConsoleBackend)
 CONSOLE_ENVIRONMENT_WITH_VISION.register_backend(SRV4ServoBoardConsoleBackend)
 CONSOLE_ENVIRONMENT_WITH_VISION.register_backend(SRV4MotorBoardConsoleBackend)
 CONSOLE_ENVIRONMENT_WITH_VISION.register_backend(SBArduinoConsoleBackend)
-CONSOLE_ENVIRONMENT_WITH_VISION.register_backend(SBZolotoSingleHardwareBackend)
+CONSOLE_ENVIRONMENT_WITH_VISION.register_backend(SBZolotoHardwareBackend)

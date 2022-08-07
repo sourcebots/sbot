@@ -1,7 +1,7 @@
 """Vision API."""
 
-from .backend import SBZolotoSingleHardwareBackend
+from .backend import SBZolotoHardwareBackend
 
 __all__ = [
-    "SBZolotoSingleHardwareBackend",
+    "SBZolotoHardwareBackend",
 ]
