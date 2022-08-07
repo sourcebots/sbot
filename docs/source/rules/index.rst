@@ -1,4 +1,4 @@
 Rules
 ======
 
-`Download the rules </_static/rules.pdf>`_
+:download:`Download the rules </_static/rules.pdf>`
