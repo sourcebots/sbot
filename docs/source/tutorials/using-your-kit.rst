@@ -8,9 +8,7 @@ Using Your Kit
 Setup
 --------
 Before you start this tutorial, make sure you have `connected your 
-kit together`_.
-
-.. _connected your kit together: connecting-your-kit
+kit together <connecting-your-kit.html>`__.
 
 There are two lines of code you must have at the very top of your code whenever 
 you want to do something with the robot, those lines are:
@@ -132,13 +130,12 @@ and 2) So if you want the last number you'll need to go one further.
 The ``time.sleep`` is there otherwise the code will immediately go to full
 power.
 
-Now try and write some code that:
-- Smoothly starts and stops your robot.
+Now try and write some code that smoothly starts *and stops* your robot.
 
 Servos
 ------
 
-Servos are a motor which knows what position it's at. You can tell it an angle
+A servo is a motor which knows what position it's at. You can tell it an angle
 and it'll handle turning to that value! 
 
 .. Warning:: Be warned, most servos can't turn a full 360 degrees!
@@ -196,12 +193,12 @@ your sensor by experimenting with it.
 
     while True:
         distance = r.arduino.ultrasound_sensors[4, 5].distance()
-        print("Object is {}m away.".format(distance))
+        print(f"Object is {distance}m away.")
         sleep(1)
 
 This code will print the distance in metres to the log file every second.
 
-Try write some code that spins your motors forward, but stop when a object closer
+Try to write some code that spins your motors forward, but stop when a object closer
 than 20cm is detected by the ultrasound sensor.
 
 Buzzer
@@ -289,9 +286,11 @@ we can run some code anyway.
     # Turn on the pins
     for pin in r.arduino.pins:
         pin.mode = GPIOPinMode.DIGITAL_OUTPUT
-        pin.digital_state = True
+        pin.digital_write(True)
 
     # Flash all of the pins.
     while True:
-        pin.digital_state = not pin.digital_state
+        for pin in r.arduino.pins:
+            old_state = pin.last_digital_write
+            pin.digital_write(not old_state)
         sleep(0.5)
