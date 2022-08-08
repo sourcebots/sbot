@@ -12,19 +12,18 @@ This board allows you to control GPIO pins and analogue pins. More specifically,
 Headers
 -------
 
-We have supplied 2 screw terminal headers for your Arduino, allowing you to easily, and securely attach your sensors.
+We have supplied 2 screw terminal headers for your Arduino, allowing you to easily and securely attach your sensors.
 
 The reset button
 ----------------
 
-The reset button allows you to instantly reboot the Arduino in case it
-isn't working. This is not a guaranteed fix, but may solve some
-problems.
+The small button next to the USB socket allows you to instantly reboot the Arduino in case it
+isn't working. This isn't a guaranteed fix, but may solve some problems.
 
 GPIO Pins
 ---------
 
-The Arduino allows you to connect your kit to your own electronics. It has fourteen digital I/O pins, and six analogue. The analogue pins can read an analogue signal from 0 to 5V. The board also has a couple of ground pins, as well as some pins fixed at 3.3V and 5V output.
+The Arduino allows you to connect your kit to your own electronics. It has fourteen digital I/O pins, and six analogue input pins. The analogue pins can read an analogue signal from 0 to 5V. The board also has a couple of ground pins, as well as some pins fixed at 3.3V and 5V output.
 
 .. figure:: /_static/kit/arduino_pinout.png
    :alt: Pin Map
