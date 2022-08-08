@@ -7,7 +7,6 @@ This section contains guides that will help your use your robotics kit.
    :maxdepth: 1
 
    connecting-your-kit
-   setting-up-pycharm
    using-your-kit
    electronics-lab
    python-whirlwind-tour
