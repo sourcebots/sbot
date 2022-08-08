@@ -5,9 +5,8 @@ Your robot supports three different coordinates systems for position:
 
 * Cartesian
 * Spherical
-* Cylindrical
 
-The latter are both variants of a `Polar Coordinates system <https://en.wikipedia.org/wiki/Polar_coordinate_system>`_.
+The latter is a `Polar Coordinates system <https://en.wikipedia.org/wiki/Polar_coordinate_system>`_.
 
 Cartesian
 ---------
@@ -67,30 +66,3 @@ The camera is located at the origin, where the coordinates are ``(0, 0, 0)``.
 
 .. Note:: When searching for spherical coordinates, you may find a references with phi and theta the other way around.
     This is due to there being *two* conventions for this. We use the ISO 80000-2 16.3 system, as often found in physics.
-
-Cylindrical
------------
-
-.. figure:: /_static/api/vision/cylindrical.png
-   :alt: The cylindrical coordinates system
-   :scale: 40%
-
-   The cylindrical coordinates system
-
-The `cylindrical coordinates system <https://en.wikipedia.org/wiki/Cylindrical_coordinate_system>`_ has three values
-to specify a point in space.
-
-* ``ρ`` (rho) - The axial distance from the origin, in metres.
-* ``φ`` (phi) - The polar angle from the plane of the camera to the point, in radians.
-* ``z`` - The height of the point from the plane of the camera.
-
-.. code:: python
-
-   markers = r.camera.see()
-
-   for m in markers:
-       print(m.position.cylindrical.p)  # The axial distance from the origin.
-       print(m.position.cylindrical.phi)  # The polar angle from the plane of the camera to the point, in radians.
-       print(m.position.cylindrical.z)  # The height of the point from the plane of the camera, in metres.
-
-.. Note:: Whilst ``ρ`` is technically rho, we denote it as ``p`` in the API to make it easier to type.
