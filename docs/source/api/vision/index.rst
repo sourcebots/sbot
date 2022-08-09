@@ -5,8 +5,8 @@ Vision
    :maxdepth: 1
    :caption: Quick Links:
 
-   orientation
    position
+   orientation
 
 .. figure:: /_static/api/vision/arena_marker.jpg
    :alt: An arena with Fiducial Markers.
@@ -86,7 +86,7 @@ You can access the position using ``m.distance``, ``m.cartesian`` and ``m.spheri
 
 * ``m.distance`` is equivalent to ``m.cartesian.z`` or ``m.spherical.dist``.
 
-For further information on position, including how to use ``m.cartesian``, ``m.spherical``, and the coordinate systems,
+For more information on position, including how to use ``m.cartesian``, ``m.spherical``, and the coordinate systems,
 see `Position <position.html>`__.
 
 It is also possible to look at the `Orientation <orientation.html>`__ of the marker.
