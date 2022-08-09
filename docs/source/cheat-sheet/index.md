@@ -1,11 +1,6 @@
----
-layout: page
-title: API Quick Reference
----
+# SourceBots API Quick Reference
 
-# SR API Quick Reference
-
-This page contains a quick guide to the `sr.robot3` API.
+This page contains a quick guide to the `sbot` API.
 
 For more information, make sure you check the rest of the documentation.
 
@@ -16,17 +11,17 @@ For more information, make sure you check the rest of the documentation.
 ~~~~~ python
 from sbot import *
 
-R = Robot()
+r = Robot()
 ~~~~~
 
 ### Initialisation without waiting for the start button
 
 ~~~~~ python
-R = Robot(auto_start=True)
+r = Robot(wait_start=False)
 
 # Code here runs before the start button is pressed
 
-R.wait_start()
+r.wait_start()
 ~~~~~
 
 ### Initialisation with extra logging
@@ -34,7 +29,7 @@ R.wait_start()
 You can also tell the robot to print extra logging information, although this is quite noisy.
 
 ~~~~~ python
-R = Robot(verbose=True)
+r = Robot(debug=True)
 ~~~~~
 
 ## Selecting which board to control
@@ -42,18 +37,18 @@ R = Robot(verbose=True)
 If you only have one board of a given type plugged into your robot, then you can use its singular name:
 
 ~~~~~ python
-R.power_board.something
-R.motor_board.something
-R.servo_board.something
-R.ruggeduino.something
+r.power_board.something
+r.motor_board.something
+r.servo_board.something
+r.ruggeduino.something
 ~~~~~
 
 If you have multiple boards of a given type plugged into your robot, you must index them by serial number:
 
 ~~~~~ python
-R.motor_boards["srABC1"].something
-R.servo_boards["srXYZ2"].something
-R.ruggeduinos["1234567890"].something
+r.motor_boards["srABC1"].something
+r.servo_boards["srXYZ2"].something
+r.ruggeduinos["1234567890"].something
 ~~~~~
 
 ## Power Board
@@ -64,27 +59,27 @@ The outputs on the power board will turn on when you initialise your robot.
 
 ~~~~~ python
 # Turn all of the outputs on
-R.power_board.outputs.power_on()
+r.power_board.outputs.power_on()
 
 # Turn all of the outputs off
-R.power_board.outputs.power_off()
+r.power_board.outputs.power_off()
 
 # Turn a single output on
-R.power_board.outputs[OUT_H0].is_enabled = True
+r.power_board.outputs[OUT_H0].is_enabled = True
 
 # Turn a single output off
-R.power_board.outputs[OUT_H0].is_enabled = False
+r.power_board.outputs[OUT_H0].is_enabled = False
 ~~~~~
 
 ### Reading voltage and current
 
 ~~~~~ python
 # Read the current of an individual output
-current = R.power_board.outputs[OUT_H0].current
+current = r.power_board.outputs[OUT_H0].current
 
 # Read the current and voltage from the LiPo battery
-voltage = R.power_board.battery_sensor.voltage
-current = R.power_board.battery_sensor.current
+voltage = r.power_board.battery_sensor.voltage
+current = r.power_board.battery_sensor.current
 ~~~~~
 
 ### Buzzer
@@ -93,10 +88,10 @@ The power board has an on-board piezoelectric buzzer.
 
 ~~~~~ python
 # Play a standard note C6 -> C8 included for 0.5s
-R.power_board.piezo.buzz(0.5, Note.C6)
+r.power_board.piezo.buzz(0.5, Note.C6)
 
 # Play a tone at 1047Hz for 1 second
-R.power_board.piezo.buzz(1, 1047)
+r.power_board.piezo.buzz(1, 1047)
 ~~~~~
 
 ## Motors
@@ -108,16 +103,16 @@ You can set the power of each motor on the board between -1 and 1.
 If you change the power of your motor too rapidly, the overcurrent protection may be triggered.
 
 ~~~~~ python
-R.motor_board.motors[0].power = 1
-R.motor_board.motors[1].power = -1
+r.motor_board.motors[0].power = 1
+r.motor_board.motors[1].power = -1
 ~~~~~
 
 Setting a motor to `COAST` is equivalent to power level `0`.
 
 ~~~~~ python
 # This is the same operation
-R.motor_board.motors[0].power = COAST
-R.motor_board.motors[0].power = 0
+r.motor_board.motors[0].power = COAST
+r.motor_board.motors[0].power = 0
 ~~~~~
 
 ### Braking Motors
@@ -125,8 +120,8 @@ R.motor_board.motors[0].power = 0
 You can also brake a motor, which will quickly slow the motor.
 
 ~~~~~ python
-R.motor_board.motors[0].power = BRAKE
-R.motor_board.motors[1].power = -1
+r.motor_board.motors[0].power = BRAKE
+r.motor_board.motors[1].power = -1
 ~~~~~
 
 ## Servos
@@ -134,8 +129,8 @@ R.motor_board.motors[1].power = -1
 You can set the position of each servo output on the board between -1 and 1.
 
 ~~~~~ python
-R.servo_board.servos[0].position = -1
-R.servo_board.servos[1].position = 1
+r.servo_board.servos[0].position = -1
+r.servo_board.servos[1].position = 1
 ~~~~~
 
 You can also set the position to `0`, which is the approximate centre.
@@ -144,7 +139,7 @@ This is different to setting the position to `None`, which will unpower the serv
 
 ~~~~~ python
 # This servo is now unpowered, and will move more freely.
-R.servo_board.servos[11].position = None
+r.servo_board.servos[11].position = None
 ~~~~~
 
 ## Camera
@@ -154,7 +149,7 @@ R.servo_board.servos[11].position = None
 It can sometimes be useful to save a photo of what markers the robot can see:
 
 ~~~~~ python
-R.camera.save("my-photo.png")  # Save my-photo.png to the USB drive
+r.camera.save("my-photo.png")  # Save my-photo.png to the USB drive
 ~~~~~
 
 ### Looking for markers
@@ -162,7 +157,7 @@ R.camera.save("my-photo.png")  # Save my-photo.png to the USB drive
 You can take a photo with the camera and search for markers:
 
 ~~~~~ python
-markers = R.camera.see()
+markers = r.camera.see()
 ~~~~~
 
 There are various bits of information available about visible markers:
@@ -197,9 +192,9 @@ for marker in markers:
 ### Setting the mode of a pin
 
 ~~~~~ python
-R.ruggeduino.pins[4].mode = OUTPUT
-R.ruggeduino.pins[4].mode = INPUT
-R.ruggeduino.pins[4].mode = INPUT_PULLUP
+r.ruggeduino.pins[4].mode = OUTPUT
+r.ruggeduino.pins[4].mode = INPUT
+r.ruggeduino.pins[4].mode = INPUT_PULLUP
 ~~~~~
 
 ### Digital Write
@@ -207,10 +202,10 @@ R.ruggeduino.pins[4].mode = INPUT_PULLUP
 You can set the output for a pin of the Ruggeduino:
 
 ~~~~~ python
-R.ruggeduino.pins[4].mode = OUTPUT
+r.ruggeduino.pins[4].mode = OUTPUT
 
-R.ruggeduino.pins[2].digital_write(True)
-R.ruggeduino.pins[2].digital_write(False)
+r.ruggeduino.pins[2].digital_write(True)
+r.ruggeduino.pins[2].digital_write(False)
 ~~~~~
 
 ### Digital Read
@@ -218,9 +213,9 @@ R.ruggeduino.pins[2].digital_write(False)
 You can read a digital value from the pins of the Ruggeduino:
 
 ~~~~~ python
-R.ruggeduino.pins[3].mode = INPUT
+r.ruggeduino.pins[3].mode = INPUT
 
-value = R.ruggeduino.pins[3].digital_read()
+value = r.ruggeduino.pins[3].digital_read()
 ~~~~~
 
 ### Analogue Read
@@ -228,7 +223,7 @@ value = R.ruggeduino.pins[3].digital_read()
 You can read an analogue value from the analogue pins of the Ruggeduino:
 
 ~~~~~ python
-value = R.ruggeduino.pins[A0].analogue_read()
+value = r.ruggeduino.pins[A0].analogue_read()
 ~~~~~
 
 ## Metadata
@@ -238,13 +233,13 @@ The API also makes some information about where your code is running
 ### Starting Zone for a match
 
 ~~~~~ python
-zone = R.zone  # -> 0, 1, 2, or 3
+zone = r.zone  # -> 0, 1, 2, or 3
 ~~~~~
 
 ### Arena Information
 
 ~~~~~ python
-arena = R.arena # -> 'A'
+arena = r.arena # -> 'A'
 ~~~~~
 
 ### Robot Mode
@@ -252,7 +247,7 @@ arena = R.arena # -> 'A'
 This is set to `COMP` when your robot is in a match.
 
 ~~~~~ python
-robot_mode = R.mode # -> DEV or COMP
+robot_mode = r.mode # -> DEV or COMP
 ~~~~~
 
 ### USB Key Path
@@ -262,5 +257,5 @@ This is the path to where your USB key is mounted.
 You can use this to save files and information to the drive.
 
 ~~~~~ python
-usb_key_path = R.usbkey # -> pathlib.Path
+usb_key_path = r.usbkey # -> pathlib.Path
 ~~~~~
