@@ -1,4 +1,4 @@
-# SourceBots API Quick Reference
+# Cheat Sheet
 
 This page contains a quick guide to the `sbot` API.
 
