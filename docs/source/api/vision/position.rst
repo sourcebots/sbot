@@ -29,9 +29,9 @@ The camera is located at the origin, where the coordinates are ``(0, 0, 0)``.
    markers = r.camera.see()
 
    for m in markers:
-       print(m.position.cartesian.x)  # Displacement from the origin in metres, along x axis.
-       print(m.position.cartesian.y)  # Displacement from the origin in metres, along y axis.
-       print(m.position.cartesian.z)  # Displacement from the origin in metres, along z axis.
+       print(m.cartesian.x)  # Displacement from the origin in millimetres, along x axis.
+       print(m.cartesian.y)  # Displacement from the origin in millimetres, along y axis.
+       print(m.cartesian.z)  # Displacement from the origin in millimetres, along z axis.
 
 .. Hint:: The `y` axis decreases as you go up. This matches convention for computer vision systems.
 
@@ -47,9 +47,9 @@ Spherical
 The `spherical coordinates system <https://en.wikipedia.org/wiki/Spherical_coordinate_system>`_ has
 three values to specify a specific point in space.
 
-* ``r`` - The `radial distance`, the distance from the origin to the point, in metres.
-* ``θ`` (theta) -  The angle from the azimuth to the point, in radians.
-* ``φ`` (phi)   -  The polar angle from the plane of the camera to the point, in radians.
+* ``distance`` - The `radial distance`, the distance from the origin to the point, in millimetres.
+* ``rot_x`` -  Rotation around the X-axis, in radians, corresponding to `theta` on the diagram.
+* ``rot_y`` -  Rotation around the Y-axis, in radians, corresponding to `phi` on the diagram.
 
 The camera is located at the origin, where the coordinates are ``(0, 0, 0)``.
 
@@ -58,11 +58,8 @@ The camera is located at the origin, where the coordinates are ``(0, 0, 0)``.
    markers = r.camera.see()
 
    for m in markers:
-       print(m.position.spherical.r)  # Distance from the origin in metres
+       print(m.position.spherical.r)  # Distance from the origin in millimetres
        print(m.position.spherical.theta)  # The angle from the azimuth to the point, in radians.
        print(m.position.spherical.phi)  # The polar angle from the plane of the camera to the point, in radians.
 
 .. Hint:: You can use the ``math.degrees`` function to convert from radians to degrees.
-
-.. Note:: When searching for spherical coordinates, you may find a references with phi and theta the other way around.
-    This is due to there being *two* conventions for this. We use the ISO 80000-2 16.3 system, as often found in physics.
