@@ -94,7 +94,7 @@ You can get the last value you digitally wrote using ``last_digital_write``.
 
 .. code:: python
 
-    pin_state = r.arduino.pins[4].last_digita_write
+    pin_state = r.arduino.pins[4].last_digital_write
 
 
 ``GPIOPinMode.ANALOGUE_INPUT``

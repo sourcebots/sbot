@@ -74,20 +74,19 @@ Position
 
 Each marker has a position in 3D space, relative to your webcam.
 
-You can access the position using ``m.bearing`` and ``m.distance``.
+You can access the position using ``m.distance``, ``m.cartesian`` and ``m.spherical``.
 
 .. code:: python
 
    markers = r.camera.see()
 
    for m in markers:
-       print(m.bearing)  # Bearing to the marker from the origin, in radians
-       print(m.distance)  # Distance to the marker from the origin, in metres
+       print(m.distance)  # Distance to the marker from the webcam, in metres
+       print(m.spherical.y)  # Bearing to the marker from the webcam, in radians
 
-* ``m.bearing`` is equivalent to ``m.position.cylindrical.phi``.
-* ``m.distance`` is equivalent to ``m.position.cylindrical.p``.
+* ``m.distance`` is equivalent to ``m.cartesian.z`` or ``m.spherical.dist``.
 
-For further information on position, including how to use ``m.position`` and the coordinate systems,
+For further information on position, including how to use ``m.cartesian``, ``m.spherical``, and the coordinate systems,
 see `Position <position.html>`__.
 
 It is also possible to look at the `Orientation <orientation.html>`__ of the marker.

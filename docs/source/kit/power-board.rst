@@ -51,16 +51,16 @@ Indicators
 |         |                                                     | power-up |
 |         |                                                     | state    |
 +=========+=====================================================+==========+
-| PWR |   | Green when powered                                  | Green    |
+| PWR |   | Green when powered;                                 | Green    |
 | FLAT    | Flashing red and green when the battery is low      |          |
 +---------+-----------------------------------------------------+----------+
 | 5V      | Green when 5V is being supplied                     | Green    |
 +---------+-----------------------------------------------------+----------+
-| H0-1,   | Green when the corresponding output is on  [1]_Red  | Off      |
+| H0-1,   | Green when the corresponding output is on. Red      | Off      |
 | L0-3    | when the output's current limit is reached          |          |
 +---------+-----------------------------------------------------+----------+
-| RUN |   | Orange on power-up, or USB reset Flashing green     | Orange   |
-| ERROR   | when ready to run Solid green when running or       |          |
+| RUN |   | Orange on power-up, or USB reset; Flashing green    | Orange   |
+| ERROR   | when ready to run; Solid green when running or      |          |
 |         | booting                                             |          |
 +---------+-----------------------------------------------------+----------+
 
@@ -78,7 +78,7 @@ Controls
 |        |                                                               |
 +========+===============================================================+
 | ON|OFF | Turns the power board on, when used in conjunction with an    |
-|        | external switch                                               |
+|        | external switch or jumper wire                                |
 +--------+---------------------------------------------------------------+
 | START  | Starts your program                                           |
 |        |                                                               |
@@ -97,7 +97,7 @@ Specification
 Parameter                           Value
 =================================== ===========
 Main battery fuse current           40A
-Overall current limit [2]_          30A
+Overall current limit [1]_          30A
 High current outputs (H0-1)         20A
 Low current outputs (L0-3)          10A
 Motor rail output voltage (nominal) 11.1V ± 15%
@@ -115,6 +115,6 @@ use the board but it may be of interest to some people.
 -  `Firmware Source <https://github.com/sourcebots/power-v4-fw>`__
 -  `Hardware Source <https://github.com/sourcebots/power-v4-hw>`__
 
-.. [2]
+.. [1]
    If overall current limit is exceeded, the Power Board will turn off
    and start beeping.
