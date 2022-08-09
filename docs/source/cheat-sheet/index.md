@@ -40,15 +40,14 @@ If you only have one board of a given type plugged into your robot, then you can
 r.power_board.something
 r.motor_board.something
 r.servo_board.something
-r.ruggeduino.something
+r.arudino.something
 ~~~~~
 
 If you have multiple boards of a given type plugged into your robot, you must index them by serial number:
 
 ~~~~~ python
 r.motor_boards["srABC1"].something
-r.servo_boards["srXYZ2"].something
-r.ruggeduinos["1234567890"].something
+r.servo_boards["SRO-ABC-XYZ"].something
 ~~~~~
 
 ## Power Board
@@ -65,17 +64,17 @@ r.power_board.outputs.power_on()
 r.power_board.outputs.power_off()
 
 # Turn a single output on
-r.power_board.outputs[OUT_H0].is_enabled = True
+r.power_board.outputs[H0].is_enabled = True
 
 # Turn a single output off
-r.power_board.outputs[OUT_H0].is_enabled = False
+r.power_board.outputs[H0].is_enabled = False
 ~~~~~
 
 ### Reading voltage and current
 
 ~~~~~ python
 # Read the current of an individual output
-current = r.power_board.outputs[OUT_H0].current
+current = r.power_board.outputs[H0].current
 
 # Read the current and voltage from the LiPo battery
 voltage = r.power_board.battery_sensor.voltage
@@ -187,43 +186,43 @@ for marker in markers:
     marker.orientation.rotation_matrix
 ~~~~~
 
-## Ruggeduino
+## Arduino
 
 ### Setting the mode of a pin
 
 ~~~~~ python
-r.ruggeduino.pins[4].mode = OUTPUT
-r.ruggeduino.pins[4].mode = INPUT
-r.ruggeduino.pins[4].mode = INPUT_PULLUP
+r.arduino.pins[4].mode = OUTPUT
+r.arduino.pins[4].mode = INPUT
+r.arduino.pins[4].mode = INPUT_PULLUP
 ~~~~~
 
 ### Digital Write
 
-You can set the output for a pin of the Ruggeduino:
+You can set the output for a pin of the Arduino:
 
 ~~~~~ python
-r.ruggeduino.pins[4].mode = OUTPUT
+r.arduino.pins[4].mode = OUTPUT
 
-r.ruggeduino.pins[2].digital_write(True)
-r.ruggeduino.pins[2].digital_write(False)
+r.arduino.pins[2].digital_write(True)
+r.arduino.pins[2].digital_write(False)
 ~~~~~
 
 ### Digital Read
 
-You can read a digital value from the pins of the Ruggeduino:
+You can read a digital value from the pins of the Arduino:
 
 ~~~~~ python
-r.ruggeduino.pins[3].mode = INPUT
+r.arduino.pins[3].mode = INPUT
 
-value = r.ruggeduino.pins[3].digital_read()
+value = r.arduino.pins[3].digital_read()
 ~~~~~
 
 ### Analogue Read
 
-You can read an analogue value from the analogue pins of the Ruggeduino:
+You can read an analogue value from the analogue pins of the Arduino:
 
 ~~~~~ python
-value = r.ruggeduino.pins[A0].analogue_read()
+value = r.arduino.pins[A0].analogue_read()
 ~~~~~
 
 ## Metadata
@@ -236,26 +235,10 @@ The API also makes some information about where your code is running
 zone = r.zone  # -> 0, 1, 2, or 3
 ~~~~~
 
-### Arena Information
+### Competition mode
+
+This is `True` when your robot is in a match.
 
 ~~~~~ python
-arena = r.arena # -> 'A'
-~~~~~
-
-### Robot Mode
-
-This is set to `COMP` when your robot is in a match.
-
-~~~~~ python
-robot_mode = r.mode # -> DEV or COMP
-~~~~~
-
-### USB Key Path
-
-This is the path to where your USB key is mounted.
-
-You can use this to save files and information to the drive.
-
-~~~~~ python
-usb_key_path = r.usbkey # -> pathlib.Path
+robot_mode = r.is_competition # -> True or False
 ~~~~~
