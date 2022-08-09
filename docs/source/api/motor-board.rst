@@ -107,3 +107,37 @@ continue moving under the momentum they had before.
    from sbot import COAST
 
    my_motor_board.motors[1].power = COAST
+
+Example
+-------
+
+.. code:: python
+
+   from sbot import *
+   import time
+
+   r = Robot()
+
+   left_motor = r.motor_board.motors[0]
+   right_motor = r.motor_board.motors[1]
+
+   def go_straight(speed):
+       left_motor.power = speed
+       right_motor.power = speed
+
+   # Go slowly
+   go_straight(0.2)
+   time.sleep(2)
+
+   # Turn left
+   left_motor.power = -0.4
+   right_motor.power = 0.4
+   time.sleep(0.6)
+
+   # Go backwards very fast (might trigger over-current protection)
+   go_straight(-1)
+   time.sleep(0.4)
+
+   # Come to a relaxed stop
+   left_motor.power = COAST
+   right_motor.power = COAST
