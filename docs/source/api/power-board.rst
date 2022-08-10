@@ -127,12 +127,6 @@ Example
    print(f"Battery voltage: {volts}")
 
 
-   # Play a chord for 2 seconds
-   chord_notes = [Note.D6, Note.A6, Note.C7, Note.D7, Note.F7]
-   for note in chord_notes:
-       r.power_board.piezo.buzz(2, note)
-
-
    # Play a tune
    tune_notes = [Note.D6, Note.G6, Note.A6, Note.D7, Note.F7, Note.A7, Note.C8]
    note_length = 0.25  # 4 notes per second
