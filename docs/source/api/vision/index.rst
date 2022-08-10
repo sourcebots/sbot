@@ -151,7 +151,7 @@ Example
        print("no cubes :(")
        sys.exit()
 
-   nearest = tokens[0]  # Find the nearest one
+   nearest = cubes[0]  # Find the nearest one
    for marker in cubes:
        if marker.distance < nearest.distance:
            nearest = marker
