@@ -1,7 +1,7 @@
 Position
 ========
 
-Your robot supports three different coordinates systems for position:
+Your robot supports two different coordinates systems for position:
 
 * Cartesian
 * Spherical
