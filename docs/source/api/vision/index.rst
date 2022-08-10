@@ -93,6 +93,20 @@ It is also possible to look at the `Orientation <orientation.html>`__ of the mar
 
 .. Hint:: You can use the ``math.degrees`` function to convert from radians to degrees.
 
+Size
+~~~~
+
+Markers can come in different sizes.
+You can access the size of a marker using ``m.size``.
+Check the rules to find out how big the different marker types are.
+
+.. code:: python
+
+   markers = r.camera.see()
+
+   for m in markers:
+       print(m.size)
+
 Pixel Positions
 ~~~~~~~~~~~~~~~
 
