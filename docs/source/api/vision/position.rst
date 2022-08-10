@@ -58,8 +58,8 @@ The camera is located at the origin, where the coordinates are ``(0, 0, 0)``.
    markers = r.camera.see()
 
    for m in markers:
-       print(m.position.spherical.r)  # Distance from the origin in millimetres
-       print(m.position.spherical.theta)  # The angle from the azimuth to the point, in radians.
-       print(m.position.spherical.phi)  # The polar angle from the plane of the camera to the point, in radians.
+       print(m.spherical.r)  # Distance from the origin in millimetres
+       print(m.spherical.theta)  # The angle from the azimuth to the point, in radians.
+       print(m.spherical.phi)  # The polar angle from the plane of the camera to the point, in radians.
 
 .. Hint:: You can use the ``math.degrees`` function to convert from radians to degrees.

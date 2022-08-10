@@ -82,7 +82,7 @@ You can access the position using ``m.distance``, ``m.cartesian`` and ``m.spheri
 
    for m in markers:
        print(m.distance)  # Distance to the marker from the webcam, in metres
-       print(m.spherical.y)  # Bearing to the marker from the webcam, in radians
+       print(m.spherical.rot_y)  # Bearing to the marker from the webcam, in radians
 
 * ``m.distance`` is equivalent to ``m.cartesian.z`` or ``m.spherical.dist``.
 
