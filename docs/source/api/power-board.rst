@@ -102,3 +102,34 @@ the start.
 
 This may be useful for debugging, but be sure to remove it in the
 competition, as you won't be allowed to touch the start button after a match has begun!
+
+Example
+-------
+
+.. code:: python
+
+   from sbot import *
+   import time
+
+   r = Robot()
+
+   # Turn off output H0
+   r.power_board.outputs[PowerOutputPosition.H0].is_enabled = False
+
+
+   # Measure the current drawn by output H1
+   amps = r.power_board.outputs[PowerOutputPosition.H1].current
+   print(f"Current drawn by H1: {amps}")
+
+
+   # Check the battery voltage
+   volts = r.power_board.battery_sensor.voltage
+   print(f"Battery voltage: {volts}")
+
+
+   # Play a tune
+   tune_notes = [Note.D6, Note.G6, Note.A6, Note.D7, Note.F7, Note.A7, Note.C8]
+   note_length = 0.25  # 4 notes per second
+   for note in tune_notes:
+       r.power_board.piezo.buzz(note_length, note)
+       time.sleep(note_length)

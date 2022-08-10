@@ -60,3 +60,26 @@ widths which in some cases will force the servo to try and turn past its
 internal end-stops. You should experiment and find what the actual limit
 of your servos are (it almost certainly won't be -1 and 1) and not
 drive them past that.
+
+Example
+-------
+
+.. code:: python
+
+   from sbot import *
+   import time
+
+   r = Robot()
+   servos = r.servo_board.servos
+
+   # Move all servos to the middle position
+   for servo in servos:
+       servo.position = 0
+
+
+   # Slowly sweep servo 0 to the end and disengage it
+   for percentage in range(100):
+       position = percentage / 100
+       servos[0].position = position
+       time.sleep(0.05)
+   servos[0].position = None

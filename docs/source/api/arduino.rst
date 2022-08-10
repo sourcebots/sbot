@@ -48,7 +48,7 @@ performing an action with that pin.
 
    r.arduino.pins[3].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
 
-You can readabout the possible pin modes below.
+You can read about the possible pin modes below.
 
 
 ``GPIOPinMode.DIGITAL_INPUT``
@@ -114,7 +114,7 @@ are labelled ``A0`` to ``A5``; however pins ``A4`` and ``A5`` are reserved and c
 
    r.arduino.pins[AnaloguePin.A0].mode = GPIOPinMode.ANALOGUE_INPUT
 
-   pin_value = r.arduino.pins[AnaloguePin.A0].analogue_read
+   pin_value = r.arduino.pins[AnaloguePin.A0].analogue_read()
 
 .. Hint:: The values are the voltages read on the pins,
    between 0 and 5.
@@ -137,3 +137,51 @@ You can also measure distance using an ultrasound sensor from the arduino.
    distance_metres = u.distance()
 
 .. Warning:: If the ultrasound signal never returns, the sensor will timeout and return ``None``.
+
+Example
+-------
+
+.. code:: python
+
+   from sbot import *
+   import time
+
+   r = Robot()
+
+
+   # Read an infrared sensor connected to pin 2
+   infrared_pin = r.arduino.pins[2]
+   infrared_pin.mode = GPIOPinMode.DIGITAL_INPUT
+
+   infrared_is_detected = infrared_pin.digital_read()
+   if infrared_is_detected:
+       print("infrared light detected")
+   else:
+       print("no infrared light detected")
+
+
+   # Flash an LED connected to pin 3
+   led_pin = r.arduino.pins[3]
+   led_pin.mode = GPIOPinMode.DIGITAL_OUTPUT
+
+   led_pin.digital_write(True)
+   time.sleep(1)
+   led_pin.digital_write(False)
+
+
+   # Read a potentiometer connected to pin A0
+   pot_pin = r.arduino.pins[AnaloguePin.A0]
+   pot_pin.mode = GPIOPinMode.ANALOGUE_INPUT
+
+   voltage = pot_pin.analogue_read()
+   print(f"potentiometer pin voltage: {voltage}V")
+
+
+   # Read the distance detected by an ultrasound sensor
+   # Trigger on pin 4, echo on pin 5
+   sensor = r.arduino.ultrasound_sensors[4, 5]
+
+   pulse_time = sensor.pulse()
+   distance = sensor.distance()
+   print(f"time taken for pulse to reflect: {pulse_time}")
+   print(f"distance to object: {distance}")
