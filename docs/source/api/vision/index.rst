@@ -93,6 +93,20 @@ It is also possible to look at the `Orientation <orientation.html>`__ of the mar
 
 .. Hint:: You can use the ``math.degrees`` function to convert from radians to degrees.
 
+Size
+~~~~
+
+Markers can come in different sizes.
+You can access the size of a marker using ``m.size``.
+Check the rules to find out how big the different marker types are.
+
+.. code:: python
+
+   markers = r.camera.see()
+
+   for m in markers:
+       print(m.size)
+
 Pixel Positions
 ~~~~~~~~~~~~~~~
 
@@ -110,3 +124,41 @@ conventionally is in the top left corner of the image.
    for m in markers:
        print(m.pixel_corners)  # Pixel positions of the marker corners within the image.
        print(m.pixel_centre)  # Pixel positions of the centre of the marker within the image.
+
+Example
+-------
+
+.. code:: python
+
+   from sbot import *
+   import sys
+   from math import degrees
+
+   r = Robot()
+
+   # Find the nearest cube
+   markers = r.camera.see()
+
+   while len(markers) == 0:  # Wait for some markers to appear
+       markers = r.camera.see()
+
+   cubes = []  # Make a list for all the cube faces
+   for marker in markers:
+       if marker.size == 80:  # Markers on cubes are 80mm wide
+           cubes.append(marker)
+
+   if len(cubes) == 0:
+       print("no cubes :(")
+       sys.exit()
+
+   nearest = tokens[0]  # Find the nearest one
+   for marker in cubes:
+       if marker.distance < nearest.distance:
+           nearest = marker
+
+   print("nearest marker:")
+   print(f"  id {nearest.id}")
+   print(f"  zone {nearest.id - 28}")
+   print(f"  {nearest.distance} metres away")
+   print(f"  bearing {degrees(nearest.spherical.rot_y)}")
+
