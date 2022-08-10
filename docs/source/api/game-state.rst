@@ -44,10 +44,21 @@ Example
 
    r = Robot()
 
+   # Is the robot in a competition?
    if r.is_competition:
        print("The robot is in a competition")
    else:
        print("The robot is not in a competition")
 
 
+   # What's the starting zone?
    print(f"Our starting zone is zone {r.zone}")
+
+   # Work out the starting zone's colour
+   colours = ["green", "orange" "yellow", "pink"]
+   zone_colour = colours[r.zone]
+   print(f"Our zone's colour is {zone_colour}")
+
+   # Calculate the number on our team's tokens (token numbers start at 28)
+   marker_number = 28 + r.zone
+   print(f"Our token number is {marker_number})
