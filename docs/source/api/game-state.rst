@@ -34,3 +34,20 @@ number, which you can access with the ``zone`` property:
 
 During a competition match, a USB drive will be used to tell your robot
 which corner it's in. By default during development, this is ``0``.
+
+Example
+-------
+
+.. code:: python
+
+   from sbot import *
+
+   r = Robot()
+
+   if r.is_competition:
+       print("The robot is in a competition")
+   else:
+       print("The robot is not in a competition")
+
+
+   print(f"Our starting zone is zone {r.zone}")
