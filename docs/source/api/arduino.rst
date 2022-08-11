@@ -132,11 +132,12 @@ You can also measure distance using an ultrasound sensor from the arduino.
    # Echo pin: 5
    u = r.arduino.ultrasound_sensors[4, 5]
 
-   time_taken = u.pulse()
+   time_taken = u.pulse()  # Time taken for the ultrasound signal to return
 
-   distance_metres = u.distance()
+   distance_metres = u.distance()  # Distance the ultrasound signal travelled
 
-.. Warning:: If the ultrasound signal never returns, the sensor will timeout and return ``None``.
+.. Warning:: The ultrasound sensor can measure distances up to 2 metres.
+   If the ultrasound signal has to travel further than 2m, the sensor will timeout and return ``None``.
 
 Example
 -------
