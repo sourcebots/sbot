@@ -134,13 +134,6 @@ r.servo_board.servos[1].position = 1
 
 You can also set the position to `0`, which is the approximate centre.
 
-This is different to setting the position to `None`, which will unpower the servo.
-
-~~~~~ python
-# This servo is now unpowered, and will move more freely.
-r.servo_board.servos[11].position = None
-~~~~~
-
 ## Camera
 
 ### Taking a photo

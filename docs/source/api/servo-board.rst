@@ -77,9 +77,9 @@ Example
        servo.position = 0
 
 
-   # Slowly sweep servo 0 to the end and disengage it
+   # Slowly sweep servo 0 to the end and reset it
    for percentage in range(100):
        position = percentage / 100
        servos[0].position = position
        time.sleep(0.05)
-   servos[0].position = None
+   servos[0].position = 0
