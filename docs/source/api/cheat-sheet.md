@@ -184,9 +184,9 @@ for marker in markers:
 ### Setting the mode of a pin
 
 ~~~~~ python
-r.arduino.pins[4].mode = OUTPUT
-r.arduino.pins[4].mode = INPUT
-r.arduino.pins[4].mode = INPUT_PULLUP
+r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_OUTPUT
+r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT
+r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_INPUT_PULLUP
 ~~~~~
 
 ### Digital Write
@@ -194,7 +194,7 @@ r.arduino.pins[4].mode = INPUT_PULLUP
 You can set the output for a pin of the Arduino:
 
 ~~~~~ python
-r.arduino.pins[4].mode = OUTPUT
+r.arduino.pins[4].mode = GPIOPinMode.DIGITAL_OUTPUT
 
 r.arduino.pins[2].digital_write(True)
 r.arduino.pins[2].digital_write(False)
@@ -205,7 +205,7 @@ r.arduino.pins[2].digital_write(False)
 You can read a digital value from the pins of the Arduino:
 
 ~~~~~ python
-r.arduino.pins[3].mode = INPUT
+r.arduino.pins[3].mode = GPIOPinMode.DIGITAL_INPUT
 
 value = r.arduino.pins[3].digital_read()
 ~~~~~
