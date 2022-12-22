@@ -33,7 +33,7 @@ mypy = "*"
 pytest = "*"
 pytest-cov = "*"
 rope = "*"
-isort = {version = "^5.8.0",extras = ["pyproject"]}
+isort = {version = "^5.11.4",extras = ["pyproject"]}
 sphinx = "^4.3.2"
 sphinx-rtd-theme = "^1.0.0"
 recommonmark = "*"
