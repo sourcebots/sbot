@@ -10,6 +10,7 @@ from typing import TypeVar
 
 import serial
 
+from .exceptions import BoardDisconnectionError
 from .logging import TRACE
 from .utils import BoardIdentity
 
@@ -40,8 +41,6 @@ def retry(
             return func(*args, **kwargs)
         return retryfn
     return decorator
-
-# TODO error handling and log messages
 
 
 class SerialWrapper:
@@ -75,13 +74,15 @@ class SerialWrapper:
     def stop(self) -> None:
         self._disconnect()
 
-    @retry(times=3, exceptions=RuntimeError)
+    @retry(times=3, exceptions=BoardDisconnectionError)
     def query(self, data: str) -> str:
         with self._lock:
             if not self.connected:
                 if not self._connect():
-                    print('Error')
-                    raise RuntimeError('Board not connected')
+                    raise BoardDisconnectionError(
+                        'Connection to board could not be established',
+                        board=self.identity,
+                    )
 
             if self.serial is None:
                 raise RuntimeError('Serial port is None')
@@ -95,12 +96,20 @@ class SerialWrapper:
                 logger.log(TRACE, f'Serial read  - "{response.decode().strip()}"')
 
                 if b'\n' not in response:
-                    raise serial.SerialException('readline timeout')
+                    # If readline times out no error is raised it returns an incomplete string
+                    logger.warning((
+                        f'Connection to board {self.identity.board_type}:'
+                        f'{self.identity.asset_tag} timed out waiting for response'
+                    ))
+                    raise serial.SerialException('Timeout on readline')
             except serial.SerialException:
                 # Serial port was closed
                 # Make sure port is cleaned up
                 self._disconnect()
-                raise RuntimeError('Board disconnected')
+                raise BoardDisconnectionError(
+                    'Board disconnected during transaction',
+                    board=self.identity,
+                )
 
             return response.decode().strip()
 
@@ -108,6 +117,10 @@ class SerialWrapper:
         response = self.query(data)
         if 'NACK' in response:
             _, error_msg = response.split(':', maxsplit=1)
+            logger.error((
+                f'Board {self.identity.board_type}:{self.identity.asset_tag} '
+                f'returned NACK on write command: {error_msg}'
+            ))
             raise RuntimeError(error_msg)
 
     def _connect(self) -> bool:
@@ -120,14 +133,22 @@ class SerialWrapper:
             self.connected = True
             time.sleep(self.delay_after_connect)
         except serial.SerialException:
+            logger.error((
+                'Failed to connect to board '
+                f'{self.identity.board_type}:{self.identity.asset_tag}'
+            ))
             return False
 
-        logger.info('Connected')
+        logger.info(
+            f'Connected to board {self.identity.board_type}:{self.identity.asset_tag}'
+        )
         return True
 
     def _disconnect(self) -> None:
         if self.serial is not None:
-            logger.info('Disconnected')
+            logger.warning(
+                f'Board {self.identity.board_type}:{self.identity.asset_tag} disconnected'
+            )
             self.connected = False
             self.serial.close()
             self.serial = None
