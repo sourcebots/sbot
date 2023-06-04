@@ -1,7 +1,9 @@
 import logging
+
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
+from .utils import BoardIdentity
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +18,16 @@ class PowerBoard:
         self._run_led = Led(self.serial, 'RUN')
         self._error_led = Led(self.serial, 'ERR')
 
+        self.identity = self.identify()
+
     @classmethod
     def _get_supported_boards(cls):
-        boards = []
+        boards = {}
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x1BDA and port.pid == 0x0010:
-                boards.append(PowerBoard(port.device))
+                board = PowerBoard(port.device)
+                boards[board.identity.asset_tag] = board
         return boards
 
     @property
@@ -39,7 +44,7 @@ class PowerBoard:
 
     def identify(self):
         data = self.serial.query('*IDN?')
-        return data.split(':')
+        return BoardIdentity(*data.split(':'))
 
     @property
     def temprature(self):

@@ -3,7 +3,7 @@ import logging
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import map_to_float, map_to_int
+from .utils import BoardIdentity, map_to_float, map_to_int
 
 DUTY_MIN = 500
 DUTY_MAX = 4000
@@ -21,13 +21,16 @@ class ServoBoard:
             Servo(self.serial, index) for index in range(12)
         )
 
+        self.identity = self.identify()
+
     @classmethod
     def _get_supported_boards(cls):
-        boards = []
+        boards = {}
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x1BDA and port.pid == 0x0011:
-                boards.append(ServoBoard(port.device))
+                board = ServoBoard(port.device)
+                boards[board.identity.asset_tag] = board
         return boards
 
     @property
@@ -36,7 +39,7 @@ class ServoBoard:
 
     def identify(self):
         data = self.serial.query('*IDN?')
-        return data.split(':')
+        return BoardIdentity(*data.split(':'))
 
     def status(self):
         data = self.serial.query('*STATUS?')

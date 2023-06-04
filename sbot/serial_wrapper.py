@@ -19,6 +19,8 @@ def retry(times, exceptions):
         return retryfn
     return decorator
 
+# TODO add method to add details for log messages
+
 
 class SerialWrapper:
     def __init__(self, port, baud, timeout=0.5):

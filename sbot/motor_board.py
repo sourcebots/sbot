@@ -4,7 +4,7 @@ from enum import Enum
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import map_to_float, map_to_int
+from .utils import BoardIdentity, map_to_float, map_to_int
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +24,16 @@ class MotorBoard:
             Motor(self.serial, 1)
         )
 
+        self.identity = self.identify()
+
     @classmethod
     def _get_supported_boards(cls):
-        boards = []
+        boards = {}
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x0403 and port.pid == 0x6001:
-                boards.append(MotorBoard(port.device))
+                board = MotorBoard(port.device)
+                boards[board.identity.asset_tag] = board
         return boards
 
     @property
@@ -39,7 +42,7 @@ class MotorBoard:
 
     def identify(self):
         data = self.serial.query('*IDN?')
-        return data.split(':')
+        return BoardIdentity(*data.split(':'))
 
     def status(self):
         data = self.serial.query('*STATUS?')
