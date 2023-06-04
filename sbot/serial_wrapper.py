@@ -22,11 +22,12 @@ else:
 Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
 
-Func = Callable[Param, RetType]
 E = TypeVar("E", bound=BaseException)
 
 
-def retry(times: int, exceptions: type[E]) -> Callable[[Func], Func]:
+def retry(
+        times: int, exceptions: type[E],
+) -> Callable[[Callable[Param, RetType]], Callable[Param, RetType]]:
     def decorator(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
         @wraps(func)
         def retryfn(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
@@ -133,3 +134,6 @@ class SerialWrapper:
 
     def set_identity(self, identity: BoardIdentity) -> None:
         self.identity = identity
+
+    def __str__(self) -> str:
+        return f"<{self.__class__.__qualname__} {self.port!r} {self.identity.asset_tag!r}>"

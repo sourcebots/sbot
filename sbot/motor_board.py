@@ -33,10 +33,10 @@ class MotorBoard:
             Motor(self._serial, 1)
         )
 
-        serial_identity = self.identify()
-        self._serial.set_identity(serial_identity)
+        self._identity = self.identify()
+        self._serial.set_identity(self._identity)
 
-        atexit.register(self._cleanup, serial_num=serial_identity.asset_tag)
+        atexit.register(self._cleanup)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, MotorBoard]:
@@ -54,7 +54,7 @@ class MotorBoard:
                         f"Found motor board-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
                     continue
-                boards[board.identify().asset_tag] = board
+                boards[board._identity.asset_tag] = board
         return boards
 
     @property
@@ -81,11 +81,14 @@ class MotorBoard:
     def reset(self) -> None:
         self._serial.write('*RESET')
 
-    def _cleanup(self, serial_num: str) -> None:
+    def _cleanup(self) -> None:
         try:
             self.reset()
         except Exception:
-            logger.warning(f"Failed to cleanup motor board {serial_num}.")
+            logger.warning(f"Failed to cleanup motor board {self._identity.asset_tag}.")
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__}: {self._serial}>"
 
 
 class Motor:
@@ -127,6 +130,9 @@ class Motor:
     def current(self) -> float:
         response = self._serial.query(f'MOT:{self._index}:I?')
         return float(response) / 1000
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__} index={self._index} {self._serial}>"
 
 
 if __name__ == '__main__':

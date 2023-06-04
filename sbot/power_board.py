@@ -47,8 +47,8 @@ class PowerBoard:
         self._run_led = Led(self._serial, 'RUN')
         self._error_led = Led(self._serial, 'ERR')
 
-        serial_identity = self.identify()
-        self._serial.set_identity(serial_identity)
+        self._identity = self.identify()
+        self._serial.set_identity(self._identity)
 
         atexit.register(self._cleanup)
 
@@ -68,7 +68,7 @@ class PowerBoard:
                         f"Found servo board-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
                     continue
-                boards[board.identify().asset_tag] = board
+                boards[board._identity.asset_tag] = board
         return boards
 
     @property
@@ -117,6 +117,9 @@ class PowerBoard:
         except Exception:
             logger.warning("Failed to cleanup power board.")
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__}: {self._serial}>"
+
 
 class Outputs:
     def __init__(self, serial: SerialWrapper):
@@ -139,6 +142,9 @@ class Outputs:
             if output._index == BRAIN_OUTPUT:
                 continue
             output.is_enabled = True
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__}: {self._serial}>"
 
 
 class Output:
@@ -176,6 +182,9 @@ class Output:
         port_oc = [True if (x == '1') else False for x in oc.split(',')]
         return port_oc[self._index]
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__} index={self._index} {self._serial}>"
+
 
 class Led:
     def __init__(self, serial: SerialWrapper, led: str):
@@ -194,6 +203,9 @@ class Led:
     def flash(self) -> None:
         self._serial.write(f'LED:{self.led}:SET:F')
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__} led={self.led} {self._serial}>"
+
 
 class BatterySensor:
     def __init__(self, serial: SerialWrapper):
@@ -211,6 +223,9 @@ class BatterySensor:
         response = self._serial.query('BATT:I?')
         return float(response) / 1000
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__}: {self._serial}>"
+
 
 class Piezo:
     def __init__(self, serial: SerialWrapper):
@@ -226,6 +241,9 @@ class Piezo:
 
         cmd = f'NOTE:{frequency_int}:{duration_ms}'
         self._serial.write(cmd)
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__}: {self._serial}>"
 
 
 class Note(float, Enum):

@@ -34,10 +34,10 @@ class ServoBoard:
             Servo(self._serial, index) for index in range(12)
         )
 
-        serial_identity = self.identify()
-        self._serial.set_identity(serial_identity)
+        self._identity = self.identify()
+        self._serial.set_identity(self._identity)
 
-        atexit.register(self._cleanup, serial_num=serial_identity.asset_tag)
+        atexit.register(self._cleanup)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, 'ServoBoard']:
@@ -55,7 +55,7 @@ class ServoBoard:
                         f"Found servo board-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
                     continue
-                boards[board.identify().asset_tag] = board
+                boards[board._identity.asset_tag] = board
         return boards
 
     @property
@@ -94,11 +94,14 @@ class ServoBoard:
         response = self._serial.query('SERVO:V?')
         return float(response) / 1000
 
-    def _cleanup(self, serial_num: str) -> None:
+    def _cleanup(self) -> None:
         try:
             self.reset()
         except Exception:
-            logger.warning(f"Failed to cleanup servo board {serial_num}.")
+            logger.warning(f"Failed to cleanup servo board {self._identity.asset_tag}.")
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__}: {self._serial}>"
 
 
 class Servo:
@@ -152,6 +155,9 @@ class Servo:
     @log_to_debug
     def disable(self) -> None:
         self._serial.write(f'SERVO:{self._index}:DISABLE')
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__qualname__} index={self._index} {self._serial}>"
 
 
 if __name__ == '__main__':

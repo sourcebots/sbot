@@ -147,9 +147,6 @@ class Robot:
         if self.is_competition:
             timeout.kill_after_delay(game_specific.GAME_LENGTH)
 
-
-# TODO repr/str on all the things
-
 # TODO immutable dict
 # TODO docstrings
 

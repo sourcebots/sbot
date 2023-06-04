@@ -56,8 +56,8 @@ class Arduino:
             + tuple(Pin(self._serial, index, supports_analog=True) for index in range(14, 20))
         )
 
-        serial_identity = self.identify()
-        self._serial.set_identity(serial_identity)
+        self._identity = self.identify()
+        self._serial.set_identity(self._identity)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, Arduino]:
@@ -75,7 +75,7 @@ class Arduino:
                         f"Found Arduino-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
                     continue
-                boards[board.identify().asset_tag] = board
+                boards[board._identity.asset_tag] = board
         return boards
 
     @log_to_debug
@@ -97,7 +97,7 @@ class Arduino:
         return self._pins
 
     def __repr__(self) -> str:
-        return ""  # TODO
+        return f"<{self.__class__.__qualname__}: {self._serial}>"
 
 
 class Pin:
@@ -153,7 +153,10 @@ class Pin:
         return map_to_float(int(response), 0, 1023, 0.0, 5.0)
 
     def __repr__(self) -> str:
-        return ""  # TODO
+        return (
+            f"<{self.__class__.__qualname__} "
+            f"index={self._index} analog={self._supports_analog} {self._serial}>"
+        )
 
 
 # PIN:<n>:MODE:GET?

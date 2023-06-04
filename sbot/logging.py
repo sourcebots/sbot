@@ -31,9 +31,9 @@ def log_to_debug(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
         kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]
         signature = ", ".join(args_repr + kwargs_repr)
 
-        logger.debug(f"Calling {func.__name__}({signature})")
+        logger.debug(f"Calling {func.__qualname__}({signature})")
         value = func(*args, **kwargs)
-        logger.debug(f"{func.__name__!r} returned {value!r}")
+        logger.debug(f"{func.__qualname__!r} returned {value!r}")
 
         return value
     return wrapper_debug
