@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import atexit
 import logging
 from enum import Enum, IntEnum
 
@@ -47,6 +48,8 @@ class PowerBoard:
 
         serial_identity = self.identify()
         self._serial.set_identity(serial_identity)
+
+        atexit.register(self._cleanup)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, PowerBoard]:
@@ -102,6 +105,12 @@ class PowerBoard:
         response: str = self._serial.query('BTN:START:GET?')
         internal, external = response.split(':')
         return (internal == '1') or (external == '1')
+
+    def _cleanup(self) -> None:
+        try:
+            self.reset()
+        except Exception:
+            logger.warning("Failed to cleanup power board.")
 
 
 class Outputs:

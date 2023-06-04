@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import atexit
 import logging
 
 from serial.tools.list_ports import comports
@@ -34,6 +35,8 @@ class ServoBoard:
 
         serial_identity = self.identify()
         self._serial.set_identity(serial_identity)
+
+        atexit.register(self._cleanup, serial_num=serial_identity.asset_tag)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, 'ServoBoard']:
@@ -83,6 +86,12 @@ class ServoBoard:
     def voltage(self) -> float:
         response = self._serial.query('SERVO:V?')
         return float(response) / 1000
+
+    def _cleanup(self, serial_num: str) -> None:
+        try:
+            self.reset()
+        except Exception:
+            logger.warning(f"Failed to cleanup servo board {serial_num}.")
 
 
 class Servo:

@@ -1,7 +1,7 @@
 """Code to kill robot after certain amount of time."""
 import logging
-import sys
 import signal
+import sys
 from types import FrameType
 
 logger = logging.getLogger(__name__)

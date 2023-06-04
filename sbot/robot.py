@@ -140,6 +140,4 @@ class Robot:
 # TODO immutable dict
 # TODO docstrings
 
-# TODO add atexits for boards
-# TODO game timeout
 # TODO arduino support
