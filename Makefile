@@ -1,26 +1,30 @@
-.PHONY: all clean lint type test test-cov
+.PHONY: lint type test isort isort-check build upload
 
-CMD:=poetry run
 PYMODULE:=sbot
 TESTS:=tests
-EXTRACODE:=
 
-all: type test lint
+all: lint isort-check type build
 
 lint:
-	$(CMD) flake8 $(PYMODULE) $(TESTS) $(EXTRACODE)
+	flake8 $(PYMODULE)
 
 type:
-	$(CMD) mypy $(PYMODULE) $(TESTS) $(EXTRACODE)
+	mypy $(PYMODULE)
 
 test:
-	$(CMD) pytest --cov=$(PYMODULE) $(TESTS)
+	pytest --cov=$(PYMODULE) $(TESTS)
 
-test-cov:
-	$(CMD) pytest --cov=$(PYMODULE) $(TESTS) --cov-report html
+isort-check:
+	python -m isort --check $(PYMODULE)
 
 isort:
-	$(CMD) isort --recursive $(PYMODULE) $(TESTS) $(EXTRACODE)
+	python -m isort $(PYMODULE)
+
+build:
+	python -m build
+
+upload:
+	twine upload dist/*
 
 clean:
-	git clean -Xdf # Delete all files in .gitignore
+	rm -rf dist/* build/*

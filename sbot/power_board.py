@@ -103,9 +103,9 @@ class Output:
             self.serial.write(f'OUT:{self._index}:SET:0')
 
     @property
-    def current(self):
-        data = self.serial.query(f'OUT:{self._index}:I?')
-        return float(data)/1000
+    def current(self) -> float:
+        response = self._serial.query(f'OUT:{self._index}:I?')
+        return float(response) / 1000
 
     @property
     def overcurrent(self):
@@ -135,14 +135,14 @@ class BatterySensor:
         self.serial = serial
 
     @property
-    def voltage(self):
-        data = self.serial.query('BATT:V?')
-        return float(data)/1000
+    def voltage(self) -> float:
+        response = self._serial.query('BATT:V?')
+        return float(response) / 1000
 
     @property
-    def current(self):
-        data = self.serial.query('BATT:I?')
-        return float(data)/1000
+    def current(self) -> float:
+        response = self._serial.query('BATT:I?')
+        return float(response) / 1000
 
 
 class Piezo:
