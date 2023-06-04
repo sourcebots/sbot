@@ -138,9 +138,39 @@ void processCommand(){
       }
     }
   }
+
+  else if(current_arg.equals("ULTRASOUND")){
+    getSlice();
+    int pulse = current_arg.toInt();
+    getSlice();
+    int echo = current_arg.toInt();
+    getSlice();
+    if(current_arg.equals("MEASURE?")){
+      pinMode(pulse, OUTPUT);
+      pinMode(echo, INPUT);
+      
+      digitalWrite(pulse, LOW);
+      delayMicroseconds(2);
+      digitalWrite(pulse, HIGH);
+      delayMicroseconds(5);
+      digitalWrite(pulse, LOW);
+
+      int duration = pulseIn(echo, HIGH, 60000);
+      Serial.print(microsecondsToMm(duration));
+      Serial.print("\n");
+      return;
+    }
+  }
+
   Serial.print("NACK:Invalid command\n");
 }
 
+long microsecondsToMm(long microseconds) {
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  // The ping travels out and back, so to find the distance we need half
+  // 10 x (us / 29 / 2)
+  return (5 * microseconds / 29);
+}
 
 int getPinMode(uint8_t pin){
   uint8_t bit = digitalPinToBitMask(pin);

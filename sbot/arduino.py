@@ -96,6 +96,21 @@ class Arduino:
     def pins(self) -> tuple[Pin, ...]:
         return self._pins
 
+    @log_to_debug
+    def ultrasound_measure(
+        self,
+        pulse_pin: int | AnalogPins,
+        echo_pin: int | AnalogPins
+    ) -> int:
+        try:  # bounds check
+            _ = self.pins[pulse_pin]
+            _ = self.pins[echo_pin]
+        except IndexError:
+            raise ValueError("Invalid pins provided") from None
+
+        response = self._serial.query(f'ULTRASOUND:{pulse_pin}:{echo_pin}:MEASURE?')
+        return int(response)
+
     def __repr__(self) -> str:
         return f"<{self.__class__.__qualname__}: {self._serial}>"
 
@@ -164,6 +179,7 @@ class Pin:
 # PIN:<n>:DIGITAL:GET?
 # PIN:<n>:DIGITAL:SET:<1/0>
 # PIN:<n>:ANALOG:GET?
+# ULTRASOUND:<pulse>:<echo>:MEASURE?
 
 if __name__ == '__main__':
     arduinos = Arduino._get_supported_boards()
