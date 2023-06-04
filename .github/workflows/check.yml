@@ -24,6 +24,10 @@ jobs:
     - name: Typecheck
       run: |
         make type
+    - name: Run tests
+      run: |
+        pip install opencv-python-headless
+        make test
     - name: Build package
       run: |
         make build
