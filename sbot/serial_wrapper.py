@@ -1,14 +1,28 @@
+from __future__ import annotations
+
 import logging
 import threading
+from collections.abc import Callable
+from functools import wraps
+from typing import Any, ParamSpec, TypeVar
 
 import serial
 
+from .logging import TRACE
+
 logger = logging.getLogger(__name__)
 
+Param = ParamSpec("Param")
+RetType = TypeVar("RetType")
+Func = Callable[Param, RetType]
 
-def retry(times, exceptions):
-    def decorator(func):
-        def retryfn(*args, **kwargs):
+E = TypeVar("E", bound=BaseException)
+
+
+def retry(times: int, exceptions: type[E]) -> Callable[[Func], Func]:
+    def decorator(func: Func) -> Func:
+        @wraps(func)
+        def retryfn(*args: Any, **kwargs: Any) -> Any:
             attempt = 0
             while attempt < times:
                 try:
@@ -23,7 +37,7 @@ def retry(times, exceptions):
 
 
 class SerialWrapper:
-    def __init__(self, port, baud, timeout=0.5):
+    def __init__(self, port: str, baud: int, timeout: float = 0.5):
         self._lock = threading.Lock()
 
         # Serial port parameters
@@ -32,32 +46,35 @@ class SerialWrapper:
         self.timeout = timeout
 
         # pyserial serial port
-        self.serial = None
+        self.serial: serial.Serial | None = None
 
         # Current port state
         self.connected = False
 
-    def start(self):
+    def start(self) -> None:
         self._connect()
 
-    def stop(self):
+    def stop(self) -> None:
         self._disconnect()
 
     @retry(times=3, exceptions=RuntimeError)
-    def query(self, data):
+    def query(self, data: str) -> str:
         with self._lock:
             if not self.connected:
                 if not self._connect():
                     print('Error')
                     raise RuntimeError('Board not connected')
 
+            if self.serial is None:
+                raise RuntimeError('Serial port is None')
+
             try:
-                logger.trace(f'Serial write - "{data}"')
+                logger.log(TRACE, f'Serial write - "{data}"')
                 cmd = data + '\n'
                 self.serial.write(cmd.encode())
 
                 response = self.serial.readline()
-                logger.trace(f'Serial read  - "{response.decode().strip()}"')
+                logger.log(TRACE, f'Serial read  - "{response.decode().strip()}"')
 
                 if b'\n' not in response:
                     raise serial.SerialException('readline timeout')
@@ -69,13 +86,13 @@ class SerialWrapper:
 
             return response.decode().strip()
 
-    def write(self, data):
+    def write(self, data: str) -> None:
         response = self.query(data)
         if 'NACK' in response:
             _, error_msg = response.split(':', maxsplit=1)
             raise RuntimeError(error_msg)
 
-    def _connect(self):
+    def _connect(self) -> bool:
         try:
             self.serial = serial.Serial(
                 port=self.port,
@@ -89,7 +106,7 @@ class SerialWrapper:
         logger.info('Connected')
         return True
 
-    def _disconnect(self):
+    def _disconnect(self) -> None:
         if self.serial is not None:
             logger.info('Disconnected')
             self.connected = False

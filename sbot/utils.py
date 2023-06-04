@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import socket
-from typing import NamedTuple
+from typing import NamedTuple, TypeVar
+
+T = TypeVar('T')
 
 
 class BoardIdentity(NamedTuple):
@@ -9,17 +13,30 @@ class BoardIdentity(NamedTuple):
     sw_version: str
 
 
-def map_to_int(x, in_min, in_max, out_min, out_max):
+def map_to_int(
+        x: float,
+        in_min: float,
+        in_max: float,
+        out_min: int,
+        out_max: int,
+) -> int:
     value = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
     return int(value)
 
 
-def map_to_float(x, in_min, in_max, out_min, out_max, precision=3):
+def map_to_float(
+        x: int,
+        in_min: int,
+        in_max: int,
+        out_min: float,
+        out_max: float,
+        precision: int = 3,
+) -> float:
     value = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
     return round(value, precision)
 
 
-def singular(container):
+def singular(container: dict[str, T]) -> T:
     length = len(container)
 
     if length == 1:
@@ -30,7 +47,7 @@ def singular(container):
         raise RuntimeError(f'expected only one to be connected, but found {length}')
 
 
-def obtain_lock(lock_port=10653):
+def obtain_lock(lock_port: int = 10653) -> socket.socket:
     lock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # We bind to a port to claim it and prevent another process using it

@@ -15,23 +15,24 @@ Example metadata file:
         "is_competition": true
     }
 """
+from __future__ import annotations
 
 import json
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 LOGGER = logging.getLogger(__name__)
 
 METADATA_ENV_VAR = "SBOT_METADATA_PATH"
 
-DEFAULT_METADATA: Dict[str, Any] = {
+DEFAULT_METADATA: dict[str, Any] = {
     "is_competition": False,
     "zone": 0,
 }
 
 
-def load() -> Dict[str, Any]:
+def load() -> dict[str, Any]:
     """
     Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it.
 
@@ -50,15 +51,15 @@ def load() -> Dict[str, Any]:
     return DEFAULT_METADATA
 
 
-def _find_file(search_path: str) -> Optional[str]:
-    for dir_path, dir_names, file_names in os.walk(search_path):
+def _find_file(search_path: str) -> str | None:
+    for dir_path, _dir_names, file_names in os.walk(search_path):
         for file_name in file_names:
             if file_name.endswith(".json"):
                 return os.path.join(dir_path, file_name)
     return None
 
 
-def _read_file(path: str) -> Dict[str, Any]:
+def _read_file(path: str) -> dict[str, Any]:
     with open(path) as file:
         try:
             obj = json.load(file)

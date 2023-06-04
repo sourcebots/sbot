@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 from serial.tools.list_ports import comports
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class ServoBoard:
-    def __init__(self, serial_port):
+    def __init__(self, serial_port: str) -> None:
         self._serial = SerialWrapper(serial_port, 115200)
 
         self._servos = tuple(
@@ -24,7 +26,7 @@ class ServoBoard:
         self.identity = self.identify()
 
     @classmethod
-    def _get_supported_boards(cls):
+    def _get_supported_boards(cls) -> dict[str, 'ServoBoard']:
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
@@ -34,14 +36,14 @@ class ServoBoard:
         return boards
 
     @property
-    def servos(self):
+    def servos(self) -> tuple['Servo', ...]:
         return self._servos
 
-    def identify(self):
+    def identify(self) -> BoardIdentity:
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
-    def status(self):
+    def status(self) -> tuple[bool, bool]:
         response = self._serial.query('*STATUS?')
 
         data = response.split(':')
@@ -50,29 +52,29 @@ class ServoBoard:
 
         return watchdog_fail, pgood
 
-    def reset(self):
+    def reset(self) -> None:
         self._serial.write('*RESET')
 
     @property
-    def current(self):
+    def current(self) -> float:
         response = self._serial.query('SERVO:I?')
         return float(response) / 1000
 
     @property
-    def voltage(self):
+    def voltage(self) -> float:
         response = self._serial.query('SERVO:V?')
         return float(response) / 1000
 
 
 class Servo:
-    def __init__(self, serial, index):
+    def __init__(self, serial: SerialWrapper, index: int):
         self._serial = serial
         self._index = index
 
         self._duty_min = START_DUTY_MIN
         self._duty_max = START_DUTY_MAX
 
-    def set_duty_limits(self, lower, upper):
+    def set_duty_limits(self, lower: int, upper: int) -> None:
         if not (isinstance(lower, int) and isinstance(upper, int)):
             raise TypeError(
                 f'Servo pulse limits are ints in µs, in the range {DUTY_MIN} to {DUTY_MAX}'
@@ -85,11 +87,11 @@ class Servo:
         self._duty_min = lower
         self._duty_max = upper
 
-    def get_duty_limits(self):
+    def get_duty_limits(self) -> tuple[int, int]:
         return self._duty_min, self._duty_max
 
     @property
-    def position(self):
+    def position(self) -> float | None:
         response = self._serial.query(f'SERVO:{self._index}:GET?')
         data = int(response)
         if data == 0:
@@ -97,7 +99,7 @@ class Servo:
         return map_to_float(data, self._duty_min, self._duty_max, -1.0, 1.0, precision=3)
 
     @position.setter
-    def position(self, value):
+    def position(self, value: float) -> None:
         try:
             if (value < -1.0) or (value > 1.0):
                 raise ValueError('Servo position is a float between -1.0 and 1.0')
@@ -107,11 +109,12 @@ class Servo:
         setpoint = map_to_int(value, -1.0, 1.0, self._duty_min, self._duty_max)
         self._serial.write(f'SERVO:{self._index}:SET:{setpoint}')
 
-    def disable(self):
+    def disable(self) -> None:
         self._serial.write(f'SERVO:{self._index}:DISABLE')
 
 
 if __name__ == '__main__':
     servoboards = ServoBoard._get_supported_boards()
-    for s in servoboards:
-        print(s.identify())
+    for serial_num, board in servoboards.items():
+        print(serial_num)
+        print(board.identify())
