@@ -4,6 +4,7 @@ from time import sleep
 from april_vision.examples.camera import setup_cameras
 
 from . import game_specific, metadata
+from .exceptions import MetadataKeyError, MetadataNotReadyError
 from .motor_board import MotorBoard
 from .power_board import PowerBoard
 from .servo_board import ServoBoard
@@ -84,7 +85,7 @@ class Robot:
     @property
     def metadata(self):
         if self._metadata is None:
-            raise metadata.MetadataNotReadyError()
+            raise MetadataNotReadyError()
         else:
             return self._metadata
 
@@ -93,14 +94,14 @@ class Robot:
         try:
             return self.metadata['zone']
         except KeyError:
-            raise metadata.MetadataKeyError('zone') from None
+            raise MetadataKeyError('zone') from None
 
     @property
     def is_competition(self):
         try:
             return self.metadata['is_competition']
         except KeyError:
-            raise metadata.MetadataKeyError('is_competition') from None
+            raise MetadataKeyError('is_competition') from None
 
     def wait_start(self):
         # TODO make this work
