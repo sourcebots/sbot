@@ -11,7 +11,7 @@ from .exceptions import MetadataNotReadyError
 from .logging import TRACE
 from .metadata import Metadata
 from .motor_board import MotorBoard
-from .power_board import PowerBoard
+from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
 from .utils import obtain_lock, singular
 
@@ -101,7 +101,6 @@ class Robot:
 
     @property
     def metadata(self) -> Metadata:
-        # TODO typeddict
         if self._metadata is None:
             raise MetadataNotReadyError()
         else:
@@ -119,8 +118,10 @@ class Robot:
         # ignore previous button presses
         _ = self.power_board._start_button()
         logger.info('Waiting for start button.')
-        # TODO add beep
+
+        self.power_board.piezo.buzz(0.1, Note.A6)
         self.power_board._run_led.flash()
+
         while not self.power_board._start_button():
             sleep(0.1)
         logger.info("Start button pressed.")
