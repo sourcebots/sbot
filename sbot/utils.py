@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 import socket
-from collections.abc import Mapping
-from typing import Any, NamedTuple, TypeVar
+from typing import Any, Mapping, NamedTuple, TypeVar
 
 from serial.tools.list_ports_common import ListPortInfo
 

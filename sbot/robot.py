@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import itertools
 import logging
-from collections.abc import Mapping
 from time import sleep
 from types import MappingProxyType
+from typing import Mapping
 
 from april_vision.examples.camera import AprilCamera, setup_cameras
 
@@ -17,7 +17,7 @@ from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
-from .utils import obtain_lock, singular
+from .utils import BoardIdentity, obtain_lock, singular
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class Robot:
             self._cameras.values(),
         )
         for board in boards:
-            identity = board.identify()
+            identity: BoardIdentity = board.identify()  # type: ignore[attr-defined]
             board_type = board.__class__.__name__
             logger.info(f"Found {board_type}, serial: {identity.asset_tag}")
             logger.debug(

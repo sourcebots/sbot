@@ -1,7 +1,7 @@
 """Game specific code."""
 from __future__ import annotations
 
-from collections.abc import Iterable
+from typing import Iterable
 
 GAME_LENGTH = 120
 

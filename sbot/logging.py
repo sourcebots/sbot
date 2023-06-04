@@ -1,8 +1,7 @@
 import functools
 import logging
 import sys
-from collections.abc import Callable
-from typing import TypeVar
+from typing import Callable, TypeVar
 
 if sys.version_info < (3, 10):
     from typing_extensions import ParamSpec
@@ -11,7 +10,6 @@ else:
 Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
 
-Func = Callable[Param, RetType]
 E = TypeVar("E", bound=BaseException)
 
 TRACE = 5

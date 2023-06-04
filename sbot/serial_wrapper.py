@@ -4,9 +4,8 @@ import logging
 import sys
 import threading
 import time
-from collections.abc import Callable
 from functools import wraps
-from typing import TypeVar
+from typing import Callable, TypeVar
 
 import serial
 
