@@ -99,7 +99,10 @@ class Servo:
         return map_to_float(data, self._duty_min, self._duty_max, -1.0, 1.0, precision=3)
 
     @position.setter
-    def position(self, value: float) -> None:
+    def position(self, value: float | None) -> None:
+        if value is None:
+            self.disable()
+            return
         try:
             if (value < -1.0) or (value > 1.0):
                 raise ValueError('Servo position is a float between -1.0 and 1.0')
@@ -110,7 +113,6 @@ class Servo:
         self._serial.write(f'SERVO:{self._index}:SET:{setpoint}')
 
     def disable(self) -> None:
-        # TODO is this position = None
         self._serial.write(f'SERVO:{self._index}:DISABLE')
 
 
