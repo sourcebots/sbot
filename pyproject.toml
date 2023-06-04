@@ -40,5 +40,32 @@ recommonmark = "*"
 sphinx-markdown-tables = "*"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "sbot/_version.py"
+
+[tool.setuptools]
+packages = ["sbot"]
+
+[project]
+name = "sbot"
+dynamic = ["version"]
+requires-python = ">=3.8"
+dependencies = [
+    "pyserial >=3,<4",
+    "april_vision >=2,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "isort",
+    "mypy",
+    "build",
+    "types-pyserial",
+    "typing-extensions; python_version<'3.10'",
+    "pytest",
+    "pytest-cov",
+]
