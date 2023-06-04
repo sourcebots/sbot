@@ -8,7 +8,7 @@ from april_vision.examples.camera import AprilCamera, setup_cameras
 from . import game_specific, metadata, timeout
 from ._version import __version__
 from .exceptions import MetadataNotReadyError
-from .logging import TRACE
+from .logging import TRACE, log_to_debug
 from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
@@ -96,10 +96,12 @@ class Robot:
     def camera(self) -> AprilCamera:
         return singular(self._cameras)
 
+    @log_to_debug
     def sleep(self, secs: float) -> None:
         sleep(secs)
 
     @property
+    @log_to_debug
     def metadata(self) -> Metadata:
         if self._metadata is None:
             raise MetadataNotReadyError()
@@ -107,13 +109,16 @@ class Robot:
             return self._metadata
 
     @property
+    @log_to_debug
     def zone(self) -> int:
         return self.metadata['zone']
 
     @property
+    @log_to_debug
     def is_competition(self) -> bool:
         return self.metadata['is_competition']
 
+    @log_to_debug
     def wait_start(self) -> None:
         # ignore previous button presses
         _ = self.power_board._start_button()
@@ -133,8 +138,6 @@ class Robot:
             timeout.kill_after_delay(game_specific.GAME_LENGTH)
 
 
-# TODO double check logging handlers
-# TODO add all the logging
 # TODO repr/str on all the things
 
 # TODO immutable dict

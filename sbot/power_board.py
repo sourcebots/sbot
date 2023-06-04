@@ -6,6 +6,7 @@ from enum import Enum, IntEnum
 
 from serial.tools.list_ports import comports
 
+from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import BoardIdentity, float_bounds_check, get_USB_identity
 
@@ -82,22 +83,26 @@ class PowerBoard:
     def piezo(self) -> Piezo:
         return self._piezo
 
+    @log_to_debug
     def identify(self) -> BoardIdentity:
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
     @property
+    @log_to_debug
     def temperature(self) -> int:
         response = self._serial.query('*STATUS?')
         _, temp, _ = response.split(':')
         return int(temp)
 
     @property
+    @log_to_debug
     def fan(self) -> bool:
         response = self._serial.query('*STATUS?')
         _, _, fan = response.split(':')
         return True if (fan == '1') else False
 
+    @log_to_debug
     def reset(self) -> None:
         self._serial.write('*RESET')
 
@@ -121,12 +126,14 @@ class Outputs:
     def __getitem__(self, key: int) -> Output:
         return self._outputs[key]
 
+    @log_to_debug
     def power_off(self) -> None:
         for output in self._outputs:
             if output._index == BRAIN_OUTPUT:
                 continue
             output.is_enabled = False
 
+    @log_to_debug
     def power_on(self) -> None:
         for output in self._outputs:
             if output._index == BRAIN_OUTPUT:
@@ -140,11 +147,13 @@ class Output:
         self._index = index
 
     @property
+    @log_to_debug
     def is_enabled(self) -> bool:
         response = self._serial.query(f'OUT:{self._index}:GET?')
         return True if (response == '1') else False
 
     @is_enabled.setter
+    @log_to_debug
     def is_enabled(self, value: bool) -> None:
         if self._index == BRAIN_OUTPUT:
             raise RuntimeError("Brain output cannot be controlled via this API.")
@@ -154,11 +163,13 @@ class Output:
             self._serial.write(f'OUT:{self._index}:SET:0')
 
     @property
+    @log_to_debug
     def current(self) -> float:
         response = self._serial.query(f'OUT:{self._index}:I?')
         return float(response) / 1000
 
     @property
+    @log_to_debug
     def overcurrent(self) -> bool:
         response = self._serial.query('*STATUS?')
         oc, _, _ = response.split(':')
@@ -171,12 +182,15 @@ class Led:
         self._serial = serial
         self.led = led
 
+    @log_to_debug
     def on(self) -> None:
         self._serial.write(f'LED:{self.led}:SET:1')
 
+    @log_to_debug
     def off(self) -> None:
         self._serial.write(f'LED:{self.led}:SET:0')
 
+    @log_to_debug
     def flash(self) -> None:
         self._serial.write(f'LED:{self.led}:SET:F')
 
@@ -186,11 +200,13 @@ class BatterySensor:
         self._serial = serial
 
     @property
+    @log_to_debug
     def voltage(self) -> float:
         response = self._serial.query('BATT:V?')
         return float(response) / 1000
 
     @property
+    @log_to_debug
     def current(self) -> float:
         response = self._serial.query('BATT:I?')
         return float(response) / 1000
@@ -200,6 +216,7 @@ class Piezo:
     def __init__(self, serial: SerialWrapper):
         self._serial = serial
 
+    @log_to_debug
     def buzz(self, duration: float, frequency: float) -> None:
         frequency_int = int(float_bounds_check(
             frequency, 8, 10_000, "Frequency is a float in Hz between 0 and 10000"))

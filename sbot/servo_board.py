@@ -5,6 +5,7 @@ import logging
 
 from serial.tools.list_ports import comports
 
+from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
     BoardIdentity, float_bounds_check,
@@ -58,13 +59,16 @@ class ServoBoard:
         return boards
 
     @property
+    @log_to_debug
     def servos(self) -> tuple['Servo', ...]:
         return self._servos
 
+    @log_to_debug
     def identify(self) -> BoardIdentity:
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
+    @log_to_debug
     def status(self) -> tuple[bool, bool]:
         response = self._serial.query('*STATUS?')
 
@@ -74,15 +78,18 @@ class ServoBoard:
 
         return watchdog_fail, pgood
 
+    @log_to_debug
     def reset(self) -> None:
         self._serial.write('*RESET')
 
     @property
+    @log_to_debug
     def current(self) -> float:
         response = self._serial.query('SERVO:I?')
         return float(response) / 1000
 
     @property
+    @log_to_debug
     def voltage(self) -> float:
         response = self._serial.query('SERVO:V?')
         return float(response) / 1000
@@ -102,6 +109,7 @@ class Servo:
         self._duty_min = START_DUTY_MIN
         self._duty_max = START_DUTY_MAX
 
+    @log_to_debug
     def set_duty_limits(self, lower: int, upper: int) -> None:
         if not (isinstance(lower, int) and isinstance(upper, int)):
             raise TypeError(
@@ -115,10 +123,12 @@ class Servo:
         self._duty_min = lower
         self._duty_max = upper
 
+    @log_to_debug
     def get_duty_limits(self) -> tuple[int, int]:
         return self._duty_min, self._duty_max
 
     @property
+    @log_to_debug
     def position(self) -> float | None:
         response = self._serial.query(f'SERVO:{self._index}:GET?')
         data = int(response)
@@ -127,6 +137,7 @@ class Servo:
         return map_to_float(data, self._duty_min, self._duty_max, -1.0, 1.0, precision=3)
 
     @position.setter
+    @log_to_debug
     def position(self, value: float | None) -> None:
         if value is None:
             self.disable()
@@ -138,6 +149,7 @@ class Servo:
         setpoint = map_to_int(value, -1.0, 1.0, self._duty_min, self._duty_max)
         self._serial.write(f'SERVO:{self._index}:SET:{setpoint}')
 
+    @log_to_debug
     def disable(self) -> None:
         self._serial.write(f'SERVO:{self._index}:DISABLE')
 

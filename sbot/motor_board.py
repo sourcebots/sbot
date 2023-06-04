@@ -5,6 +5,7 @@ import logging
 
 from serial.tools.list_ports import comports
 
+from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
     BoardIdentity, float_bounds_check,
@@ -57,13 +58,16 @@ class MotorBoard:
         return boards
 
     @property
+    @log_to_debug
     def motors(self) -> tuple[Motor, Motor]:
         return self._motors
 
+    @log_to_debug
     def identify(self) -> BoardIdentity:
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
+    @log_to_debug
     def status(self) -> tuple[list[bool], float]:
         response = self._serial.query('*STATUS?')
 
@@ -73,6 +77,7 @@ class MotorBoard:
 
         return output_faults, input_voltage
 
+    @log_to_debug
     def reset(self) -> None:
         self._serial.write('*RESET')
 
@@ -89,6 +94,7 @@ class Motor:
         self._index = index
 
     @property
+    @log_to_debug
     def power(self) -> float:
         response = self._serial.query(f'MOT:{self._index}:GET?')
 
@@ -101,6 +107,7 @@ class Motor:
         return map_to_float(value, -1000, 1000, -1.0, 1.0, precision=3)
 
     @power.setter
+    @log_to_debug
     def power(self, value: float) -> None:
         if value == COAST:
             self._serial.write(f'MOT:{self._index}:DISABLE')
@@ -116,6 +123,7 @@ class Motor:
             self._serial.write(f'MOT:{self._index}:SET:{setpoint}')
 
     @property
+    @log_to_debug
     def current(self) -> float:
         response = self._serial.query(f'MOT:{self._index}:I?')
         return float(response) / 1000
