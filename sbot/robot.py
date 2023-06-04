@@ -117,6 +117,5 @@ class Robot:
 # TODO game timeout
 # TODO loading metadata
 # TODO immutable dict
-# TODO camera marker sizes
 # TODO arduino support
 # TODO add atexits for boards

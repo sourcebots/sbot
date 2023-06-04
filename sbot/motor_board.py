@@ -17,11 +17,11 @@ class MotorSpecialState(Enum):
 
 class MotorBoard:
     def __init__(self, serial_port):
-        self.serial = SerialWrapper(serial_port, 115200)
+        self._serial = SerialWrapper(serial_port, 115200)
 
         self._motors = (
-            Motor(self.serial, 0),
-            Motor(self.serial, 1)
+            Motor(self._serial, 0),
+            Motor(self._serial, 1)
         )
 
         self.identity = self.identify()
@@ -41,15 +41,20 @@ class MotorBoard:
         return self._motors
 
     def identify(self):
-        data = self.serial.query('*IDN?')
-        return BoardIdentity(*data.split(':'))
+        response = self._serial.query('*IDN?')
+        return BoardIdentity(*response.split(':'))
 
     def status(self):
-        data = self.serial.query('*STATUS?')
-        return data
+        response = self._serial.query('*STATUS?')
+
+        data = response.split(':')
+        output_faults = [True if port == '1' else False for port in data[0].split(',')]
+        input_voltage = float(data[1]) / 1000
+
+        return output_faults, input_voltage
 
     def reset(self):
-        self.serial.write('*RESET')
+        self._serial.write('*RESET')
 
 
 class Motor:
@@ -59,26 +64,36 @@ class Motor:
 
     @property
     def power(self):
-        data = self.serial.query(f'MOT:{self._index}:GET?')
-        enabled, value = data.split(':')
-        if enabled == '0':
+        response = self._serial.query(f'MOT:{self._index}:GET?')
+
+        data = response.split(':')
+        enabled = True if data[0] == '1' else False
+        value = int(data[1])
+
+        if not enabled:
             return MotorSpecialState.COAST
         return map_to_float(value, -1000, 1000, -1.0, 1.0, precision=3)
 
     @power.setter
     def power(self, value):
-        # TODO rescale -1.1 -> -127.127
+        try:
+            if (value < -1.0) or (value > 1.0):
+                raise ValueError('Motor power is a float between -1.0 and 1.0')
+        except TypeError:
+            raise TypeError('Motor power is a float between -1.0 and 1.0')
+
         if value == MotorSpecialState.COAST:
-            self.serial.write(f'MOT:{self._index}:DISABLE')
+            self._serial.write(f'MOT:{self._index}:DISABLE')
         elif value == MotorSpecialState.BRAKE:
-            self.serial.write(f'MOT:{self._index}:SET:0')
+            self._serial.write(f'MOT:{self._index}:SET:0')
         else:
             setpoint = map_to_int(value, -1.0, 1.0, -1000, 1000)
-            self.serial.write(f'MOT:{self._index}:SET:{setpoint}')
+            self._serial.write(f'MOT:{self._index}:SET:{setpoint}')
 
     @property
     def current(self):
-        return self.serial.query(f'MOT:{self._index}:I?')
+        response = self._serial.query(f'MOT:{self._index}:I?')
+        return float(response) / 1000
 
 
 if __name__ == '__main__':

@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 
 class ServoBoard:
     def __init__(self, serial_port):
-        self.serial = SerialWrapper(serial_port, 115200)
+        self._serial = SerialWrapper(serial_port, 115200)
 
         self._servos = tuple(
-            Servo(self.serial, index) for index in range(12)
+            Servo(self._serial, index) for index in range(12)
         )
 
         self.identity = self.identify()
@@ -38,23 +38,30 @@ class ServoBoard:
         return self._servos
 
     def identify(self):
-        data = self.serial.query('*IDN?')
-        return BoardIdentity(*data.split(':'))
+        response = self._serial.query('*IDN?')
+        return BoardIdentity(*response.split(':'))
 
     def status(self):
-        data = self.serial.query('*STATUS?')
-        return data
+        response = self._serial.query('*STATUS?')
+
+        data = response.split(':')
+        watchdog_fail = True if data[0] == '1' else False
+        pgood = True if data[1] == '1' else False
+
+        return watchdog_fail, pgood
 
     def reset(self):
-        self.serial.write('*RESET')
+        self._serial.write('*RESET')
 
     @property
     def current(self):
-        return self.serial.query('SERVO:I?')
+        response = self._serial.query('SERVO:I?')
+        return float(response) / 1000
 
     @property
     def voltage(self):
-        return self.serial.query('SERVO:V?')
+        response = self._serial.query('SERVO:V?')
+        return float(response) / 1000
 
 
 class Servo:
@@ -66,8 +73,15 @@ class Servo:
         self._duty_max = START_DUTY_MAX
 
     def set_duty_limits(self, lower, upper):
-        # TODO check int provided
-        # TODO check int falls in the correct bounds
+        if not (isinstance(lower, int) and isinstance(upper, int)):
+            raise TypeError(
+                f'Servo pulse limits are ints in µs, in the range {DUTY_MIN} to {DUTY_MAX}'
+            )
+        if not (DUTY_MIN <= lower <= DUTY_MAX and DUTY_MIN <= upper <= DUTY_MAX):
+            raise ValueError(
+                f'Servo pulse limits are ints in µs, in the range {DUTY_MIN} to {DUTY_MAX}'
+            )
+
         self._duty_min = lower
         self._duty_max = upper
 
@@ -76,13 +90,20 @@ class Servo:
 
     @property
     def position(self):
-        value = self._serial.query(f'SERVO:{self._index}:GET?')
-        if value == 0:
+        response = self._serial.query(f'SERVO:{self._index}:GET?')
+        data = int(response)
+        if data == 0:
             return None
-        return map_to_float(value, self._duty_min, self._duty_max, -1.0, 1.0, precision=3)
+        return map_to_float(data, self._duty_min, self._duty_max, -1.0, 1.0, precision=3)
 
     @position.setter
     def position(self, value):
+        try:
+            if (value < -1.0) or (value > 1.0):
+                raise ValueError('Servo position is a float between -1.0 and 1.0')
+        except TypeError:
+            raise TypeError('Servo position is a float between -1.0 and 1.0')
+
         setpoint = map_to_int(value, -1.0, 1.0, self._duty_min, self._duty_max)
         self._serial.write(f'SERVO:{self._index}:SET:{setpoint}')
 
