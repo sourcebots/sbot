@@ -25,7 +25,7 @@ def singular(container):
     length = len(container)
 
     if length == 1:
-        return next(container.values())
+        return list(container.values())[0]
     elif length == 0:
         raise RuntimeError('No boards of this type found')
     else:

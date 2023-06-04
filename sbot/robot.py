@@ -3,7 +3,7 @@ from time import sleep
 
 from april_vision.examples.camera import setup_cameras
 
-from . import metadata
+from . import game_specific, metadata
 from .motor_board import MotorBoard
 from .power_board import PowerBoard
 from .servo_board import ServoBoard
@@ -48,10 +48,7 @@ class Robot:
         self._servo_boards = ServoBoard._get_supported_boards()
 
     def _init_camera(self):
-        # TODO tag sizes go in here
-        # cameras = setup_cameras()
-        # self._camera = singular(cameras)
-        pass
+        self._cameras = setup_cameras(game_specific.MARKER_SIZES)
 
     @property
     def power_boards(self):
@@ -79,7 +76,7 @@ class Robot:
 
     @property
     def camera(self):
-        return self._camera
+        return singular(self._cameras)
 
     def sleep(self, secs):
         sleep(secs)
@@ -115,6 +112,7 @@ class Robot:
 # TODO bounds checks and type checks
 # TODO error handling
 # TODO add all the logging
+# TODO repr/str on all the things
 
 # TODO game timeout
 # TODO loading metadata
