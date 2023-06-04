@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import logging
 import itertools
+import logging
 from collections.abc import Mapping
 from time import sleep
 from types import MappingProxyType
@@ -83,7 +83,7 @@ class Robot:
             self.motor_boards.values(),
             self.servo_boards.values(),
             self.arduinos.values(),
-            self.cameras.values(),
+            self._cameras.values(),
         )
         for board in boards:
             identity = board.identify()
