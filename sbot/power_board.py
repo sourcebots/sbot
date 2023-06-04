@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 class PowerBoard:
     def __init__(self, serial_port):
-        self.serial = SerialWrapper(serial_port, 115200)
+        self._serial = SerialWrapper(serial_port, 115200)
 
-        self._outputs = Outputs(self.serial)
-        self._battery_sensor = BatterySensor(self.serial)
-        self._piezo = Piezo(self.serial)
-        self._run_led = Led(self.serial, 'RUN')
-        self._error_led = Led(self.serial, 'ERR')
+        self._outputs = Outputs(self._serial)
+        self._battery_sensor = BatterySensor(self._serial)
+        self._piezo = Piezo(self._serial)
+        self._run_led = Led(self._serial, 'RUN')
+        self._error_led = Led(self._serial, 'ERR')
 
         self.identity = self.identify()
 
@@ -43,34 +43,34 @@ class PowerBoard:
         return self._piezo
 
     def identify(self):
-        data = self.serial.query('*IDN?')
-        return BoardIdentity(*data.split(':'))
+        response = self._serial.query('*IDN?')
+        return BoardIdentity(*response.split(':'))
 
     @property
-    def temprature(self):
-        data = self.serial.query('*STATUS?')
-        _, temp, _ = data.split(':')
+    def temperature(self):
+        response = self._serial.query('*STATUS?')
+        _, temp, _ = response.split(':')
         return int(temp)
 
     @property
     def fan(self):
-        data = self.serial.query('*STATUS?')
-        _, _, fan = data.split(':')
+        response = self._serial.query('*STATUS?')
+        _, _, fan = response.split(':')
         return (fan == '1')
 
     def reset(self):
-        self.serial.write('*RESET')
+        self._serial.write('*RESET')
 
     def start_button(self):
-        _ = self.serial.query('BTN:START:GET?')
-        data = self.serial.query('BTN:START:GET?')
-        internal, external = [int(x) for x in data.split(':')]
+        _ = self._serial.query('BTN:START:GET?')
+        response = self._serial.query('BTN:START:GET?')
+        internal, external = [int(x) for x in response.split(':')]
         return internal, external
 
 
 class Outputs:
     def __init__(self, serial):
-        self.serial = serial
+        self._serial = serial
         self._outputs = tuple(Output(serial, i) for i in range(7))
 
     def __getitem__(self, key):
@@ -87,20 +87,20 @@ class Outputs:
 
 class Output:
     def __init__(self, serial, index):
-        self.serial = serial
+        self._serial = serial
         self._index = index
 
     @property
     def is_enabled(self):
-        data = self.serial.query(f'OUT:{self._index}:GET?')
-        return (data == '1')
+        response = self._serial.query(f'OUT:{self._index}:GET?')
+        return (response == '1')
 
     @is_enabled.setter
     def is_enabled(self, value):
         if value:
-            self.serial.write(f'OUT:{self._index}:SET:1')
+            self._serial.write(f'OUT:{self._index}:SET:1')
         else:
-            self.serial.write(f'OUT:{self._index}:SET:0')
+            self._serial.write(f'OUT:{self._index}:SET:0')
 
     @property
     def current(self) -> float:
@@ -109,30 +109,30 @@ class Output:
 
     @property
     def overcurrent(self):
-        data = self.serial.query('*STATUS?')
-        oc, _, _ = data.split(':')
+        response = self._serial.query('*STATUS?')
+        oc, _, _ = response.split(':')
         port_oc = [(x == '1') for x in oc.split(',')]
         return port_oc[self._index]
 
 
 class Led:
     def __init__(self, serial, led):
-        self.serial = serial
+        self._serial = serial
         self.led = led
 
     def on(self):
-        self.serial.write(f'LED:{self.led}:SET:1')
+        self._serial.write(f'LED:{self.led}:SET:1')
 
     def off(self):
-        self.serial.write(f'LED:{self.led}:SET:0')
+        self._serial.write(f'LED:{self.led}:SET:0')
 
     def flash(self):
-        self.serial.write(f'LED:{self.led}:SET:F')
+        self._serial.write(f'LED:{self.led}:SET:F')
 
 
 class BatterySensor:
     def __init__(self, serial):
-        self.serial = serial
+        self._serial = serial
 
     @property
     def voltage(self) -> float:
@@ -147,9 +147,10 @@ class BatterySensor:
 
 class Piezo:
     def __init__(self, serial):
-        self.serial = serial
+        self._serial = serial
 
     def buzz(self, duration, frequency):
+        # TODO type / bounds check + add music note
         frequency_int = int(round(frequency))
         if not (0 < frequency_int < 10_000):
             raise ValueError('Frequency out of range')
@@ -157,4 +158,4 @@ class Piezo:
         duration_ms = int(duration * 1000)
 
         cmd = f'NOTE:{frequency_int}:{duration_ms}'
-        self.serial.write(cmd)
+        self._serial.write(cmd)

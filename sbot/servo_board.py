@@ -45,8 +45,8 @@ class ServoBoard:
         response = self._serial.query('*STATUS?')
 
         data = response.split(':')
-        watchdog_fail = True if data[0] == '1' else False
-        pgood = True if data[1] == '1' else False
+        watchdog_fail = (data[0] == '1')
+        pgood = (data[1] == '1')
 
         return watchdog_fail, pgood
 
