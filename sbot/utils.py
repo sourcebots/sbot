@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import socket
+from collections.abc import Mapping
 from typing import Any, NamedTuple, TypeVar
 
 from serial.tools.list_ports_common import ListPortInfo
@@ -40,7 +41,7 @@ def map_to_float(
     return round(value, precision)
 
 
-def singular(container: dict[str, T]) -> T:
+def singular(container: Mapping[str, T]) -> T:
     length = len(container)
 
     if length == 1:

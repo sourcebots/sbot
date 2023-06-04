@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from time import sleep
+from types import MappingProxyType
 
 from april_vision.examples.camera import AprilCamera, setup_cameras
 
@@ -72,14 +74,14 @@ class Robot:
         self._arduinos = Arduino._get_supported_boards()
 
     def _init_camera(self) -> None:
-        self._cameras = setup_cameras(game_specific.MARKER_SIZES)
+        self._cameras = MappingProxyType(setup_cameras(game_specific.MARKER_SIZES))
 
     @property
     def power_board(self) -> PowerBoard:
         return self._power_board
 
     @property
-    def motor_boards(self) -> dict[str, MotorBoard]:
+    def motor_boards(self) -> Mapping[str, MotorBoard]:
         return self._motor_boards
 
     @property
@@ -87,7 +89,7 @@ class Robot:
         return singular(self._motor_boards)
 
     @property
-    def servo_boards(self) -> dict[str, ServoBoard]:
+    def servo_boards(self) -> Mapping[str, ServoBoard]:
         return self._servo_boards
 
     @property
@@ -95,7 +97,7 @@ class Robot:
         return singular(self._servo_boards)
 
     @property
-    def arduinos(self) -> dict[str, Arduino]:
+    def arduinos(self) -> Mapping[str, Arduino]:
         return self._arduinos
 
     @property
@@ -147,7 +149,4 @@ class Robot:
         if self.is_competition:
             timeout.kill_after_delay(game_specific.GAME_LENGTH)
 
-# TODO immutable dict
 # TODO docstrings
-
-# TODO arduino support

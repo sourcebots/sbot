@@ -3,6 +3,7 @@ from __future__ import annotations
 import atexit
 import logging
 from enum import Enum, IntEnum
+from types import MappingProxyType
 
 from serial.tools.list_ports import comports
 
@@ -53,7 +54,7 @@ class PowerBoard:
         atexit.register(self._cleanup)
 
     @classmethod
-    def _get_supported_boards(cls) -> dict[str, PowerBoard]:
+    def _get_supported_boards(cls) -> MappingProxyType[str, PowerBoard]:
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
@@ -69,7 +70,7 @@ class PowerBoard:
                         "but it could not be identified. Ignoring this device")
                     continue
                 boards[board._identity.asset_tag] = board
-        return boards
+        return MappingProxyType(boards)
 
     @property
     def outputs(self) -> Outputs:
