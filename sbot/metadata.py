@@ -25,12 +25,17 @@ LOGGER = logging.getLogger(__name__)
 
 METADATA_ENV_VAR = "SBOT_METADATA_PATH"
 
+DEFAULT_METADATA: Dict[str, Any] = {
+    "is_competition": False,
+    "zone": 0,
+}
 
-def load(*, fallback: Dict[str, Any] = {}) -> Dict[str, Any]:
+
+def load() -> Dict[str, Any]:
     """
     Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it.
 
-    If no file is found, it falls back to the `fallback` dict.
+    If no file is found, it falls back to the default dict.
     """
     search_path = os.environ.get(METADATA_ENV_VAR)
     if search_path:
@@ -42,7 +47,7 @@ def load(*, fallback: Dict[str, Any] = {}) -> Dict[str, Any]:
             LOGGER.info(f"No JSON metadata files found in {search_path}")
     else:
         LOGGER.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
-    return fallback
+    return DEFAULT_METADATA
 
 
 def _find_file(search_path: str) -> Optional[str]:

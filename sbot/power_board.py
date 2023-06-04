@@ -65,7 +65,7 @@ class PowerBoard:
         _ = self._serial.query('BTN:START:GET?')
         response = self._serial.query('BTN:START:GET?')
         internal, external = [int(x) for x in response.split(':')]
-        return internal, external
+        return (internal == '1') or (external == '1')
 
 
 class Outputs:

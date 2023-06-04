@@ -3,7 +3,7 @@ from time import sleep
 
 from april_vision.examples.camera import setup_cameras
 
-from . import game_specific, metadata
+from . import game_specific, metadata, timeout
 from .exceptions import MetadataKeyError, MetadataNotReadyError
 from .motor_board import MotorBoard
 from .power_board import PowerBoard
@@ -52,12 +52,8 @@ class Robot:
         self._cameras = setup_cameras(game_specific.MARKER_SIZES)
 
     @property
-    def power_boards(self):
-        return self._power_boards
-
-    @property
     def power_board(self):
-        return singular(self._power_boards)
+        return self._power_board
 
     @property
     def motor_boards(self):
@@ -104,9 +100,18 @@ class Robot:
             raise MetadataKeyError('is_competition') from None
 
     def wait_start(self):
-        # TODO make this work
-        # TODO get the metadata at this point
-        pass
+        logger.info('Waiting for start button.')
+        self.power_board._run_led.flash()
+        while not self.power_board.start_button():
+            sleep(0.1)
+        logger.info("Start button pressed.")
+        self.power_board._run_led.on()
+
+        self._metadata = metadata.load()
+
+        if self.is_competition:
+            timeout.kill_after_delay(game_specific.GAME_LENGTH)
+
 
 
 # TODO double check logging handlers
