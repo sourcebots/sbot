@@ -26,6 +26,9 @@ class PowerOutputPosition(IntEnum):
     FIVE_VOLT = 6
 
 
+BRAIN_OUTPUT = PowerOutputPosition.FIVE_VOLT
+
+
 class PowerBoard:
     def __init__(
         self,
@@ -111,10 +114,14 @@ class Outputs:
 
     def power_off(self) -> None:
         for output in self._outputs:
+            if output._index == BRAIN_OUTPUT:
+                continue
             output.is_enabled = False
 
     def power_on(self) -> None:
         for output in self._outputs:
+            if output._index == BRAIN_OUTPUT:
+                continue
             output.is_enabled = True
 
 
@@ -130,6 +137,8 @@ class Output:
 
     @is_enabled.setter
     def is_enabled(self, value: bool) -> None:
+        if self._index == BRAIN_OUTPUT:
+            raise RuntimeError("Brain output cannot be controlled via this API.")
         if value:
             self._serial.write(f'OUT:{self._index}:SET:1')
         else:
