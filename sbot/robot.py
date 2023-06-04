@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import itertools
 from collections.abc import Mapping
 from time import sleep
 from types import MappingProxyType
@@ -57,7 +58,7 @@ class Robot:
         self._init_power_board()
         self._init_aux_boards()
         self._init_camera()
-        # TODO log connected boards
+        self._log_connected_boards()
 
         if wait_start:
             self.wait_start()
@@ -75,6 +76,23 @@ class Robot:
 
     def _init_camera(self) -> None:
         self._cameras = MappingProxyType(setup_cameras(game_specific.MARKER_SIZES))
+
+    def _log_connected_boards(self) -> None:
+        boards = itertools.chain(
+            [self.power_board],
+            self.motor_boards.values(),
+            self.servo_boards.values(),
+            self.arduinos.values(),
+            self.cameras.values(),
+        )
+        for board in boards:
+            identity = board.identify()
+            board_type = board.__class__.__name__
+            logger.info(f"Found {board_type}, serial: {identity.asset_tag}")
+            logger.debug(
+                f"Firmware Version of {identity.asset_tag}: {identity.sw_version}, "
+                f"reported type: {identity.board_type}",
+            )
 
     @property
     def power_board(self) -> PowerBoard:
