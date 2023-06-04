@@ -1,6 +1,9 @@
+import logging
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
+
+logger = logging.getLogger(__name__)
 
 
 class PowerBoard:

@@ -1,3 +1,5 @@
+import logging
+
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
@@ -7,6 +9,8 @@ DUTY_MIN = 500
 DUTY_MAX = 4000
 START_DUTY_MIN = 1000
 START_DUTY_MAX = 2000
+
+logger = logging.getLogger(__name__)
 
 
 class ServoBoard:

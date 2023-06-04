@@ -3,6 +3,8 @@ import threading
 
 import serial
 
+logger = logging.getLogger(__name__)
+
 
 def retry(times, exceptions):
     def decorator(func):
@@ -20,8 +22,6 @@ def retry(times, exceptions):
 
 class SerialWrapper:
     def __init__(self, port, baud, timeout=0.5):
-        self.logger = logging.getLogger(__name__)
-
         self._lock = threading.Lock()
 
         # Serial port parameters
@@ -50,9 +50,13 @@ class SerialWrapper:
                     raise RuntimeError('Board not connected')
 
             try:
+                logger.trace(f'Serial write - "{data}"')
                 cmd = data + '\n'
                 self.serial.write(cmd.encode())
+
                 response = self.serial.readline()
+                logger.trace(f'Serial read  - "{response.decode().strip()}"')
+
                 if b'\n' not in response:
                     raise serial.SerialException('readline timeout')
             except serial.SerialException:
@@ -64,11 +68,10 @@ class SerialWrapper:
             return response.decode().strip()
 
     def write(self, data):
-        with self._lock:
-            response = self.query(data)
-            if 'NACK' in response:
-                _, error_msg = response.split(':', maxsplit=1)
-                raise RuntimeError(error_msg)
+        response = self.query(data)
+        if 'NACK' in response:
+            _, error_msg = response.split(':', maxsplit=1)
+            raise RuntimeError(error_msg)
 
     def _connect(self):
         try:
@@ -81,12 +84,12 @@ class SerialWrapper:
         except serial.SerialException:
             return False
 
-        self.logger.info('Connected')
+        logger.info('Connected')
         return True
 
     def _disconnect(self):
         if self.serial is not None:
-            self.logger.info('Disconnected')
+            logger.info('Disconnected')
             self.connected = False
             self.serial.close()
             self.serial = None
