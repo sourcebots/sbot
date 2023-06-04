@@ -4,7 +4,7 @@ import logging
 import threading
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, TypeVar
 
 import serial
 
@@ -12,9 +12,8 @@ from .logging import TRACE
 
 logger = logging.getLogger(__name__)
 
-Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
-Func = Callable[Param, RetType]
+Func = Callable[..., RetType]
 
 E = TypeVar("E", bound=BaseException)
 

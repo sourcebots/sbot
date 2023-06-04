@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from enum import Enum
 
 from serial.tools.list_ports import comports
 
@@ -150,13 +151,38 @@ class Piezo:
     def __init__(self, serial: SerialWrapper):
         self._serial = serial
 
-    def buzz(self, duration: float, frequency: int) -> None:
-        # TODO type / bounds check + add music note
+    def buzz(self, duration: float, frequency: float) -> None:
         frequency_int = int(round(frequency))
-        if not (0 < frequency_int < 10_000):
+        if not (8 <= frequency_int <= 10_000):
             raise ValueError('Frequency out of range')
 
         duration_ms = int(duration * 1000)
+        if duration_ms < 0 or duration_ms > (2**31-1):
+            raise ValueError('Duration out of range')
 
         cmd = f'NOTE:{frequency_int}:{duration_ms}'
         self._serial.write(cmd)
+
+
+class Note(float, Enum):
+    """An enumeration of notes.
+
+    An enumeration of notes from scientific pitch
+    notation and their related frequencies in Hz.
+    """
+
+    C6 = 1047.0
+    D6 = 1174.7
+    E6 = 1318.5
+    F6 = 1396.9
+    G6 = 1568.0
+    A6 = 1760.0
+    B6 = 1975.5
+    C7 = 2093.0
+    D7 = 2349.3
+    E7 = 2637.0
+    F7 = 2793.8
+    G7 = 3136.0
+    A7 = 3520.0
+    B7 = 3951.1
+    C8 = 4186.0

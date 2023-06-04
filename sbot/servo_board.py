@@ -110,6 +110,7 @@ class Servo:
         self._serial.write(f'SERVO:{self._index}:SET:{setpoint}')
 
     def disable(self) -> None:
+        # TODO is this position = None
         self._serial.write(f'SERVO:{self._index}:DISABLE')
 
 

@@ -5,7 +5,7 @@ class MetadataKeyError(KeyError):
         self.key = key
 
     def __str__(self) -> str:
-        return f"Key {self.key!r} not present in metadata, or no metadata was available"
+        return f"Key {self.key!r} not present in metadata"
 
 
 class MetadataNotReadyError(RuntimeError):

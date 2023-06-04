@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import logging
 from time import sleep
-from typing import Any, cast
 
 from april_vision.examples.camera import AprilCamera, setup_cameras
 
 from . import game_specific, metadata, timeout
-from .exceptions import MetadataKeyError, MetadataNotReadyError
+from ._version import __version__
+from .exceptions import MetadataNotReadyError
 from .logging import TRACE
+from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import PowerBoard
 from .servo_board import ServoBoard
@@ -17,8 +18,8 @@ from .utils import obtain_lock, singular
 logger = logging.getLogger(__name__)
 
 
-def setup_logging(trace_logging: bool) -> None:
-    logformat = '%(asctime)s [%(levelname)s] : %(module)s : %(message)s'
+def setup_logging(debug_logging: bool, trace_logging: bool) -> None:
+    logformat = '%(name)s - %(levelname)s - %(message)s'
     formatter = logging.Formatter(fmt=logformat)
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
@@ -27,20 +28,36 @@ def setup_logging(trace_logging: bool) -> None:
     root_logger.addHandler(handler)
     if trace_logging:
         root_logger.setLevel(TRACE)
+        logger.log(TRACE, "Trace Mode is enabled")
+    elif debug_logging:
+        root_logger.setLevel(logging.DEBUG)
+        logger.debug("Debug Mode is enabled")
     else:
         root_logger.setLevel(logging.INFO)
 
 
 class Robot:
-    def __init__(self, trace_logging: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        debug: bool = False,
+        wait_start: bool = True,
+        trace_logging: bool = False,
+    ) -> None:
         self._lock = obtain_lock()
-        self._metadata: dict[str, Any] | None = None
+        self._metadata: Metadata | None = None
 
-        setup_logging(trace_logging)
+        setup_logging(debug, trace_logging)
+
+        logger.info(f"SourceBots API v{__version__}")
 
         self._init_power_board()
         self._init_aux_boards()
         self._init_camera()
+        # TODO log connected boards
+
+        if wait_start:
+            self.wait_start()
 
     def _init_power_board(self) -> None:
         power_boards = PowerBoard._get_supported_boards()
@@ -83,30 +100,26 @@ class Robot:
         sleep(secs)
 
     @property
-    def metadata(self) -> dict[str, Any]:
+    def metadata(self) -> Metadata:
+        # TODO typeddict
         if self._metadata is None:
             raise MetadataNotReadyError()
         else:
             return self._metadata
 
     @property
-    def zone(self) -> str:
-        try:
-            return cast(str, self.metadata['zone'])
-        except KeyError:
-            raise MetadataKeyError('zone') from None
+    def zone(self) -> int:
+        return self.metadata['zone']
 
     @property
     def is_competition(self) -> bool:
-        try:
-            return cast(bool, self.metadata['is_competition'])
-        except KeyError:
-            raise MetadataKeyError('is_competition') from None
+        return self.metadata['is_competition']
 
     def wait_start(self) -> None:
         # ignore previous button presses
         _ = self.power_board._start_button()
         logger.info('Waiting for start button.')
+        # TODO add beep
         self.power_board._run_led.flash()
         while not self.power_board._start_button():
             sleep(0.1)
@@ -129,5 +142,4 @@ class Robot:
 
 # TODO add atexits for boards
 # TODO game timeout
-# TODO loading metadata
 # TODO arduino support

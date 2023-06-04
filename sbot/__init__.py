@@ -4,6 +4,7 @@ from .robot import Robot
 
 logger_setup()
 
+# TODO add things to the all
 __all__ = [
     'BRAKE',
     'COAST',

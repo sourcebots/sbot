@@ -20,19 +20,29 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any
+from pathlib import Path
+from typing import TypedDict
 
-LOGGER = logging.getLogger(__name__)
+from .exceptions import MetadataKeyError
+
+logger = logging.getLogger(__name__)
 
 METADATA_ENV_VAR = "SBOT_METADATA_PATH"
+METADATA_NAME = "metadata.json"
 
-DEFAULT_METADATA: dict[str, Any] = {
+
+class Metadata(TypedDict):
+    is_competition: bool
+    zone: int
+
+
+DEFAULT_METADATA: Metadata = {
     "is_competition": False,
     "zone": 0,
 }
 
 
-def load() -> dict[str, Any]:
+def load() -> Metadata:
     """
     Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it.
 
@@ -40,32 +50,34 @@ def load() -> dict[str, Any]:
     """
     search_path = os.environ.get(METADATA_ENV_VAR)
     if search_path:
-        path = _find_file(search_path)
-        if path:
-            LOGGER.info(f"Loading metadata from {path}")
-            return _read_file(path)
+        for item in Path(search_path).iterdir():
+            if item.is_dir():
+                if (item / METADATA_NAME).exists():
+                    return _load_metadata(item / METADATA_NAME)
+            else:
+                if item.name == METADATA_NAME:
+                    return _load_metadata(item / METADATA_NAME)
         else:
-            LOGGER.info(f"No JSON metadata files found in {search_path}")
+            logger.info(f"No JSON metadata files found in {search_path}")
     else:
-        LOGGER.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
+        logger.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
     return DEFAULT_METADATA
 
 
-def _find_file(search_path: str) -> str | None:
-    for dir_path, _dir_names, file_names in os.walk(search_path):
-        for file_name in file_names:
-            if file_name.endswith(".json"):
-                return os.path.join(dir_path, file_name)
-    return None
-
-
-def _read_file(path: str) -> dict[str, Any]:
-    with open(path) as file:
+def _load_metadata(path: Path) -> Metadata:
+    logger.info(f"Loading metadata from {path}")
+    with path.open() as file:
         try:
-            obj = json.load(file)
-        except json.decoder.JSONDecodeError:
-            raise RuntimeError("Unable to decode metadata. Ask a volunteer for help.")
-    if isinstance(obj, dict):
-        return obj
-    else:
-        raise TypeError("Top-level value in metadata file must be a JSON object")
+            obj: Metadata = json.load(file)
+        except json.decoder.JSONDecodeError as e:
+            raise RuntimeError("Unable to load metadata.") from e
+
+    if not isinstance(obj, dict):
+        raise TypeError(f"Found metadata file, but format is invalid. Got: {obj}")
+
+    # check required keys exist at runtime
+    for key in Metadata.__annotations__.keys():
+        if key not in obj.keys():
+            raise MetadataKeyError(key)
+
+    return obj

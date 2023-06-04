@@ -74,15 +74,16 @@ class Motor:
 
     @power.setter
     def power(self, value: float) -> None:
+        if value == COAST:
+            self._serial.write(f'MOT:{self._index}:DISABLE')
+            return
         try:
             if (value < -1.0) or (value > 1.0):
                 raise ValueError('Motor power is a float between -1.0 and 1.0')
         except TypeError:
             raise TypeError('Motor power is a float between -1.0 and 1.0')
 
-        if value == COAST:
-            self._serial.write(f'MOT:{self._index}:DISABLE')
-        elif value == BRAKE:
+        if value == BRAKE:
             self._serial.write(f'MOT:{self._index}:SET:0')
         else:
             setpoint = map_to_int(value, -1.0, 1.0, -1000, 1000)
