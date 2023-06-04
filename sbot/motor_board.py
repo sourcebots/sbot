@@ -5,7 +5,7 @@ import logging
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity, map_to_float, map_to_int
+from .utils import BoardIdentity, float_bounds_check, map_to_float, map_to_int
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ class MotorBoard:
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x0403 and port.pid == 0x6001:
+                # TODO handle identity failing
                 board = MotorBoard(port.device)
                 boards[board.identity.asset_tag] = board
         return boards
@@ -77,11 +78,9 @@ class Motor:
         if value == COAST:
             self._serial.write(f'MOT:{self._index}:DISABLE')
             return
-        try:
-            if (value < -1.0) or (value > 1.0):
-                raise ValueError('Motor power is a float between -1.0 and 1.0')
-        except TypeError:
-            raise TypeError('Motor power is a float between -1.0 and 1.0')
+        value = float_bounds_check(
+            value, -1.0, 1.0,
+            'Motor power is a float between -1.0 and 1.0')
 
         if value == BRAKE:
             self._serial.write(f'MOT:{self._index}:SET:0')

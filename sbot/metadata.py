@@ -50,13 +50,16 @@ def load() -> Metadata:
     """
     search_path = os.environ.get(METADATA_ENV_VAR)
     if search_path:
+        search_root = Path(search_path)
+        if not search_root.is_dir():
+            raise FileNotFoundError(f"Metaddata path {search_path} does not exist")
         for item in Path(search_path).iterdir():
             if item.is_dir():
                 if (item / METADATA_NAME).exists():
                     return _load_metadata(item / METADATA_NAME)
             else:
                 if item.name == METADATA_NAME:
-                    return _load_metadata(item / METADATA_NAME)
+                    return _load_metadata(item)
         else:
             logger.info(f"No JSON metadata files found in {search_path}")
     else:

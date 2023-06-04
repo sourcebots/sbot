@@ -5,7 +5,7 @@ import logging
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity, map_to_float, map_to_int
+from .utils import BoardIdentity, float_bounds_check, map_to_float, map_to_int
 
 DUTY_MIN = 500
 DUTY_MAX = 4000
@@ -31,6 +31,7 @@ class ServoBoard:
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x1BDA and port.pid == 0x0011:
+                # TODO handle identity failing
                 board = ServoBoard(port.device)
                 boards[board.identity.asset_tag] = board
         return boards
@@ -103,11 +104,9 @@ class Servo:
         if value is None:
             self.disable()
             return
-        try:
-            if (value < -1.0) or (value > 1.0):
-                raise ValueError('Servo position is a float between -1.0 and 1.0')
-        except TypeError:
-            raise TypeError('Servo position is a float between -1.0 and 1.0')
+        value = float_bounds_check(
+            value, -1.0, 1.0,
+            'Servo position is a float between -1.0 and 1.0')
 
         setpoint = map_to_int(value, -1.0, 1.0, self._duty_min, self._duty_max)
         self._serial.write(f'SERVO:{self._index}:SET:{setpoint}')

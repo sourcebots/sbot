@@ -6,9 +6,11 @@ from enum import Enum
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity
+from .utils import BoardIdentity, float_bounds_check
 
 logger = logging.getLogger(__name__)
+
+# TODO add intenum for outputs
 
 
 class PowerBoard:
@@ -29,6 +31,7 @@ class PowerBoard:
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x1BDA and port.pid == 0x0010:
+                # TODO handle identity failing
                 board = PowerBoard(port.device)
                 boards[board.identity.asset_tag] = board
         return boards
@@ -65,8 +68,8 @@ class PowerBoard:
         self._serial.write('*RESET')
 
     def _start_button(self) -> bool:
-        response = self._serial.query('BTN:START:GET?')
-        internal, external = [int(x) for x in response.split(':')]
+        response: str = self._serial.query('BTN:START:GET?')
+        internal, external = response.split(':')
         return (internal == '1') or (external == '1')
 
 
@@ -152,13 +155,11 @@ class Piezo:
         self._serial = serial
 
     def buzz(self, duration: float, frequency: float) -> None:
-        frequency_int = int(round(frequency))
-        if not (8 <= frequency_int <= 10_000):
-            raise ValueError('Frequency out of range')
-
-        duration_ms = int(duration * 1000)
-        if duration_ms < 0 or duration_ms > (2**31-1):
-            raise ValueError('Duration out of range')
+        frequency_int = int(float_bounds_check(
+            frequency, 8, 10_000, "Frequency is a float in Hz between 0 and 10000"))
+        duration_ms = int(float_bounds_check(
+            duration * 1000, 0, 2**31 - 1,
+            f"Duration is a float in seconds between 0 and {(2**31-1)/1000:,.0f}"))
 
         cmd = f'NOTE:{frequency_int}:{duration_ms}'
         self._serial.write(cmd)

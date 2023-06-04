@@ -134,7 +134,6 @@ class Robot:
 
 
 # TODO double check logging handlers
-# TODO bounds checks and type checks
 # TODO error handling
 # TODO add all the logging
 # TODO repr/str on all the things
