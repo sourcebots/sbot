@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
+import sys
 import threading
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, TypeVar
+from typing import TypeVar
 
 import serial
 
@@ -12,16 +13,21 @@ from .logging import TRACE
 
 logger = logging.getLogger(__name__)
 
+if sys.version_info < (3, 10):
+    from typing_extensions import ParamSpec
+else:
+    from typing import ParamSpec
+Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
-Func = Callable[..., RetType]
 
+Func = Callable[Param, RetType]
 E = TypeVar("E", bound=BaseException)
 
 
 def retry(times: int, exceptions: type[E]) -> Callable[[Func], Func]:
-    def decorator(func: Func) -> Func:
+    def decorator(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
         @wraps(func)
-        def retryfn(*args: Any, **kwargs: Any) -> Any:
+        def retryfn(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
             attempt = 0
             while attempt < times:
                 try:

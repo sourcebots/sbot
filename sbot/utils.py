@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import socket
-from typing import NamedTuple, TypeVar
+from typing import Any, NamedTuple, TypeVar
 
 T = TypeVar('T')
 
@@ -57,3 +57,15 @@ def obtain_lock(lock_port: int = 10653) -> socket.socket:
         raise OSError('Unable to obtain lock, Is another robot instance already running')
 
     return lock
+
+
+def float_bounds_check(value: Any, min_val: float, max_val: float, err_msg: str) -> float:
+    try:
+        new_val = float(value)
+    except Exception as e:
+        raise TypeError(err_msg) from e
+
+    if (new_val < min_val) or (new_val > max_val):
+        raise ValueError(err_msg)
+
+    return new_val

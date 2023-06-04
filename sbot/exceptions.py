@@ -16,3 +16,8 @@ class MetadataNotReadyError(RuntimeError):
             "Metadata (e.g. zone or is_competition) can only be used after"
             " wait_start has been called"
         )
+
+
+class BoardDisconnectionError(IOError):
+    """Raised when communication to a board fails and cannot be reestablished."""
+    pass
