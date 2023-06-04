@@ -5,7 +5,10 @@ import logging
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity, float_bounds_check, map_to_float, map_to_int
+from .utils import (
+    BoardIdentity, float_bounds_check,
+    get_USB_identity, map_to_float, map_to_int,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -14,15 +17,22 @@ COAST = float("-inf")
 
 
 class MotorBoard:
-    def __init__(self, serial_port: str) -> None:
-        self._serial = SerialWrapper(serial_port, 115200)
+    def __init__(
+        self,
+        serial_port: str,
+        initial_identity: BoardIdentity | None = None,
+    ) -> None:
+        if initial_identity is None:
+            initial_identity = BoardIdentity()
+        self._serial = SerialWrapper(serial_port, 115200, identity=initial_identity)
 
         self._motors = (
             Motor(self._serial, 0),
             Motor(self._serial, 1)
         )
 
-        self.identity = self.identify()
+        serial_identity = self.identify()
+        self._serial.set_identity(serial_identity)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, MotorBoard]:
@@ -30,9 +40,17 @@ class MotorBoard:
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x0403 and port.pid == 0x6001:
-                # TODO handle identity failing
-                board = MotorBoard(port.device)
-                boards[board.identity.asset_tag] = board
+                # Create board identity from USB port info
+                initial_identity = get_USB_identity(port)
+
+                try:
+                    board = MotorBoard(port.device, initial_identity)
+                except RuntimeError:
+                    logger.warning(
+                        f"Found motor board-like serial port at {port.device!r}, "
+                        "but it could not be identified. Ignoring this device")
+                    continue
+                boards[board.identify().asset_tag] = board
         return boards
 
     @property

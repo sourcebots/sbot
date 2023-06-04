@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import logging
 import socket
 from typing import Any, NamedTuple, TypeVar
 
+from serial.tools.list_ports_common import ListPortInfo
+
 T = TypeVar('T')
+logger = logging.getLogger(__name__)
 
 
 class BoardIdentity(NamedTuple):
-    manufacturer: str
-    board_type: str
-    asset_tag: str
-    sw_version: str
+    manufacturer: str = ""
+    board_type: str = ""
+    asset_tag: str = ""
+    sw_version: str = ""
 
 
 def map_to_int(
@@ -69,3 +73,16 @@ def float_bounds_check(value: Any, min_val: float, max_val: float, err_msg: str)
         raise ValueError(err_msg)
 
     return new_val
+
+
+def get_USB_identity(port: ListPortInfo) -> BoardIdentity:
+    try:
+        return BoardIdentity(
+            manufacturer=port.manufacturer or "",
+            board_type=port.product or "",
+            asset_tag=port.serial_number or "",
+        )
+    except Exception:
+        logger.warning(
+            f"Failed to pull identifying information from serial device {port.device}")
+        return BoardIdentity()

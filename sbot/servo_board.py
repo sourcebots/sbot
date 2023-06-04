@@ -5,7 +5,10 @@ import logging
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity, float_bounds_check, map_to_float, map_to_int
+from .utils import (
+    BoardIdentity, float_bounds_check,
+    get_USB_identity, map_to_float, map_to_int,
+)
 
 DUTY_MIN = 500
 DUTY_MAX = 4000
@@ -16,14 +19,21 @@ logger = logging.getLogger(__name__)
 
 
 class ServoBoard:
-    def __init__(self, serial_port: str) -> None:
-        self._serial = SerialWrapper(serial_port, 115200)
+    def __init__(
+        self,
+        serial_port: str,
+        initial_identity: BoardIdentity | None = None,
+    ) -> None:
+        if initial_identity is None:
+            initial_identity = BoardIdentity()
+        self._serial = SerialWrapper(serial_port, 115200, identity=initial_identity)
 
         self._servos = tuple(
             Servo(self._serial, index) for index in range(12)
         )
 
-        self.identity = self.identify()
+        serial_identity = self.identify()
+        self._serial.set_identity(serial_identity)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, 'ServoBoard']:
@@ -31,9 +41,17 @@ class ServoBoard:
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x1BDA and port.pid == 0x0011:
-                # TODO handle identity failing
-                board = ServoBoard(port.device)
-                boards[board.identity.asset_tag] = board
+                # Create board identity from USB port info
+                initial_identity = get_USB_identity(port)
+
+                try:
+                    board = ServoBoard(port.device, initial_identity)
+                except RuntimeError:
+                    logger.warning(
+                        f"Found servo board-like serial port at {port.device!r}, "
+                        "but it could not be identified. Ignoring this device")
+                    continue
+                boards[board.identify().asset_tag] = board
         return boards
 
     @property

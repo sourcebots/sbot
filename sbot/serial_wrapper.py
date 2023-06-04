@@ -10,6 +10,7 @@ from typing import TypeVar
 import serial
 
 from .logging import TRACE
+from .utils import BoardIdentity
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +39,19 @@ def retry(times: int, exceptions: type[E]) -> Callable[[Func], Func]:
         return retryfn
     return decorator
 
-# TODO add method to add details for log messages
+# TODO error handling and log messages
 
 
 class SerialWrapper:
-    def __init__(self, port: str, baud: int, timeout: float = 0.5):
+    def __init__(
+        self,
+        port: str,
+        baud: int,
+        timeout: float = 0.5,
+        identity: BoardIdentity = BoardIdentity(),
+    ):
         self._lock = threading.Lock()
+        self.identity = identity
 
         # Serial port parameters
         self.port = port
@@ -117,3 +125,6 @@ class SerialWrapper:
             self.connected = False
             self.serial.close()
             self.serial = None
+
+    def set_identity(self, identity: BoardIdentity) -> None:
+        self.identity = identity

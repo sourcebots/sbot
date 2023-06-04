@@ -1,21 +1,40 @@
 from __future__ import annotations
 
 import logging
-from enum import Enum
+from enum import Enum, IntEnum
 
 from serial.tools.list_ports import comports
 
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity, float_bounds_check
+from .utils import BoardIdentity, float_bounds_check, get_USB_identity
 
 logger = logging.getLogger(__name__)
 
-# TODO add intenum for outputs
+
+class PowerOutputPosition(IntEnum):
+    """
+    A mapping of name to number of the PowerBoard outputs.
+
+    The numbers here are the same as used in wire communication with the PowerBoard.
+    """
+    H0 = 0
+    H1 = 1
+    L0 = 2
+    L1 = 3
+    L2 = 4
+    L3 = 5
+    FIVE_VOLT = 6
 
 
 class PowerBoard:
-    def __init__(self, serial_port: str) -> None:
-        self._serial = SerialWrapper(serial_port, 115200)
+    def __init__(
+        self,
+        serial_port: str,
+        initial_identity: BoardIdentity | None = None,
+    ) -> None:
+        if initial_identity is None:
+            initial_identity = BoardIdentity()
+        self._serial = SerialWrapper(serial_port, 115200, identity=initial_identity)
 
         self._outputs = Outputs(self._serial)
         self._battery_sensor = BatterySensor(self._serial)
@@ -23,7 +42,8 @@ class PowerBoard:
         self._run_led = Led(self._serial, 'RUN')
         self._error_led = Led(self._serial, 'ERR')
 
-        self.identity = self.identify()
+        serial_identity = self.identify()
+        self._serial.set_identity(serial_identity)
 
     @classmethod
     def _get_supported_boards(cls) -> dict[str, PowerBoard]:
@@ -31,9 +51,17 @@ class PowerBoard:
         serial_ports = comports()
         for port in serial_ports:
             if port.vid == 0x1BDA and port.pid == 0x0010:
-                # TODO handle identity failing
-                board = PowerBoard(port.device)
-                boards[board.identity.asset_tag] = board
+                # Create board identity from USB port info
+                initial_identity = get_USB_identity(port)
+
+                try:
+                    board = PowerBoard(port.device, initial_identity)
+                except RuntimeError:
+                    logger.warning(
+                        f"Found servo board-like serial port at {port.device!r}, "
+                        "but it could not be identified. Ignoring this device")
+                    continue
+                boards[board.identify().asset_tag] = board
         return boards
 
     @property

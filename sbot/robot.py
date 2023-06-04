@@ -134,11 +134,11 @@ class Robot:
 
 
 # TODO double check logging handlers
-# TODO error handling
 # TODO add all the logging
 # TODO repr/str on all the things
 
 # TODO immutable dict
+# TODO docstrings
 
 # TODO add atexits for boards
 # TODO game timeout
