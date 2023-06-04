@@ -55,18 +55,14 @@ class SerialWrapper:
         self._lock = threading.Lock()
         self.identity = identity
 
-        # Serial port parameters
-        self.port = port
-        self.baud = baud
-        self.timeout = timeout
-
+        # Time to wait before sending data after connecting to a board
         self.delay_after_connect = delay_after_connect
 
         # pyserial serial port
-        self.serial: serial.Serial | None = None
-
-        # Current port state
-        self.connected = False
+        self.serial: serial.Serial = serial.Serial()
+        self.serial.port = port
+        self.serial.baudrate = baud
+        self.serial.timeout = timeout
 
     def start(self) -> None:
         self._connect()
@@ -77,15 +73,12 @@ class SerialWrapper:
     @retry(times=3, exceptions=BoardDisconnectionError)
     def query(self, data: str) -> str:
         with self._lock:
-            if not self.connected:
+            if not self.serial.is_open:
                 if not self._connect():
-                    raise BoardDisconnectionError(
-                        'Connection to board could not be established',
-                        board=self.identity,
-                    )
-
-            if self.serial is None:
-                raise RuntimeError('Serial port is None')
+                    raise BoardDisconnectionError((
+                        f'Connection to board {self.identity.board_type}:'
+                        f'{self.identity.asset_tag} could not be established',
+                    ))
 
             try:
                 logger.log(TRACE, f'Serial write - "{data}"')
@@ -106,10 +99,10 @@ class SerialWrapper:
                 # Serial port was closed
                 # Make sure port is cleaned up
                 self._disconnect()
-                raise BoardDisconnectionError(
-                    'Board disconnected during transaction',
-                    board=self.identity,
-                )
+                raise BoardDisconnectionError((
+                    f'Board {self.identity.board_type}:{self.identity.asset_tag} '
+                    'disconnected during transaction'
+                ))
 
             return response.decode().strip()
 
@@ -125,12 +118,7 @@ class SerialWrapper:
 
     def _connect(self) -> bool:
         try:
-            self.serial = serial.Serial(
-                port=self.port,
-                baudrate=self.baud,
-                timeout=self.timeout
-            )
-            self.connected = True
+            self.serial.open()
             time.sleep(self.delay_after_connect)
         except serial.SerialException:
             logger.error((
@@ -145,16 +133,15 @@ class SerialWrapper:
         return True
 
     def _disconnect(self) -> None:
-        if self.serial is not None:
-            logger.warning(
-                f'Board {self.identity.board_type}:{self.identity.asset_tag} disconnected'
-            )
-            self.connected = False
-            self.serial.close()
-            self.serial = None
+        self.serial.close()
+        logger.warning(
+            f'Board {self.identity.board_type}:{self.identity.asset_tag} disconnected'
+        )
 
     def set_identity(self, identity: BoardIdentity) -> None:
         self.identity = identity
 
     def __str__(self) -> str:
-        return f"<{self.__class__.__qualname__} {self.port!r} {self.identity.asset_tag!r}>"
+        return (
+            f"<{self.__class__.__qualname__} {self.serial.port!r} {self.identity.asset_tag!r}>"
+        )
