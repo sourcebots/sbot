@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import sys
 import threading
+import time
 from collections.abc import Callable
 from functools import wraps
 from typing import TypeVar
@@ -49,6 +50,7 @@ class SerialWrapper:
         baud: int,
         timeout: float = 0.5,
         identity: BoardIdentity = BoardIdentity(),
+        delay_after_connect: float = 0,
     ):
         self._lock = threading.Lock()
         self.identity = identity
@@ -57,6 +59,8 @@ class SerialWrapper:
         self.port = port
         self.baud = baud
         self.timeout = timeout
+
+        self.delay_after_connect = delay_after_connect
 
         # pyserial serial port
         self.serial: serial.Serial | None = None
@@ -113,6 +117,7 @@ class SerialWrapper:
                 timeout=self.timeout
             )
             self.connected = True
+            time.sleep(self.delay_after_connect)
         except serial.SerialException:
             return False
 

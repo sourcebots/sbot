@@ -7,6 +7,7 @@ from april_vision.examples.camera import AprilCamera, setup_cameras
 
 from . import game_specific, metadata, timeout
 from ._version import __version__
+from .arduino import Arduino
 from .exceptions import MetadataNotReadyError
 from .logging import TRACE, log_to_debug
 from .metadata import Metadata
@@ -68,6 +69,7 @@ class Robot:
     def _init_aux_boards(self) -> None:
         self._motor_boards = MotorBoard._get_supported_boards()
         self._servo_boards = ServoBoard._get_supported_boards()
+        self._arduinos = Arduino._get_supported_boards()
 
     def _init_camera(self) -> None:
         self._cameras = setup_cameras(game_specific.MARKER_SIZES)
@@ -91,6 +93,14 @@ class Robot:
     @property
     def servo_board(self) -> ServoBoard:
         return singular(self._servo_boards)
+
+    @property
+    def arduinos(self) -> dict[str, Arduino]:
+        return self._arduinos
+
+    @property
+    def arduino(self) -> Arduino:
+        return singular(self._arduinos)
 
     @property
     def camera(self) -> AprilCamera:
