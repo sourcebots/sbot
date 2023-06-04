@@ -1,6 +1,7 @@
 from serial.tools.list_ports import comports
-from serial_wrapper import SerialWrapper
-from utils import map_to_float, map_to_int
+
+from .serial_wrapper import SerialWrapper
+from .utils import map_to_float, map_to_int
 
 DUTY_MIN = 500
 DUTY_MAX = 4000

@@ -1,6 +1,6 @@
 from serial.tools.list_ports import comports
 
-from serial_wrapper import SerialWrapper
+from .serial_wrapper import SerialWrapper
 
 
 class PowerBoard:
