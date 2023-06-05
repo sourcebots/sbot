@@ -103,7 +103,7 @@ class SerialWrapper:
                     'disconnected during transaction'
                 ))
 
-            return response.decode().strip()
+            return response.decode(errors='ignore').strip()
 
     def write(self, data: str) -> None:
         response = self.query(data)
