@@ -1,16 +1,14 @@
 """
 Implementation of loading metadata.
 
-Metadata is a dictionary of arbitrary information about the environment that the robot is
-running in. It usually includes the starting zone and a flag indicating whether we are in
+Metadata is a dictionary of information about the environment that the robot is running in.
+It usually includes the starting zone and a flag indicating whether we are in
 competition or development mode. Metadata is stored in a JSON file, typically on a
 competition USB stick. The environment variable SBOT_METADATA_PATH specifies a directory
-that is (recursively) searched for a JSON file to load.
+where it, and its children, are searched for the JSON file to load.
 
 Example metadata file:
-
     {
-        "arena": "A",
         "zone": 2,
         "is_competition": true
     }
