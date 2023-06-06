@@ -93,15 +93,22 @@ class PowerBoard:
     @log_to_debug
     def temperature(self) -> int:
         response = self._serial.query('*STATUS?')
-        _, temp, _ = response.split(':')
+        _, temp, *_ = response.split(':')
         return int(temp)
 
     @property
     @log_to_debug
     def fan(self) -> bool:
         response = self._serial.query('*STATUS?')
-        _, _, fan = response.split(':')
+        _, _, fan, *_ = response.split(':')
         return True if (fan == '1') else False
+
+    @property
+    @log_to_debug
+    def regulator_voltage(self) -> float:
+        response = self._serial.query('*STATUS?')
+        _, _, _, raw_voltage, *_ = response.split(':')
+        return float(raw_voltage) / 1000
 
     @log_to_debug
     def reset(self) -> None:
@@ -179,7 +186,7 @@ class Output:
     @log_to_debug
     def overcurrent(self) -> bool:
         response = self._serial.query('*STATUS?')
-        oc, _, _ = response.split(':')
+        oc, *_ = response.split(':')
         port_oc = [True if (x == '1') else False for x in oc.split(',')]
         return port_oc[self._index]
 
