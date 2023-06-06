@@ -28,7 +28,9 @@ def setup_logging(debug_logging: bool, trace_logging: bool) -> None:
     handler.setFormatter(formatter)
 
     root_logger = logging.getLogger()
-    root_logger.addHandler(handler)
+    if not len(root_logger.handlers):
+        # only add a handler if there were no handlers previously attached
+        root_logger.addHandler(handler)
     if trace_logging:
         root_logger.setLevel(TRACE)
         logger.log(TRACE, "Trace Mode is enabled")
