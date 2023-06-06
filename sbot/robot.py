@@ -6,11 +6,10 @@ from time import sleep
 from types import MappingProxyType
 from typing import Mapping
 
-from april_vision.examples.camera import AprilCamera, setup_cameras
-
 from . import game_specific, metadata, timeout
 from ._version import __version__
 from .arduino import Arduino
+from .camera import AprilCamera, setup_cameras
 from .exceptions import MetadataNotReadyError
 from .logging import TRACE, log_to_debug
 from .metadata import Metadata
