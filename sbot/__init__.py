@@ -4,7 +4,7 @@ from .exceptions import (
 )
 from .game_specific import GAME_LENGTH
 from .logging import logger_setup
-from .motor_board import BRAKE, COAST
+from .motor_board import MotorPower
 from .power_board import Note, PowerOutputPosition
 from .robot import Robot
 
@@ -23,6 +23,9 @@ L0 = PowerOutputPosition.L0
 L1 = PowerOutputPosition.L1
 L2 = PowerOutputPosition.L2
 L3 = PowerOutputPosition.L3
+
+BRAKE = MotorPower.BRAKE
+COAST = MotorPower.COAST
 
 __all__ = [
     'A0',

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import atexit
 import logging
+from enum import IntEnum
 from types import MappingProxyType
 
 from serial.tools.list_ports import comports
@@ -15,8 +16,10 @@ from .utils import (
 
 logger = logging.getLogger(__name__)
 
-BRAKE = 0
-COAST = float("-inf")
+
+class MotorPower(IntEnum):
+    BRAKE = 0
+    COAST = -1024  # A value outside the allowable range
 
 
 class MotorBoard:
@@ -107,20 +110,20 @@ class Motor:
         value = int(data[1])
 
         if not enabled:
-            return COAST
+            return MotorPower.COAST
         return map_to_float(value, -1000, 1000, -1.0, 1.0, precision=3)
 
     @power.setter
     @log_to_debug
     def power(self, value: float) -> None:
-        if value == COAST:
+        if value == MotorPower.COAST:
             self._serial.write(f'MOT:{self._index}:DISABLE')
             return
         value = float_bounds_check(
             value, -1.0, 1.0,
             'Motor power is a float between -1.0 and 1.0')
 
-        if value == BRAKE:
+        if value == MotorPower.BRAKE:
             self._serial.write(f'MOT:{self._index}:SET:0')
         else:
             setpoint = map_to_int(value, -1.0, 1.0, -1000, 1000)
