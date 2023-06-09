@@ -8,7 +8,7 @@ from serial.tools.list_ports import comports
 
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity, get_USB_identity, map_to_float
+from .utils import Board, BoardIdentity, get_USB_identity, map_to_float
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class AnalogPins(IntEnum):
     A5 = 19
 
 
-class Arduino:
+class Arduino(Board):
     __supported_vid_pids__ = {
         (0x2341, 0x0043),
         (0x2A03, 0x0043),

@@ -16,7 +16,7 @@ from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
-from .utils import BoardIdentity, obtain_lock, singular
+from .utils import obtain_lock, singular
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ class Robot:
             self._cameras.values(),
         )
         for board in boards:
-            identity: BoardIdentity = board.identify()  # type: ignore[attr-defined]
+            identity = board.identify()
             board_type = board.__class__.__name__
             logger.info(f"Found {board_type}, serial: {identity.asset_tag}")
             logger.debug(

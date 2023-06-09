@@ -9,7 +9,7 @@ from serial.tools.list_ports import comports
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
-    BoardIdentity, float_bounds_check,
+    Board, BoardIdentity, float_bounds_check,
     get_USB_identity, map_to_float, map_to_int,
 )
 
@@ -21,7 +21,7 @@ START_DUTY_MAX = 2000
 logger = logging.getLogger(__name__)
 
 
-class ServoBoard:
+class ServoBoard(Board):
     def __init__(
         self,
         serial_port: str,

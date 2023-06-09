@@ -9,12 +9,12 @@ from april_vision import (
 from april_vision.helpers import Base64Sender
 from numpy.typing import NDArray
 
-from .utils import BoardIdentity
+from .utils import Board, BoardIdentity
 
 LOGGER = logging.getLogger(__name__)
 
 
-class AprilCamera:
+class AprilCamera(Board):
     """
     Virtual Camera Board for detecting fiducial markers.
 

@@ -9,7 +9,7 @@ from serial.tools.list_ports import comports
 
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
-from .utils import BoardIdentity, float_bounds_check, get_USB_identity
+from .utils import Board, BoardIdentity, float_bounds_check, get_USB_identity
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class PowerOutputPosition(IntEnum):
 BRAIN_OUTPUT = PowerOutputPosition.FIVE_VOLT
 
 
-class PowerBoard:
+class PowerBoard(Board):
     def __init__(
         self,
         serial_port: str,

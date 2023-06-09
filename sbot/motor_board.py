@@ -10,7 +10,7 @@ from serial.tools.list_ports import comports
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
-    BoardIdentity, float_bounds_check,
+    Board, BoardIdentity, float_bounds_check,
     get_USB_identity, map_to_float, map_to_int,
 )
 
@@ -22,7 +22,7 @@ class MotorPower(IntEnum):
     COAST = -1024  # A value outside the allowable range
 
 
-class MotorBoard:
+class MotorBoard(Board):
     def __init__(
         self,
         serial_port: str,

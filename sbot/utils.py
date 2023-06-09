@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import socket
+from abc import abstractmethod
 from typing import Any, Mapping, NamedTuple, TypeVar
 
 from serial.tools.list_ports_common import ListPortInfo
@@ -15,6 +16,12 @@ class BoardIdentity(NamedTuple):
     board_type: str = ""
     asset_tag: str = ""
     sw_version: str = ""
+
+
+class Board:
+    @abstractmethod
+    def identify(self) -> BoardIdentity:
+        pass
 
 
 def map_to_int(
