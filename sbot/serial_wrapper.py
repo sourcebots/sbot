@@ -57,11 +57,13 @@ class SerialWrapper:
         # Time to wait before sending data after connecting to a board
         self.delay_after_connect = delay_after_connect
 
-        # pyserial serial port
-        self.serial: serial.Serial = serial.Serial()
-        self.serial.port = port
-        self.serial.baudrate = baud
-        self.serial.timeout = timeout
+        # pyserial serial port, the port will be opened on the first message
+        self.serial = serial.serial_for_url(
+            port,
+            baudrate=baud,
+            timeout=timeout,
+            do_not_open=True,
+        )
 
     def start(self) -> None:
         self._connect()
