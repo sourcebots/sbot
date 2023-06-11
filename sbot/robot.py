@@ -11,7 +11,7 @@ from ._version import __version__
 from .arduino import Arduino
 from .camera import AprilCamera, setup_cameras
 from .exceptions import MetadataNotReadyError
-from .logging import TRACE, log_to_debug
+from .logging import setup_logging, log_to_debug
 from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
@@ -19,26 +19,6 @@ from .servo_board import ServoBoard
 from .utils import obtain_lock, singular
 
 logger = logging.getLogger(__name__)
-
-
-def setup_logging(debug_logging: bool, trace_logging: bool) -> None:
-    logformat = '%(name)s - %(levelname)s - %(message)s'
-    formatter = logging.Formatter(fmt=logformat)
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-
-    root_logger = logging.getLogger()
-    if not len(root_logger.handlers):
-        # only add a handler if there were no handlers previously attached
-        root_logger.addHandler(handler)
-    if trace_logging:
-        root_logger.setLevel(TRACE)
-        logger.log(TRACE, "Trace Mode is enabled")
-    elif debug_logging:
-        root_logger.setLevel(logging.DEBUG)
-        logger.debug("Debug Mode is enabled")
-    else:
-        root_logger.setLevel(logging.INFO)
 
 
 class Robot:

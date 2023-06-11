@@ -19,6 +19,26 @@ def logger_setup() -> None:
     logging.addLevelName(TRACE, "TRACE")
 
 
+def setup_logging(debug_logging: bool, trace_logging: bool) -> None:
+    logformat = '%(name)s - %(levelname)s - %(message)s'
+    formatter = logging.Formatter(fmt=logformat)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+
+    root_logger = logging.getLogger()
+    if not len(root_logger.handlers):
+        # only add a handler if there were no handlers previously attached
+        root_logger.addHandler(handler)
+    if trace_logging:
+        root_logger.setLevel(TRACE)
+        logging.log(TRACE, "Trace Mode is enabled")
+    elif debug_logging:
+        root_logger.setLevel(logging.DEBUG)
+        logging.debug("Debug Mode is enabled")
+    else:
+        root_logger.setLevel(logging.INFO)
+
+
 def log_to_debug(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
     """Print the function signature and return value"""
     logger = logging.getLogger(func.__module__)
