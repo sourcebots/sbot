@@ -21,3 +21,13 @@ class MetadataNotReadyError(RuntimeError):
 class BoardDisconnectionError(IOError):
     """Raised when communication to a board fails and cannot be reestablished."""
     pass
+
+
+class IncorrectBoardError(IOError):
+    """Raised when a board returns the wrong board type in response to *IDN?"""
+    def __init__(self, board_type: str, expected_type: str):
+        self.returned_type = board_type
+        self.expected_type = expected_type
+
+    def __str__(self) -> str:
+        return f"Board returned type {self.returned_type!r}, expected {self.expected_type!r}"

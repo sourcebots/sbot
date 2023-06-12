@@ -19,6 +19,8 @@ class BoardIdentity(NamedTuple):
 
 
 class Board:
+    BOARD_TYPE: str
+
     @abstractmethod
     def identify(self) -> BoardIdentity:
         pass

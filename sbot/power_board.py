@@ -7,6 +7,7 @@ from types import MappingProxyType
 
 from serial.tools.list_ports import comports
 
+from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import Board, BoardIdentity, float_bounds_check, get_USB_identity
@@ -33,6 +34,8 @@ BRAIN_OUTPUT = PowerOutputPosition.FIVE_VOLT
 
 
 class PowerBoard(Board):
+    BOARD_TYPE = 'PBv4B'
+
     def __init__(
         self,
         serial_port: str,
@@ -49,6 +52,8 @@ class PowerBoard(Board):
         self._error_led = Led(self._serial, 'ERR')
 
         self._identity = self.identify()
+        if self._identity.board_type != self.BOARD_TYPE:
+            raise IncorrectBoardError(self._identity.board_type, self.BOARD_TYPE)
         self._serial.set_identity(self._identity)
 
         atexit.register(self._cleanup)
@@ -64,10 +69,15 @@ class PowerBoard(Board):
 
                 try:
                     board = PowerBoard(port.device, initial_identity)
-                except RuntimeError:
+                except BoardDisconnectionError:
                     logger.warning(
                         f"Found servo board-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
+                    continue
+                except IncorrectBoardError as err:
+                    logger.warning(
+                        f"Board returned type {err.returned_type!r}, "
+                        f"expected {err.expected_type!r}. Ignoring this device")
                     continue
                 boards[board._identity.asset_tag] = board
         return MappingProxyType(boards)

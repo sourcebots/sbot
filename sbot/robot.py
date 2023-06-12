@@ -11,7 +11,7 @@ from ._version import __version__
 from .arduino import Arduino
 from .camera import AprilCamera, setup_cameras
 from .exceptions import MetadataNotReadyError
-from .logging import setup_logging, log_to_debug
+from .logging import log_to_debug, setup_logging
 from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard

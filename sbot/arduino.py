@@ -6,6 +6,7 @@ from types import MappingProxyType
 
 from serial.tools.list_ports import comports
 
+from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import Board, BoardIdentity, get_USB_identity, map_to_float
@@ -29,6 +30,7 @@ class AnalogPins(IntEnum):
 
 
 class Arduino(Board):
+    BOARD_TYPE = 'Arduino'
     __supported_vid_pids__ = {
         (0x2341, 0x0043),
         (0x2A03, 0x0043),
@@ -58,6 +60,8 @@ class Arduino(Board):
         )
 
         self._identity = self.identify()
+        if self._identity.board_type != self.BOARD_TYPE:
+            raise IncorrectBoardError(self._identity.board_type, self.BOARD_TYPE)
         self._serial.set_identity(self._identity)
 
     @classmethod
@@ -71,10 +75,15 @@ class Arduino(Board):
 
                 try:
                     board = Arduino(port.device, initial_identity)
-                except RuntimeError:
+                except BoardDisconnectionError:
                     logger.warning(
                         f"Found Arduino-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
+                    continue
+                except IncorrectBoardError as err:
+                    logger.warning(
+                        f"Board returned type {err.returned_type!r}, "
+                        f"expected {err.expected_type!r}. Ignoring this device")
                     continue
                 boards[board._identity.asset_tag] = board
         return MappingProxyType(boards)

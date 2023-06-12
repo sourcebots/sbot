@@ -7,6 +7,7 @@ from types import MappingProxyType
 
 from serial.tools.list_ports import comports
 
+from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
@@ -23,6 +24,8 @@ class MotorPower(IntEnum):
 
 
 class MotorBoard(Board):
+    BOARD_TYPE = 'MCv4B'
+
     def __init__(
         self,
         serial_port: str,
@@ -38,6 +41,8 @@ class MotorBoard(Board):
         )
 
         self._identity = self.identify()
+        if self._identity.board_type != self.BOARD_TYPE:
+            raise IncorrectBoardError(self._identity.board_type, self.BOARD_TYPE)
         self._serial.set_identity(self._identity)
 
         atexit.register(self._cleanup)
@@ -53,10 +58,15 @@ class MotorBoard(Board):
 
                 try:
                     board = MotorBoard(port.device, initial_identity)
-                except RuntimeError:
+                except BoardDisconnectionError:
                     logger.warning(
                         f"Found motor board-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
+                    continue
+                except IncorrectBoardError as err:
+                    logger.warning(
+                        f"Board returned type {err.returned_type!r}, "
+                        f"expected {err.expected_type!r}. Ignoring this device")
                     continue
                 boards[board._identity.asset_tag] = board
         return MappingProxyType(boards)

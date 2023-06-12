@@ -15,6 +15,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AprilCamera(Board):
+    BOARD_TYPE = 'camera'
+
     """
     Virtual Camera Board for detecting fiducial markers.
 
