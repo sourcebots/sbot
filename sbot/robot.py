@@ -28,6 +28,7 @@ class Robot:
         debug: bool = False,
         wait_start: bool = True,
         trace_logging: bool = False,
+        manual_boards: dict[str, list[str]] | None = None,
     ) -> None:
         self._lock = obtain_lock()
         self._metadata: Metadata | None = None
@@ -36,24 +37,36 @@ class Robot:
 
         logger.info(f"SourceBots API v{__version__}")
 
-        self._init_power_board()
-        self._init_aux_boards()
+        if manual_boards:
+            self._init_power_board(manual_boards.get(PowerBoard.BOARD_TYPE, []))
+            self._init_aux_boards(manual_boards)
+            pass
+        else:
+            self._init_power_board()
+            self._init_aux_boards()
         self._init_camera()
         self._log_connected_boards()
 
         if wait_start:
             self.wait_start()
 
-    def _init_power_board(self) -> None:
-        power_boards = PowerBoard._get_supported_boards()
+    def _init_power_board(self, manual_boards: list[str] | None = None) -> None:
+        power_boards = PowerBoard._get_supported_boards(manual_boards)
         self._power_board = singular(power_boards)
         self._power_board.outputs.power_on()
         # TODO delay for boards to power up ???
 
-    def _init_aux_boards(self) -> None:
-        self._motor_boards = MotorBoard._get_supported_boards()
-        self._servo_boards = ServoBoard._get_supported_boards()
-        self._arduinos = Arduino._get_supported_boards()
+    def _init_aux_boards(self, manual_boards: dict[str, list[str]] | None = None) -> None:
+        if manual_boards is None:
+            manual_boards = {}
+
+        manual_motorboards = manual_boards.get(MotorBoard.BOARD_TYPE, [])
+        manual_servoboards = manual_boards.get(ServoBoard.BOARD_TYPE, [])
+        manual_arduinos = manual_boards.get(Arduino.BOARD_TYPE, [])
+
+        self._motor_boards = MotorBoard._get_supported_boards(manual_motorboards)
+        self._servo_boards = ServoBoard._get_supported_boards(manual_servoboards)
+        self._arduinos = Arduino._get_supported_boards(manual_arduinos)
 
     def _init_camera(self) -> None:
         self._cameras = MappingProxyType(setup_cameras(game_specific.MARKER_SIZES))

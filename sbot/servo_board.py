@@ -46,7 +46,9 @@ class ServoBoard(Board):
         atexit.register(self._cleanup)
 
     @classmethod
-    def _get_supported_boards(cls) -> MappingProxyType[str, 'ServoBoard']:
+    def _get_supported_boards(
+        cls, manual_boards: list[str] | None = None,
+    ) -> MappingProxyType[str, 'ServoBoard']:
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
@@ -60,6 +62,27 @@ class ServoBoard(Board):
                     logger.warning(
                         f"Found servo board-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
+                    continue
+                except IncorrectBoardError as err:
+                    logger.warning(
+                        f"Board returned type {err.returned_type!r}, "
+                        f"expected {err.expected_type!r}. Ignoring this device")
+                    continue
+                boards[board._identity.asset_tag] = board
+        if isinstance(manual_boards, list):
+            for manual_port in manual_boards:
+                # Create board identity from the info given
+                initial_identity = BoardIdentity(
+                    board_type='manual',
+                    asset_tag=manual_port,
+                )
+
+                try:
+                    board = ServoBoard(manual_port, initial_identity)
+                except BoardDisconnectionError:
+                    logger.warning(
+                        f"Manually specified servo board at port {manual_port!r}, "
+                        "could not be identified. Ignoring this device")
                     continue
                 except IncorrectBoardError as err:
                     logger.warning(
