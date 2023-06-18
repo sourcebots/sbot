@@ -24,7 +24,11 @@ class MotorPower(IntEnum):
 
 
 class MotorBoard(Board):
-    BOARD_TYPE = 'MCv4B'
+    __slots__ = ('_serial', '_identity', '_motors')
+
+    @staticmethod
+    def get_board_type() -> str:
+        return 'MCv4B'
 
     def __init__(
         self,
@@ -41,8 +45,8 @@ class MotorBoard(Board):
         )
 
         self._identity = self.identify()
-        if self._identity.board_type != self.BOARD_TYPE:
-            raise IncorrectBoardError(self._identity.board_type, self.BOARD_TYPE)
+        if self._identity.board_type != self.get_board_type():
+            raise IncorrectBoardError(self._identity.board_type, self.get_board_type())
         self._serial.set_identity(self._identity)
 
         atexit.register(self._cleanup)
@@ -129,6 +133,8 @@ class MotorBoard(Board):
 
 
 class Motor:
+    __slots__ = ('_serial', '_index')
+
     def __init__(self, serial: SerialWrapper, index: int):
         self._serial = serial
         self._index = index

@@ -22,6 +22,11 @@ logger = logging.getLogger(__name__)
 
 
 class Robot:
+    __slots__ = (
+        '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
+        '_arduinos', '_cameras',
+    )
+
     def __init__(
         self,
         *,
@@ -38,9 +43,8 @@ class Robot:
         logger.info(f"SourceBots API v{__version__}")
 
         if manual_boards:
-            self._init_power_board(manual_boards.get(PowerBoard.BOARD_TYPE, []))
+            self._init_power_board(manual_boards.get(PowerBoard.get_board_type(), []))
             self._init_aux_boards(manual_boards)
-            pass
         else:
             self._init_power_board()
             self._init_aux_boards()
@@ -60,9 +64,9 @@ class Robot:
         if manual_boards is None:
             manual_boards = {}
 
-        manual_motorboards = manual_boards.get(MotorBoard.BOARD_TYPE, [])
-        manual_servoboards = manual_boards.get(ServoBoard.BOARD_TYPE, [])
-        manual_arduinos = manual_boards.get(Arduino.BOARD_TYPE, [])
+        manual_motorboards = manual_boards.get(MotorBoard.get_board_type(), [])
+        manual_servoboards = manual_boards.get(ServoBoard.get_board_type(), [])
+        manual_arduinos = manual_boards.get(Arduino.get_board_type(), [])
 
         self._motor_boards = MotorBoard._get_supported_boards(manual_motorboards)
         self._servo_boards = ServoBoard._get_supported_boards(manual_servoboards)

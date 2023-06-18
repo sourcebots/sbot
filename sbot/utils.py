@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import socket
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any, Mapping, NamedTuple, TypeVar
 
 from serial.tools.list_ports_common import ListPortInfo
@@ -18,8 +18,13 @@ class BoardIdentity(NamedTuple):
     sw_version: str = ""
 
 
-class Board:
-    BOARD_TYPE: str
+class Board(ABC):
+    __slots__ = ('_identity',)
+
+    @staticmethod
+    @abstractmethod
+    def get_board_type() -> str:
+        pass
 
     @abstractmethod
     def identify(self) -> BoardIdentity:

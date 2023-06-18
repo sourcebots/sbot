@@ -34,7 +34,13 @@ BRAIN_OUTPUT = PowerOutputPosition.FIVE_VOLT
 
 
 class PowerBoard(Board):
-    BOARD_TYPE = 'PBv4B'
+    __slots__ = (
+        '_serial', '_identity', '_outputs', '_battery_sensor',
+        '_piezo', '_run_led', '_error_led')
+
+    @staticmethod
+    def get_board_type() -> str:
+        return 'PBv4B'
 
     def __init__(
         self,
@@ -52,8 +58,8 @@ class PowerBoard(Board):
         self._error_led = Led(self._serial, 'ERR')
 
         self._identity = self.identify()
-        if self._identity.board_type != self.BOARD_TYPE:
-            raise IncorrectBoardError(self._identity.board_type, self.BOARD_TYPE)
+        if self._identity.board_type != self.get_board_type():
+            raise IncorrectBoardError(self._identity.board_type, self.get_board_type())
         self._serial.set_identity(self._identity)
 
         atexit.register(self._cleanup)
@@ -163,6 +169,8 @@ class PowerBoard(Board):
 
 
 class Outputs:
+    __slots__ = ('_serial', '_outputs')
+
     def __init__(self, serial: SerialWrapper):
         self._serial = serial
         self._outputs = tuple(Output(serial, i) for i in range(7))
@@ -189,6 +197,8 @@ class Outputs:
 
 
 class Output:
+    __slots__ = ('_serial', '_index')
+
     def __init__(self, serial: SerialWrapper, index: int):
         self._serial = serial
         self._index = index
@@ -228,27 +238,31 @@ class Output:
 
 
 class Led:
+    __slots__ = ('_serial', '_led')
+
     def __init__(self, serial: SerialWrapper, led: str):
         self._serial = serial
-        self.led = led
+        self._led = led
 
     @log_to_debug
     def on(self) -> None:
-        self._serial.write(f'LED:{self.led}:SET:1')
+        self._serial.write(f'LED:{self._led}:SET:1')
 
     @log_to_debug
     def off(self) -> None:
-        self._serial.write(f'LED:{self.led}:SET:0')
+        self._serial.write(f'LED:{self._led}:SET:0')
 
     @log_to_debug
     def flash(self) -> None:
-        self._serial.write(f'LED:{self.led}:SET:F')
+        self._serial.write(f'LED:{self._led}:SET:F')
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__qualname__} led={self.led} {self._serial}>"
+        return f"<{self.__class__.__qualname__} led={self._led} {self._serial}>"
 
 
 class BatterySensor:
+    __slots__ = ('_serial',)
+
     def __init__(self, serial: SerialWrapper):
         self._serial = serial
 
@@ -269,6 +283,8 @@ class BatterySensor:
 
 
 class Piezo:
+    __slots__ = ('_serial',)
+
     def __init__(self, serial: SerialWrapper):
         self._serial = serial
 

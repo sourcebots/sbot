@@ -23,7 +23,11 @@ logger = logging.getLogger(__name__)
 
 
 class ServoBoard(Board):
-    BOARD_TYPE = 'SBv4B'
+    __slots__ = ('_serial', '_identity', '_servos')
+
+    @staticmethod
+    def get_board_type() -> str:
+        return 'SBv4B'
 
     def __init__(
         self,
@@ -39,8 +43,8 @@ class ServoBoard(Board):
         )
 
         self._identity = self.identify()
-        if self._identity.board_type != self.BOARD_TYPE:
-            raise IncorrectBoardError(self._identity.board_type, self.BOARD_TYPE)
+        if self._identity.board_type != self.get_board_type():
+            raise IncorrectBoardError(self._identity.board_type, self.get_board_type())
         self._serial.set_identity(self._identity)
 
         atexit.register(self._cleanup)
@@ -139,6 +143,8 @@ class ServoBoard(Board):
 
 
 class Servo:
+    __slots__ = ('_serial', '_index', '_duty_min', '_duty_max')
+
     def __init__(self, serial: SerialWrapper, index: int):
         self._serial = serial
         self._index = index

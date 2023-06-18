@@ -15,7 +15,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AprilCamera(Board):
-    BOARD_TYPE = 'camera'
+    __slots__ = ('_serial_num', '_cam')
+
+    @staticmethod
+    def get_board_type() -> str:
+        return 'camera'
 
     """
     Virtual Camera Board for detecting fiducial markers.

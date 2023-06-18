@@ -13,6 +13,14 @@ from .utils import Board, BoardIdentity, get_USB_identity, map_to_float
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_VID_PIDS = {
+    (0x2341, 0x0043),
+    (0x2A03, 0x0043),
+    (0x1A86, 0x7523),  # Uno
+    (0x10C4, 0xEA60),  # Ruggeduino
+    (0x16D0, 0x0613),  # Ruggeduino
+}
+
 
 class GPIOPinMode(str, Enum):
     INPUT = 'INPUT'
@@ -29,15 +37,17 @@ class AnalogPins(IntEnum):
     A5 = 19
 
 
+DIGITAL_READ_MODES = (GPIOPinMode.INPUT, GPIOPinMode.INPUT_PULLUP, GPIOPinMode.OUTPUT)
+DIGITAL_WRITE_MODES = (GPIOPinMode.OUTPUT,)
+ANALOG_READ_MODES = (GPIOPinMode.INPUT,)
+
+
 class Arduino(Board):
-    BOARD_TYPE = 'Arduino'
-    __supported_vid_pids__ = {
-        (0x2341, 0x0043),
-        (0x2A03, 0x0043),
-        (0x1A86, 0x7523),  # Uno
-        (0x10C4, 0xEA60),  # Ruggeduino
-        (0x16D0, 0x0613),  # Ruggeduino
-    }
+    __slots__ = ('_serial_num', '_serial', '_pins', '_identity')
+
+    @staticmethod
+    def get_board_type() -> str:
+        return 'Arduino'
 
     def __init__(
         self,
@@ -60,8 +70,8 @@ class Arduino(Board):
         )
 
         self._identity = self.identify()
-        if self._identity.board_type != self.BOARD_TYPE:
-            raise IncorrectBoardError(self._identity.board_type, self.BOARD_TYPE)
+        if self._identity.board_type != self.get_board_type():
+            raise IncorrectBoardError(self._identity.board_type, self.get_board_type())
         self._serial.set_identity(self._identity)
 
     @classmethod
@@ -71,7 +81,7 @@ class Arduino(Board):
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
-            if (port.vid, port.pid) in cls.__supported_vid_pids__:
+            if (port.vid, port.pid) in SUPPORTED_VID_PIDS:
                 # Create board identity from USB port info
                 initial_identity = get_USB_identity(port)
 
@@ -150,9 +160,7 @@ class Arduino(Board):
 
 
 class Pin:
-    _digital_read_modes = (GPIOPinMode.INPUT, GPIOPinMode.INPUT_PULLUP, GPIOPinMode.OUTPUT)
-    _digital_write_modes = (GPIOPinMode.OUTPUT)
-    _analog_read_modes = (GPIOPinMode.INPUT)
+    __slots__ = ('_serial', '_index', '_supports_analog')
 
     def __init__(self, serial: SerialWrapper, index: int, supports_analog: bool):
         self._serial = serial
@@ -175,7 +183,7 @@ class Pin:
     @property
     @log_to_debug
     def digital_value(self) -> bool:
-        if self.mode not in self._digital_read_modes:
+        if self.mode not in DIGITAL_READ_MODES:
             raise IOError(f'Digital read is not supported in {self.mode}')
         response = self._serial.query(f'PIN:{self._index}:DIGITAL:GET?')
         return (response == '1')
@@ -183,7 +191,7 @@ class Pin:
     @digital_value.setter
     @log_to_debug
     def digital_value(self, value: bool) -> None:
-        if self.mode not in self._digital_write_modes:
+        if self.mode not in DIGITAL_WRITE_MODES:
             raise IOError(f'Digital write is not supported in {self.mode}')
         if value:
             self._serial.write(f'PIN:{self._index}:DIGITAL:SET:1')
@@ -194,7 +202,7 @@ class Pin:
     @log_to_debug
     def analog_value(self) -> float:
         """Get the analog voltage on a pin, ranges from 0 to 5."""
-        if self.mode not in self._analog_read_modes:
+        if self.mode not in ANALOG_READ_MODES:
             raise IOError(f'Analog read is not supported in {self.mode}')
         if not self._supports_analog:
             raise IOError('Pin does not support analog read')
