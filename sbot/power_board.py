@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import atexit
 import logging
-from enum import Enum, IntEnum
+from enum import IntEnum
 from types import MappingProxyType
 
 from serial.tools.list_ports import comports
@@ -303,25 +303,25 @@ class Piezo:
         return f"<{self.__class__.__qualname__}: {self._serial}>"
 
 
-class Note(float, Enum):
+class Note(IntEnum):
     """An enumeration of notes.
 
     An enumeration of notes from scientific pitch
     notation and their related frequencies in Hz.
     """
 
-    C6 = 1047.0
-    D6 = 1174.7
-    E6 = 1318.5
-    F6 = 1396.9
-    G6 = 1568.0
-    A6 = 1760.0
-    B6 = 1975.5
-    C7 = 2093.0
-    D7 = 2349.3
-    E7 = 2637.0
-    F7 = 2793.8
-    G7 = 3136.0
-    A7 = 3520.0
-    B7 = 3951.1
-    C8 = 4186.0
+    C6 = 1047
+    D6 = 1175
+    E6 = 1319
+    F6 = 1397
+    G6 = 1568
+    A6 = 1760
+    B6 = 1976
+    C7 = 2093
+    D7 = 2349
+    E7 = 2637
+    F7 = 2794
+    G7 = 3136
+    A7 = 3520
+    B7 = 3951
+    C8 = 4186
