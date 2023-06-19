@@ -1,5 +1,12 @@
+"""Exceptions used by the sbot package."""
+
+
 class MetadataKeyError(KeyError):
-    """Raised when trying to access a metadata key for which no value exists."""
+    """
+    Raised when trying to access a metadata key for which no value exists.
+
+    :param key: The key that was not found
+    """
 
     def __init__(self, key: str):
         self.key = key
@@ -9,7 +16,7 @@ class MetadataKeyError(KeyError):
 
 
 class MetadataNotReadyError(RuntimeError):
-    """Raised when trying to access metadata before it has been loaded."""
+    """Raised when trying to access metadata before wait_start has been called."""
 
     def __str__(self) -> str:
         return (
@@ -24,7 +31,14 @@ class BoardDisconnectionError(IOError):
 
 
 class IncorrectBoardError(IOError):
-    """Raised when a board returns the wrong board type in response to *IDN?"""
+    """
+    Raised when a board returns the wrong board type in response to *IDN?.
+
+    This is usually caused by a board being provided the wrong serial port.
+
+    :param board_type: The board type returned by the board
+    :param expected_type: The board type expected by the class
+    """
     def __init__(self, board_type: str, expected_type: str):
         self.returned_type = board_type
         self.expected_type = expected_type

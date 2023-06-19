@@ -1,3 +1,4 @@
+"""An implementation of a camera board using the april_vision library."""
 import logging
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Union
@@ -15,23 +16,39 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AprilCamera(Board):
-    __slots__ = ('_serial_num', '_cam')
-
-    @staticmethod
-    def get_board_type() -> str:
-        return 'camera'
-
     """
     Virtual Camera Board for detecting fiducial markers.
 
     Additionally, it will do pose estimation, along with some calibration
     in order to determine the spatial positon and orientation of the markers
     that it has detected.
+
+    :param camera_id: The index of the camera to use.
+    :param camera_data: The calibration data for the camera.
+    :param serial_num: The serial number of the camera.
     """
+    __slots__ = ('_serial_num', '_cam')
+
+    @staticmethod
+    def get_board_type() -> str:
+        """
+        Return the type of this board.
+
+        :return: The literal string 'camera'.
+        """
+        return 'camera'
 
     @classmethod
-    def discover(cls) -> Dict[str, 'AprilCamera']:
-        """Discover boards that this backend can control."""
+    def _discover(cls) -> Dict[str, 'AprilCamera']:
+        """
+        Discover the connected cameras that have calibration data available.
+
+        The calibration data from the april_vision library is included when searching.
+        To add additional calibration data, add the paths to the environment variable
+        `OPENCV_CALIBRATIONS`, separated by a colon.
+
+        :return: A dict of cameras, keyed by their name and index.
+        """
         return {
             (serial := f"{camera_data.name} - {camera_data.index}"):
             cls(camera_data.index, camera_data=camera_data, serial_num=serial)
@@ -39,12 +56,13 @@ class AprilCamera(Board):
         }
 
     def __init__(self, camera_id: int, camera_data: CalibratedCamera, serial_num: str) -> None:
-        """Generate a backend from the camera index and calibration data."""
+        # The camera source handles the connection between the camera and the processor
         camera_source = USBCamera.from_calibration_file(
             camera_id,
             calibration_file=camera_data.calibration,
             vidpid=camera_data.vidpid,
         )
+        # The processor handles the detection and pose estimation
         self._cam = Processor(
             camera_source,
             calibration=camera_source.calibration,
@@ -55,6 +73,14 @@ class AprilCamera(Board):
         self._serial_num = serial_num
 
     def identify(self) -> BoardIdentity:
+        """
+        Get the identity of the camera.
+
+        The asset tag of the board is the camera name and index.
+        The version is the version of the april_vision library.
+
+        :return: The identity of the board.
+        """
         return BoardIdentity(
             manufacturer='april_vision',
             board_type='camera',
@@ -70,13 +96,13 @@ class AprilCamera(Board):
         """
         self._cam.close()
 
-    # Proxy methods from USBCamera object
     def see(self, *, eager: bool = True, frame: Optional[NDArray] = None) -> List[Marker]:
         """
         Capture an image and identify fiducial markers.
 
         :param eager: Process the pose estimations of markers immediately,
             currently unused.
+        :param frame: An image to detect markers in, instead of capturing a new one,
         :returns: list of markers that the camera could see.
         """
         return self._cam.see(frame=frame)
@@ -90,10 +116,17 @@ class AprilCamera(Board):
         return self._cam.capture()
 
     def save(self, path: Union[Path, str], *, frame: Optional[NDArray] = None) -> None:
-        """Save an annotated image to a path."""
+        """
+        Save an annotated image to a path.
+
+        :param path: The path to save the image to,
+            this is given a JPEG extension if none is provided.
+        :param frame: An image to annotate and save, instead of capturing a new one,
+            defaults to None
+        """
         self._cam.save(path, frame=frame)
 
-    def set_marker_sizes(
+    def _set_marker_sizes(
         self,
         tag_sizes: Union[float, Dict[int, float]],
     ) -> None:
@@ -102,12 +135,18 @@ class AprilCamera(Board):
 
         If a dict is given for tag_sizes, only marker IDs that are keys of the
         dict will be detected.
+
+        :param tag_sizes: The size of the tags to use for pose estimation given in meters.
         """
         self._cam.set_marker_sizes(tag_sizes)
 
-    def set_detection_hook(self, callback: Callable[[Frame, List[Marker]], None]) -> None:
+    def _set_detection_hook(self, callback: Callable[[Frame, List[Marker]], None]) -> None:
         """
-        Setup a callback to be run after each dectection.
+        Setup a callback to be run after each detection.
+
+        The callback will be passed the frame and the list of markers that were detected.
+
+        :param callback: The function to run after each detection.
         """
         self._cam.detection_hook = callback
 
@@ -124,17 +163,23 @@ def setup_cameras(
 
     Optionally set a callback to send a base64 encode JPEG bytestream of each
     image detection is run on.
+
+    :param tag_sizes: The size of the tags to use for pose estimation given in millimeters
+    :param publish_func: Optionally, a function to call with the base64 encoded JPEG bytestream
+    :return: A dict of cameras, keyed by their name and index.
     """
+    # Unroll the tag ID iterables and convert the sizes to meters
     expanded_tag_sizes = generate_marker_size_mapping(tag_sizes)
 
     if publish_func:
         frame_sender = Base64Sender(publish_func)
 
-    cameras = AprilCamera.discover()
+    cameras = AprilCamera._discover()
 
     for camera in cameras.values():
-        camera.set_marker_sizes(expanded_tag_sizes)
+        # Set the tag sizes in the camera
+        camera._set_marker_sizes(expanded_tag_sizes)
         if publish_func:
-            camera.set_detection_hook(frame_sender.annotated_frame_hook)
+            camera._set_detection_hook(frame_sender.annotated_frame_hook)
 
     return cameras

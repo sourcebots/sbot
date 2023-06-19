@@ -1,3 +1,4 @@
+"""The servo board module provides an interface to the servo board firmware over serial."""
 from __future__ import annotations
 
 import atexit
@@ -23,10 +24,24 @@ logger = logging.getLogger(__name__)
 
 
 class ServoBoard(Board):
+    """
+    A class representing the servo board interface.
+
+    This class is intended to be used to communicate with the servo board over serial
+    using the text-based protocol added in version 4.3 of the servo board firmware.
+
+    :param serial_port: The serial port to connect to.
+    :param initial_identity: The identity of the board, as reported by the USB descriptor.
+    """
     __slots__ = ('_serial', '_identity', '_servos')
 
     @staticmethod
     def get_board_type() -> str:
+        """
+        Return the type of the board.
+
+        :return: The literal string 'SBv4B'.
+        """
         return 'SBv4B'
 
     def __init__(
@@ -53,6 +68,15 @@ class ServoBoard(Board):
     def _get_supported_boards(
         cls, manual_boards: list[str] | None = None,
     ) -> MappingProxyType[str, 'ServoBoard']:
+        """
+        Find all connected servo boards.
+
+        Ports are filtered to the USB vendor and product ID: 0x1BDA and 0x0011 respectively.
+
+        :param manual_boards: A list of manually specified serial ports to also attempt
+            to connect to, defaults to None
+        :return: A mapping of serial numbers to servo boards.
+        """
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
@@ -73,6 +97,8 @@ class ServoBoard(Board):
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
                 boards[board._identity.asset_tag] = board
+
+        # Add any manually specified boards
         if isinstance(manual_boards, list):
             for manual_port in manual_boards:
                 # Create board identity from the info given
@@ -99,15 +125,30 @@ class ServoBoard(Board):
     @property
     @log_to_debug
     def servos(self) -> tuple['Servo', ...]:
+        """
+        A tuple of the servos on the board.
+
+        :return: A tuple of the servos on the board.
+        """
         return self._servos
 
     @log_to_debug
     def identify(self) -> BoardIdentity:
+        """
+        Get the identity of the board.
+
+        :return: The identity of the board.
+        """
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
     @log_to_debug
     def status(self) -> tuple[bool, bool]:
+        """
+        Get the board's status.
+
+        :return: A tuple of the watchdog fail and pgood status.
+        """
         response = self._serial.query('*STATUS?')
 
         data = response.split(':')
@@ -118,21 +159,43 @@ class ServoBoard(Board):
 
     @log_to_debug
     def reset(self) -> None:
+        """
+        Reset the board.
+
+        This will disable all servos.
+        """
         self._serial.write('*RESET')
 
     @property
     @log_to_debug
     def current(self) -> float:
+        """
+        Get the current draw of the board.
+
+        This only includes the servos powered through the main port, not the aux port.
+
+        :return: The current draw of the board in amps.
+        """
         response = self._serial.query('SERVO:I?')
         return float(response) / 1000
 
     @property
     @log_to_debug
     def voltage(self) -> float:
+        """
+        Get the voltage of the on-board regulator.
+
+        :return: The voltage of the on-board regulator in volts.
+        """
         response = self._serial.query('SERVO:V?')
         return float(response) / 1000
 
     def _cleanup(self) -> None:
+        """
+        Reset the board and disable all servos on exit.
+
+        This is registered as an exit function.
+        """
         try:
             self.reset()
         except Exception:
@@ -143,6 +206,12 @@ class ServoBoard(Board):
 
 
 class Servo:
+    """
+    A class representing a servo on the servo board.
+
+    :param serial: The serial wrapper to use to communicate with the board.
+    :param index: The index of the servo on the board.
+    """
     __slots__ = ('_serial', '_index', '_duty_min', '_duty_max')
 
     def __init__(self, serial: SerialWrapper, index: int):
@@ -154,6 +223,16 @@ class Servo:
 
     @log_to_debug
     def set_duty_limits(self, lower: int, upper: int) -> None:
+        """
+        Set the pulse on-time limits of the servo.
+
+        These limits are used to map the servo position to a pulse on-time.
+
+        :param lower: The lower limit of the servo pulse in µs.
+        :param upper: The upper limit of the servo pulse in µs.
+        :raises TypeError: If the limits are not ints.
+        :raises ValueError: If the limits are not in the range 500 to 4000.
+        """
         if not (isinstance(lower, int) and isinstance(upper, int)):
             raise TypeError(
                 f'Servo pulse limits are ints in µs, in the range {DUTY_MIN} to {DUTY_MAX}'
@@ -168,11 +247,25 @@ class Servo:
 
     @log_to_debug
     def get_duty_limits(self) -> tuple[int, int]:
+        """
+        Get the current pulse on-time limits of the servo.
+
+        The limits are specified in µs.
+
+        :return: A tuple of the lower and upper limits of the servo pulse in µs.
+        """
         return self._duty_min, self._duty_max
 
     @property
     @log_to_debug
     def position(self) -> float | None:
+        """
+        Get the position of the servo.
+
+        If the servo is disabled, this will return None.
+
+        :return: The position of the servo as a float between -1.0 and 1.0 or None if disabled.
+        """
         response = self._serial.query(f'SERVO:{self._index}:GET?')
         data = int(response)
         if data == 0:
@@ -182,6 +275,15 @@ class Servo:
     @position.setter
     @log_to_debug
     def position(self, value: float | None) -> None:
+        """
+        Set the position of the servo.
+
+        If the servo is disabled, this will enable it.
+        -1.0 to 1.0 may not be the full range of the servo, see set_duty_limits().
+
+        :param value: The position of the servo as a float between -1.0 and 1.0
+            or None to disable.
+        """
         if value is None:
             self.disable()
             return
@@ -194,6 +296,11 @@ class Servo:
 
     @log_to_debug
     def disable(self) -> None:
+        """
+        Disable the servo.
+
+        This will cause this channel to output a 0% duty cycle.
+        """
         self._serial.write(f'SERVO:{self._index}:DISABLE')
 
     def __repr__(self) -> str:

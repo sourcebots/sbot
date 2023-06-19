@@ -1,3 +1,4 @@
+"""The Arduino module provides an interface to the Arduino firmware."""
 from __future__ import annotations
 
 import logging
@@ -23,12 +24,14 @@ SUPPORTED_VID_PIDS = {
 
 
 class GPIOPinMode(str, Enum):
+    """The possible modes for a GPIO pin."""
     INPUT = 'INPUT'
     INPUT_PULLUP = 'INPUT_PULLUP'
     OUTPUT = 'OUTPUT'
 
 
 class AnalogPins(IntEnum):
+    """The analog pins on the Arduino."""
     A0 = 14
     A1 = 15
     A2 = 16
@@ -43,10 +46,23 @@ ANALOG_READ_MODES = (GPIOPinMode.INPUT,)
 
 
 class Arduino(Board):
+    """
+    The Arduino board interface.
+
+    This is intended to be used with Arduino Uno boards running the sbot firmware.
+
+    :param serial_port: The serial port to connect to.
+    :param initial_identity: The identity of the board, as reported by the USB descriptor.
+    """
     __slots__ = ('_serial_num', '_serial', '_pins', '_identity')
 
     @staticmethod
     def get_board_type() -> str:
+        """
+        Return the type of the board.
+
+        :return: The literal string 'Arduino'.
+        """
         return 'Arduino'
 
     def __init__(
@@ -56,12 +72,14 @@ class Arduino(Board):
     ) -> None:
         if initial_identity is None:
             initial_identity = BoardIdentity()
+
+        # The arduino firmware cannot access the serial number reported in the USB descriptor
         self._serial_num = initial_identity.asset_tag
         self._serial = SerialWrapper(
             serial_port,
             115200,
             identity=initial_identity,
-            delay_after_connect=2,
+            delay_after_connect=2,  # Wait for the board to reset after connecting
         )
 
         self._pins = (
@@ -78,6 +96,13 @@ class Arduino(Board):
     def _get_supported_boards(
         cls, manual_boards: list[str] | None = None,
     ) -> MappingProxyType[str, Arduino]:
+        """
+        Discover the connected Arduinos, by matching the USB descriptor to SUPPORTED_VID_PIDS.
+
+        :param manual_boards: A list of manually specified board port strings,
+            defaults to None
+        :return: A mapping of board serial numbers to Arduinos
+        """
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
@@ -99,6 +124,7 @@ class Arduino(Board):
                     continue
                 boards[board._identity.asset_tag] = board
 
+        # Add any manually specified boards
         if isinstance(manual_boards, list):
             for manual_port in manual_boards:
                 # Create board identity from the info given
@@ -124,6 +150,13 @@ class Arduino(Board):
 
     @log_to_debug
     def identify(self) -> BoardIdentity:
+        """
+        Get the identity of the board.
+
+        The asset tag of the board is the serial number from the USB descriptor.
+
+        :return: The identity of the board.
+        """
         response = self._serial.query('*IDN?')
         response_fields = response.split(':')
 
@@ -138,14 +171,29 @@ class Arduino(Board):
     @property
     @log_to_debug
     def pins(self) -> tuple[Pin, ...]:
+        """
+        The pins on the Arduino.
+
+        :return: A tuple of the pins on the Arduino.
+        """
         return self._pins
 
     @log_to_debug
     def ultrasound_measure(
         self,
-        pulse_pin: int | AnalogPins,
-        echo_pin: int | AnalogPins
+        pulse_pin: int,
+        echo_pin: int,
     ) -> int:
+        """
+        Measure the distance to an object using an ultrasound sensor.
+
+        The sensor can only measure distances up to 4m.
+
+        :param pulse_pin: The pin to send the ultrasound pulse from.
+        :param echo_pin: The pin to read the ultrasound echo from.
+        :raises ValueError: If either of the pins are invalid
+        :return: The distance measured by the ultrasound sensor in mm.
+        """
         try:  # bounds check
             _ = self.pins[pulse_pin]
             _ = self.pins[echo_pin]
@@ -160,6 +208,13 @@ class Arduino(Board):
 
 
 class Pin:
+    """
+    A pin on the Arduino.
+
+    :param serial: The serial wrapper to use to communicate with the board.
+    :param index: The index of the pin.
+    :param supports_analog: Whether the pin supports analog reads.
+    """
     __slots__ = ('_serial', '_index', '_supports_analog')
 
     def __init__(self, serial: SerialWrapper, index: int, supports_analog: bool):
@@ -170,12 +225,28 @@ class Pin:
     @property
     @log_to_debug
     def mode(self) -> GPIOPinMode:
+        """
+        Get the mode of the pin.
+
+        This is fetched from the board.
+
+        :return: The mode of the pin.
+        """
         mode = self._serial.query(f'PIN:{self._index}:MODE:GET?')
         return GPIOPinMode(mode)
 
     @mode.setter
     @log_to_debug
     def mode(self, value: GPIOPinMode) -> None:
+        """
+        Set the mode of the pin.
+
+        To do analog or digital reads set the mode to INPUT or INPUT_PULLUP.
+        To do digital writes set the mode to OUTPUT.
+
+        :param value: The mode to set the pin to.
+        :raises IOError: If the pin mode is not a GPIOPinMode
+        """
         if not isinstance(value, GPIOPinMode):
             raise IOError('Pin mode only supports being set to a GPIOPinMode')
         self._serial.write(f'PIN:{self._index}:MODE:SET:{value}')
@@ -183,6 +254,12 @@ class Pin:
     @property
     @log_to_debug
     def digital_value(self) -> bool:
+        """
+        Perform a digital read on the pin.
+
+        :raises IOError: If the pin's current mode does not support digital read
+        :return: The digital value of the pin.
+        """
         if self.mode not in DIGITAL_READ_MODES:
             raise IOError(f'Digital read is not supported in {self.mode}')
         response = self._serial.query(f'PIN:{self._index}:DIGITAL:GET?')
@@ -191,6 +268,12 @@ class Pin:
     @digital_value.setter
     @log_to_debug
     def digital_value(self, value: bool) -> None:
+        """
+        Write a digital value to the pin.
+
+        :param value: The value to write to the pin.
+        :raises IOError: If the pin's current mode does not support digital write
+        """
         if self.mode not in DIGITAL_WRITE_MODES:
             raise IOError(f'Digital write is not supported in {self.mode}')
         if value:
@@ -201,7 +284,14 @@ class Pin:
     @property
     @log_to_debug
     def analog_value(self) -> float:
-        """Get the analog voltage on a pin, ranges from 0 to 5."""
+        """
+        Get the analog voltage on the pin.
+
+        This is returned in volts. Only pins A0-A5 support analog reads.
+
+        :raises IOError: If the pin or its current mode does not support analog read
+        :return: The analog voltage on the pin, ranges from 0 to 5.
+        """
         if self.mode not in ANALOG_READ_MODES:
             raise IOError(f'Analog read is not supported in {self.mode}')
         if not self._supports_analog:

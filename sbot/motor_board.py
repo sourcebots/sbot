@@ -1,3 +1,4 @@
+"""The motor board module provides an interface to the motor board firmware over serial."""
 from __future__ import annotations
 
 import atexit
@@ -19,15 +20,30 @@ logger = logging.getLogger(__name__)
 
 
 class MotorPower(IntEnum):
+    """Special values for motor power."""
     BRAKE = 0
     COAST = -1024  # A value outside the allowable range
 
 
 class MotorBoard(Board):
+    """
+    A class representing the motor board interface.
+
+    This class is intended to be used to communicate with the motor board over serial
+    using the text-based protocol added in version 4.4 of the motor board firmware.
+
+    :param serial_port: The serial port to connect to.
+    :param initial_identity: The identity of the board, as reported by the USB descriptor.
+    """
     __slots__ = ('_serial', '_identity', '_motors')
 
     @staticmethod
     def get_board_type() -> str:
+        """
+        Return the type of the board.
+
+        :return: The literal string 'MCv4B'.
+        """
         return 'MCv4B'
 
     def __init__(
@@ -49,12 +65,22 @@ class MotorBoard(Board):
             raise IncorrectBoardError(self._identity.board_type, self.get_board_type())
         self._serial.set_identity(self._identity)
 
+        # Disable motors on exit
         atexit.register(self._cleanup)
 
     @classmethod
     def _get_supported_boards(
         cls, manual_boards: list[str] | None = None,
     ) -> MappingProxyType[str, MotorBoard]:
+        """
+        Find all connected motor boards.
+
+        Ports are filtered to the USB vendor and product ID: 0x0403 and 0x6001 respectively.
+
+        :param manual_boards: A list of manually specified serial ports to also attempt
+            to connect to, defaults to None
+        :return: A mapping of serial numbers to motor boards.
+        """
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
@@ -75,6 +101,8 @@ class MotorBoard(Board):
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
                 boards[board._identity.asset_tag] = board
+
+        # Add any manually specified boards
         if isinstance(manual_boards, list):
             for manual_port in manual_boards:
                 # Create board identity from the info given
@@ -101,15 +129,30 @@ class MotorBoard(Board):
     @property
     @log_to_debug
     def motors(self) -> tuple[Motor, Motor]:
+        """
+        A tuple of the two motors on the board.
+
+        :return: A tuple of the two motors on the board.
+        """
         return self._motors
 
     @log_to_debug
     def identify(self) -> BoardIdentity:
+        """
+        Get the identity of the board.
+
+        :return: The identity of the board.
+        """
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
     @log_to_debug
     def status(self) -> tuple[list[bool], float]:
+        """
+        Read the board's status.
+
+        :return: A tuple of the output faults and the input voltage.
+        """
         response = self._serial.query('*STATUS?')
 
         data = response.split(':')
@@ -120,9 +163,19 @@ class MotorBoard(Board):
 
     @log_to_debug
     def reset(self) -> None:
+        """
+        Reset the board.
+
+        This command disables the motors and clears all faults.
+        """
         self._serial.write('*RESET')
 
     def _cleanup(self) -> None:
+        """
+        Disable the motors while exiting.
+
+        This method is registered as an exit handler.
+        """
         try:
             self.reset()
         except Exception:
@@ -133,6 +186,15 @@ class MotorBoard(Board):
 
 
 class Motor:
+    """
+    A class representing a motor on the motor board.
+
+    Each motor is controlled through the power property
+    and its current can be read using the current property.
+
+    :param serial: The serial wrapper to use to communicate with the board.
+    :param index: The index of the motor on the board.
+    """
     __slots__ = ('_serial', '_index')
 
     def __init__(self, serial: SerialWrapper, index: int):
@@ -142,6 +204,12 @@ class Motor:
     @property
     @log_to_debug
     def power(self) -> float:
+        """
+        Read the current power setting of the motor.
+
+        :return: The power of the motor as a float between -1.0 and 1.0
+            or the special value MotorPower.COAST.
+        """
         response = self._serial.query(f'MOT:{self._index}:GET?')
 
         data = response.split(':')
@@ -155,6 +223,15 @@ class Motor:
     @power.setter
     @log_to_debug
     def power(self, value: float) -> None:
+        """
+        Set the power of the motor.
+
+        Internally this method maps the power to an integer between
+        -1000 and 1000 so only 3 digits of precision are available.
+
+        :param value: The power of the motor as a float between -1.0 and 1.0
+            or the special values MotorPower.COAST and MotorPower.BRAKE.
+        """
         if value == MotorPower.COAST:
             self._serial.write(f'MOT:{self._index}:DISABLE')
             return
@@ -171,6 +248,11 @@ class Motor:
     @property
     @log_to_debug
     def current(self) -> float:
+        """
+        Read the current draw of the motor.
+
+        :return: The current draw of the motor in amps.
+        """
         response = self._serial.query(f'MOT:{self._index}:I?')
         return float(response) / 1000
 

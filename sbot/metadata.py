@@ -8,10 +8,12 @@ competition USB stick. The environment variable SBOT_METADATA_PATH specifies a d
 where it, and its children, are searched for the JSON file to load.
 
 Example metadata file:
-    {
-        "zone": 2,
-        "is_competition": true
-    }
+```json
+{
+    "zone": 2,
+    "is_competition": true
+}
+```
 """
 from __future__ import annotations
 
@@ -25,15 +27,25 @@ from .exceptions import MetadataKeyError
 
 logger = logging.getLogger(__name__)
 
+# The name of the environment variable that specifies the path to search
+# for metadata USB sticks
 METADATA_ENV_VAR = "SBOT_METADATA_PATH"
+# The name of the metadata file
 METADATA_NAME = "metadata.json"
 
 
 class Metadata(TypedDict):
+    """
+    The structure of the metadata dictionary.
+
+    :param is_competition: Whether the robot is in competition mode
+    :param zone: The zone that the robot is in
+    """
     is_competition: bool
     zone: int
 
 
+# The default metadata to use if no file is found
 DEFAULT_METADATA: Metadata = {
     "is_competition": False,
     "zone": 0,
@@ -41,10 +53,14 @@ DEFAULT_METADATA: Metadata = {
 
 
 def load() -> Metadata:
-    """
-    Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it.
+    f"""
+    Search for a metadata file and load it.
 
-    If no file is found, it falls back to the default dict.
+    Searches the path identified by {METADATA_ENV_VAR} and its children for
+    {METADATA_NAME} and reads it.
+
+    :raises FileNotFoundError: If no metadata file is found
+    :return: The metadata dictionary, either loaded from a file or the default
     """
     search_path = os.environ.get(METADATA_ENV_VAR)
     if search_path:
@@ -66,6 +82,17 @@ def load() -> Metadata:
 
 
 def _load_metadata(path: Path) -> Metadata:
+    """
+    Load the metadata from a JSON file, found by `load`.
+
+    The file must be a JSON dictionary with the keys `is_competition` and `zone`.
+
+    :param path: The path to the metadata file
+    :raises RuntimeError: If the metadata file is invalid JSON
+    :raises TypeError: If the metadata file is not a JSON dictionary
+    :raises MetadataKeyError: If the metadata file is missing a required key
+    :return: The metadata dictionary
+    """
     logger.info(f"Loading metadata from {path}")
     with path.open() as file:
         try:
