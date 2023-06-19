@@ -40,12 +40,28 @@ packages = ["sbot"]
 
 [project]
 name = "sbot"
+description = "The robot API for the Smallpeice summer school"
+authors = [{name = "SourceBots", email =  "hello@sourcebots.co.uk"}]
+readme = "README.md"
+license = {file = "LICENSE"}
 dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
     "pyserial >=3,<4",
     "april_vision >=2,<3",
 ]
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Typing :: Typed",
+    "Topic :: Education",
+]
+
+[project.urls]
+Repository = "https://github.com/sourcebots/sbot"
+Homepage = "https://sourcebots.co.uk"
+Documentation = "https://docs.sourcebots.co.uk"
 
 [project.optional-dependencies]
 dev = [
@@ -58,3 +74,4 @@ dev = [
     "pytest",
     "pytest-cov",
 ]
+vision = ["opencv-python-headless >=4,<5"]
