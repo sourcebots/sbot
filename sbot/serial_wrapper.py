@@ -138,12 +138,15 @@ class SerialWrapper:
                     ))
 
             try:
-                logger.log(TRACE, f'Serial write - "{data}"')
+                logger.log(TRACE, f'Serial write - {data!r}')
                 cmd = data + '\n'
                 self.serial.write(cmd.encode())
 
                 response = self.serial.readline()
                 # Drop all unicode characters that cannot be decoded
+                response_str = response.decode(errors='ignore').rstrip('\n')
+                logger.log(
+                    TRACE, f'Serial read  - {response_str!r}')
 
                 if b'\n' not in response:
                     # If readline times out no error is raised, it returns an incomplete string
@@ -160,7 +163,15 @@ class SerialWrapper:
                     'disconnected during transaction'
                 ))
 
-            return response.decode(errors='ignore').strip()
+            if 'NACK' in response_str:
+                _, error_msg = response_str.split(':', maxsplit=1)
+                logger.error((
+                    f'Board {self.identity.board_type}:{self.identity.asset_tag} '
+                    f'returned NACK on write command: {error_msg}'
+                ))
+                raise RuntimeError(error_msg)
+
+            return response_str
 
     def write(self, data: str) -> None:
         """
@@ -170,14 +181,7 @@ class SerialWrapper:
         :raises RuntimeError: If the board returns a NACK response,
             the firmware's error message is raised.
         """
-        response = self.query(data)
-        if 'NACK' in response:
-            _, error_msg = response.split(':', maxsplit=1)
-            logger.error((
-                f'Board {self.identity.board_type}:{self.identity.asset_tag} '
-                f'returned NACK on write command: {error_msg}'
-            ))
-            raise RuntimeError(error_msg)
+        _ = self.query(data)
 
     def _connect(self) -> bool:
         """
