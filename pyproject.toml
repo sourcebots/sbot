@@ -28,6 +28,11 @@ known_first_party = "sbot"
 multi_line_output = 5
 include_trailing_comma = true
 
+[tool.pytest.ini_options]
+markers = [
+    "hardware: mark a test that requires hardware to be connected",
+]
+
 [build-system]
 requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
 build-backend = "setuptools.build_meta"
