@@ -102,7 +102,7 @@ class PowerBoard(Board):
                     board = PowerBoard(port.device, initial_identity)
                 except BoardDisconnectionError:
                     logger.warning(
-                        f"Found servo board-like serial port at {port.device!r}, "
+                        f"Found power board-like serial port at {port.device!r}, "
                         "but it could not be identified. Ignoring this device")
                     continue
                 except IncorrectBoardError as err:

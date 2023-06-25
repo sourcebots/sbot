@@ -239,11 +239,8 @@ class Motor:
             value, -1.0, 1.0,
             'Motor power is a float between -1.0 and 1.0')
 
-        if value == MotorPower.BRAKE:
-            self._serial.write(f'MOT:{self._index}:SET:0')
-        else:
-            setpoint = map_to_int(value, -1.0, 1.0, -1000, 1000)
-            self._serial.write(f'MOT:{self._index}:SET:{setpoint}')
+        setpoint = map_to_int(value, -1.0, 1.0, -1000, 1000)
+        self._serial.write(f'MOT:{self._index}:SET:{setpoint}')
 
     @property
     @log_to_debug

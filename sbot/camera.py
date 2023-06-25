@@ -34,9 +34,9 @@ class AprilCamera(Board):
         """
         Return the type of this board.
 
-        :return: The literal string 'camera'.
+        :return: The literal string 'Camera'.
         """
-        return 'camera'
+        return 'Camera'
 
     @classmethod
     def _discover(cls) -> Dict[str, 'AprilCamera']:

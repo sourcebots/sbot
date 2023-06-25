@@ -170,7 +170,7 @@ def float_bounds_check(value: Any, min_val: float, max_val: float, err_msg: str)
     """
     try:
         new_val = float(value)
-    except Exception as e:
+    except ValueError as e:
         raise TypeError(err_msg) from e
 
     if (new_val < min_val) or (new_val > max_val):

@@ -15,8 +15,8 @@ from .utils import Board, BoardIdentity, get_USB_identity, map_to_float
 logger = logging.getLogger(__name__)
 
 SUPPORTED_VID_PIDS = {
-    (0x2341, 0x0043),
-    (0x2A03, 0x0043),
+    (0x2341, 0x0043),  # Arduino Uno rev 3
+    (0x2A03, 0x0043),  # Arduino Uno rev 3
     (0x1A86, 0x7523),  # Uno
     (0x10C4, 0xEA60),  # Ruggeduino
     (0x16D0, 0x0613),  # Ruggeduino
@@ -40,9 +40,9 @@ class AnalogPins(IntEnum):
     A5 = 19
 
 
-DIGITAL_READ_MODES = (GPIOPinMode.INPUT, GPIOPinMode.INPUT_PULLUP, GPIOPinMode.OUTPUT)
-DIGITAL_WRITE_MODES = (GPIOPinMode.OUTPUT,)
-ANALOG_READ_MODES = (GPIOPinMode.INPUT,)
+DIGITAL_READ_MODES = {GPIOPinMode.INPUT, GPIOPinMode.INPUT_PULLUP, GPIOPinMode.OUTPUT}
+DIGITAL_WRITE_MODES = {GPIOPinMode.OUTPUT}
+ANALOG_READ_MODES = {GPIOPinMode.INPUT}
 
 
 class Arduino(Board):
@@ -196,9 +196,12 @@ class Arduino(Board):
         """
         try:  # bounds check
             _ = self.pins[pulse_pin]
+        except IndexError:
+            raise ValueError("Invalid pulse pin provided") from None
+        try:
             _ = self.pins[echo_pin]
         except IndexError:
-            raise ValueError("Invalid pins provided") from None
+            raise ValueError("Invalid echo pin provided") from None
 
         response = self._serial.query(f'ULTRASOUND:{pulse_pin}:{echo_pin}:MEASURE?')
         return int(response)
@@ -341,7 +344,7 @@ if __name__ == '__main__':  # pragma: no cover
         analog_read_value = board.pins[AnalogPins.A0].analog_value
         print(f'Analog input A0 = {analog_read_value}')
 
-        # # Trigger pin: 4
-        # # Echo pin: 5
-        # ultrasound_sensor = board.setup_ultrasound(4, 5)
-        # time_taken = ultrasound_sensor.measure()
+        # Trigger pin: 4
+        # Echo pin: 5
+        ultrasound_dist = board.ultrasound_measure(4, 5)
+        print(f'Ultrasound distance = {ultrasound_dist}mm')

@@ -3,6 +3,8 @@ Test that the servo board can be created and used.
 
 This test uses a mock serial wrapper to simulate the connection to the servo board.
 """
+from __future__ import annotations
+
 import re
 from typing import NamedTuple
 
