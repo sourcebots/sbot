@@ -35,6 +35,15 @@ def test_load_file() -> None:
     assert data == {"is_competition": True, "zone": 1}
 
 
+def test_load_nested_file() -> None:
+    """Test that we can load a file from a nested directory."""
+    data_path = Path(__file__).parent / 'test_data/nested'
+    environ[METADATA_ENV_VAR] = str(data_path.absolute())
+
+    data = load()
+    assert data == {"is_competition": True, "zone": 1}
+
+
 def test_load_file_not_found() -> None:
     """Test that the fallback data is loaded if no file is found."""
     data_path = Path(__file__).parent / "test_data/empty"
@@ -59,4 +68,22 @@ def test_load_bad_data() -> None:
     environ[METADATA_ENV_VAR] = str(data_path.absolute())
 
     with raises(TypeError):
+        load()
+
+
+def test_load_bad_key() -> None:
+    """Test that an exception is thrown when the JSON has a missing key."""
+    data_path = Path(__file__).parent / "test_data/missing_key"
+    environ[METADATA_ENV_VAR] = str(data_path.absolute())
+
+    with raises(MetadataKeyError):
+        load()
+
+
+def test_missing_metadata_path() -> None:
+    """Test that an exception is thrown when the metadata path does not exist."""
+    data_path = Path(__file__).parent / "test_data/missing_path"
+    environ[METADATA_ENV_VAR] = str(data_path.absolute())
+
+    with raises(FileNotFoundError):
         load()
