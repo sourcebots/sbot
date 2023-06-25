@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+
 from sbot.utils import BoardIdentity
 
 
@@ -39,6 +40,10 @@ class MockSerialWrapper:
         self.request_index = 0
         self.identity = BoardIdentity()
 
+    def _add_responses(self, responses: list[tuple[str, str]]) -> None:
+        """Add more responses to the end of the list."""
+        self.responses.extend(responses)
+
     def __call__(
         self,
         port: str,
@@ -75,3 +80,17 @@ class MockSerialWrapper:
     def set_identity(self, identity: BoardIdentity) -> None:
         """Set the identity of the board."""
         self.identity = identity
+
+
+class MockAtExit:
+    def __init__(self):
+        self._callbacks = []
+
+    def register(self, callback):
+        self._callbacks.append(callback)
+
+    def unregister(self, callback):
+        try:
+            self._callbacks.remove(callback)
+        except ValueError:
+            pass

@@ -260,7 +260,7 @@ class Motor:
         return f"<{self.__class__.__qualname__} index={self._index} {self._serial}>"
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     motorboards = MotorBoard._get_supported_boards()
     for serial_num, board in motorboards.items():
         print(serial_num)

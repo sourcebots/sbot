@@ -52,7 +52,7 @@ class Board(ABC):
 
         :return: The board type name
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def identify(self) -> BoardIdentity:
@@ -61,7 +61,7 @@ class Board(ABC):
 
         :return: The board's identity
         """
-        pass
+        pass  # pragma: no cover
 
 
 def map_to_int(
