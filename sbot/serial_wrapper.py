@@ -163,7 +163,7 @@ class SerialWrapper:
                     'disconnected during transaction'
                 ))
 
-            if 'NACK' in response_str:
+            if response_str.startswith('NACK'):
                 _, error_msg = response_str.split(':', maxsplit=1)
                 logger.error((
                     f'Board {self.identity.board_type}:{self.identity.asset_tag} '

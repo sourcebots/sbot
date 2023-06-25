@@ -3,14 +3,14 @@ Test that the servo board can be created and used.
 
 This test uses a mock serial wrapper to simulate the connection to the servo board.
 """
-from typing import NamedTuple
 import re
+from typing import NamedTuple
 
 import pytest
 
+from sbot.exceptions import IncorrectBoardError
 from sbot.servo_board import ServoBoard
 from sbot.utils import singular
-from sbot.exceptions import IncorrectBoardError
 
 from .conftest import MockAtExit, MockSerialWrapper
 

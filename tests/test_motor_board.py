@@ -3,14 +3,14 @@ Test that the motor board can be created and used.
 
 This test uses a mock serial wrapper to simulate the connection to the motor board.
 """
-from typing import NamedTuple
 import re
+from typing import NamedTuple
 
 import pytest
 
+from sbot.exceptions import IncorrectBoardError
 from sbot.motor_board import MotorBoard, MotorPower
 from sbot.utils import singular
-from sbot.exceptions import IncorrectBoardError
 
 from .conftest import MockAtExit, MockSerialWrapper
 
