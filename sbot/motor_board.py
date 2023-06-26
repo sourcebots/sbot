@@ -159,7 +159,7 @@ class MotorBoard(Board):
         response = self._serial.query('*STATUS?')
 
         data = response.split(':')
-        output_faults = [True if (port == '1') else False for port in data[0].split(',')]
+        output_faults = [(port == '1') for port in data[0].split(',')]
         input_voltage = float(data[1]) / 1000
 
         return output_faults, input_voltage

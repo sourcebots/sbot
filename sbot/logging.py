@@ -16,7 +16,7 @@ E = TypeVar("E", bound=BaseException)
 TRACE = 5
 
 
-def logger_setup() -> None:
+def add_trace_level() -> None:
     """Set logging to label messages at level 5 as "TRACE"."""
     logging.addLevelName(TRACE, "TRACE")
 

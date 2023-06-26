@@ -296,7 +296,8 @@ class Robot:
         logger.info("Start button pressed.")
         self.power_board._run_led.on()
 
-        self._metadata = metadata.load()
+        if self._metadata is None:
+            self._metadata = metadata.load()
 
         if self.is_competition:
             timeout.kill_after_delay(game_specific.GAME_LENGTH)

@@ -207,7 +207,7 @@ class PowerBoard(Board):
         """
         response = self._serial.query('*STATUS?')
         _, _, fan, *_ = response.split(':')
-        return True if (fan == '1') else False
+        return fan == '1'
 
     @property
     @log_to_debug
@@ -327,7 +327,7 @@ class Output:
         :return: Whether the output is enabled.
         """
         response = self._serial.query(f'OUT:{self._index}:GET?')
-        return True if (response == '1') else False
+        return response == '1'
 
     @is_enabled.setter
     @log_to_debug
@@ -374,7 +374,7 @@ class Output:
         """
         response = self._serial.query('*STATUS?')
         oc, *_ = response.split(':')
-        port_oc = [True if (x == '1') else False for x in oc.split(',')]
+        port_oc = [(x == '1') for x in oc.split(',')]
         return port_oc[self._index]
 
     def __repr__(self) -> str:

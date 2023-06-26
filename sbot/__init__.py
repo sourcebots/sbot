@@ -3,12 +3,12 @@ from .exceptions import (
     BoardDisconnectionError, MetadataKeyError, MetadataNotReadyError,
 )
 from .game_specific import GAME_LENGTH
-from .logging import logger_setup
+from .logging import add_trace_level
 from .motor_board import MotorPower
 from .power_board import Note, PowerOutputPosition
 from .robot import Robot
 
-logger_setup()
+add_trace_level()
 
 A0 = AnalogPins.A0
 A1 = AnalogPins.A1

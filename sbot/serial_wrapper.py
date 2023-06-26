@@ -32,7 +32,7 @@ E = TypeVar("E", bound=BaseException)
 
 
 def retry(
-    times: int, exceptions: type[E],
+    times: int, exceptions: type[E] | tuple[type[E], ...]
 ) -> Callable[[Callable[Param, RetType]], Callable[Param, RetType]]:
     """
     Decorator to retry a function a number of times on a given exception.
@@ -114,7 +114,7 @@ class SerialWrapper:
         """
         self._disconnect()
 
-    @retry(times=3, exceptions=BoardDisconnectionError)
+    @retry(times=3, exceptions=(BoardDisconnectionError, UnicodeDecodeError))
     def query(self, data: str) -> str:
         """
         Send a command to the board and return the response.
@@ -143,8 +143,13 @@ class SerialWrapper:
                 self.serial.write(cmd.encode())
 
                 response = self.serial.readline()
-                # Drop all unicode characters that cannot be decoded
-                response_str = response.decode(errors='ignore').rstrip('\n')
+                try:
+                    response_str = response.decode().rstrip('\n')
+                except UnicodeDecodeError as e:
+                    logger.warning(
+                        f"Board {self.identity.board_type}:{self.identity.asset_tag} "
+                        f"returned invalid characters: {response!r}")
+                    raise e
                 logger.log(
                     TRACE, f'Serial read  - {response_str!r}')
 
