@@ -10,7 +10,7 @@ from typing import Mapping
 from . import game_specific, metadata, timeout
 from ._version import __version__
 from .arduino import Arduino
-from .camera import AprilCamera, setup_cameras
+from .camera import AprilCamera, _setup_cameras
 from .exceptions import MetadataNotReadyError
 from .logging import log_to_debug, setup_logging
 from .metadata import Metadata
@@ -110,7 +110,7 @@ class Robot:
         These cameras are used for AprilTag detection and provide location data of
         markers in its field of view.
         """
-        self._cameras = MappingProxyType(setup_cameras(game_specific.MARKER_SIZES))
+        self._cameras = MappingProxyType(_setup_cameras(game_specific.MARKER_SIZES))
 
     def _log_connected_boards(self) -> None:
         """

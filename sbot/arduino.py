@@ -13,6 +13,7 @@ from .serial_wrapper import SerialWrapper
 from .utils import Board, BoardIdentity, get_USB_identity, map_to_float
 
 logger = logging.getLogger(__name__)
+BAUDRATE = 115200
 
 SUPPORTED_VID_PIDS = {
     (0x2341, 0x0043),  # Arduino Uno rev 3
@@ -77,7 +78,7 @@ class Arduino(Board):
         self._serial_num = initial_identity.asset_tag
         self._serial = SerialWrapper(
             serial_port,
-            115200,
+            BAUDRATE,
             identity=initial_identity,
             delay_after_connect=2,  # Wait for the board to reset after connecting
         )
@@ -295,12 +296,16 @@ class Pin:
         :raises IOError: If the pin or its current mode does not support analog read
         :return: The analog voltage on the pin, ranges from 0 to 5.
         """
+        ADC_MAX = 1023  # 10 bit ADC
+        ADC_MIN = 0
+
         if self.mode not in ANALOG_READ_MODES:
             raise IOError(f'Analog read is not supported in {self.mode}')
         if not self._supports_analog:
             raise IOError('Pin does not support analog read')
         response = self._serial.query(f'PIN:{self._index}:ANALOG:GET?')
-        return map_to_float(int(response), 0, 1023, 0.0, 5.0)
+        # map the response from the ADC range to the voltage range
+        return map_to_float(int(response), ADC_MIN, ADC_MAX, 0.0, 5.0)
 
     def __repr__(self) -> str:
         return (

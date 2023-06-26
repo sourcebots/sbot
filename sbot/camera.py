@@ -154,7 +154,7 @@ class AprilCamera(Board):
         return f"<{self.__class__.__qualname__}: {self._serial_num}>"
 
 
-def setup_cameras(
+def _setup_cameras(
     tag_sizes: Dict[Iterable[int], int],
     publish_func: Optional[Callable[[str, bytes], None]] = None,
 ) -> Dict[str, AprilCamera]:

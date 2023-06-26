@@ -53,11 +53,11 @@ DEFAULT_METADATA: Metadata = {
 
 
 def load() -> Metadata:
-    f"""
+    """
     Search for a metadata file and load it.
 
-    Searches the path identified by {METADATA_ENV_VAR} and its children for
-    {METADATA_NAME} and reads it.
+    Searches the path identified by SBOT_METADATA_PATH and its children for
+    metadata.json (set by METADATA_NAME) and reads it.
 
     :raises FileNotFoundError: If no metadata file is found
     :return: The metadata dictionary, either loaded from a file or the default

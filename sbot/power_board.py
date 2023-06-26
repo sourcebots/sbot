@@ -14,6 +14,7 @@ from .serial_wrapper import SerialWrapper
 from .utils import Board, BoardIdentity, float_bounds_check, get_USB_identity
 
 logger = logging.getLogger(__name__)
+BAUDRATE = 115200  # Since the power board is a USB device, this is ignored
 
 
 class PowerOutputPosition(IntEnum):
@@ -64,7 +65,7 @@ class PowerBoard(Board):
     ) -> None:
         if initial_identity is None:
             initial_identity = BoardIdentity()
-        self._serial = SerialWrapper(serial_port, 115200, identity=initial_identity)
+        self._serial = SerialWrapper(serial_port, BAUDRATE, identity=initial_identity)
 
         self._outputs = Outputs(self._serial)
         self._battery_sensor = BatterySensor(self._serial)
@@ -94,6 +95,7 @@ class PowerBoard(Board):
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
+            # Filter to USB vendor and product ID of the SR v4 power board
             if port.vid == 0x1BDA and port.pid == 0x0010:
                 # Create board identity from USB port info
                 initial_identity = get_USB_identity(port)

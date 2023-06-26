@@ -17,6 +17,7 @@ from .utils import (
 )
 
 logger = logging.getLogger(__name__)
+BAUDRATE = 115200
 
 
 class MotorPower(IntEnum):
@@ -53,7 +54,7 @@ class MotorBoard(Board):
     ) -> None:
         if initial_identity is None:
             initial_identity = BoardIdentity()
-        self._serial = SerialWrapper(serial_port, 115200, identity=initial_identity)
+        self._serial = SerialWrapper(serial_port, BAUDRATE, identity=initial_identity)
 
         self._motors = (
             Motor(self._serial, 0),
@@ -84,6 +85,8 @@ class MotorBoard(Board):
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
+            # Filter to USB vendor and product ID of the FTDI FT232R
+            # chip used on the motor board
             if port.vid == 0x0403 and port.pid == 0x6001:
                 # Create board identity from USB port info
                 initial_identity = get_USB_identity(port)

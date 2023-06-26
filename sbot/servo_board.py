@@ -21,6 +21,7 @@ START_DUTY_MIN = 1000
 START_DUTY_MAX = 2000
 
 logger = logging.getLogger(__name__)
+BAUDRATE = 115200  # Since the servo board is a USB device, this is ignored
 
 
 class ServoBoard(Board):
@@ -51,7 +52,7 @@ class ServoBoard(Board):
     ) -> None:
         if initial_identity is None:
             initial_identity = BoardIdentity()
-        self._serial = SerialWrapper(serial_port, 115200, identity=initial_identity)
+        self._serial = SerialWrapper(serial_port, BAUDRATE, identity=initial_identity)
 
         self._servos = tuple(
             Servo(self._serial, index) for index in range(12)
@@ -80,6 +81,7 @@ class ServoBoard(Board):
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
+            # Filter to USB vendor and product ID of the SR v4 servo board
             if port.vid == 0x1BDA and port.pid == 0x0011:
                 # Create board identity from USB port info
                 initial_identity = get_USB_identity(port)
