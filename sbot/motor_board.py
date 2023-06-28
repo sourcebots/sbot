@@ -5,6 +5,7 @@ import atexit
 import logging
 from enum import IntEnum
 from types import MappingProxyType
+from typing import NamedTuple
 
 from serial.tools.list_ports import comports
 
@@ -24,6 +25,25 @@ class MotorPower(IntEnum):
     """Special values for motor power."""
     BRAKE = 0
     COAST = -1024  # A value outside the allowable range
+
+
+class MotorStatus(NamedTuple):
+    """A tuple representing the status of the motor board."""
+    output_faults: tuple[bool, ...]
+    input_voltage: float
+
+    @classmethod
+    def from_status_response(cls, response: str) -> MotorStatus:
+        """
+        Create a MotorStatus object from the response to a status command.
+
+        :param response: The response from a *STATUS? command.
+        :return: A MotorStatus object.
+        """
+        data = response.split(':')
+        output_faults = tuple((port == '1') for port in data[0].split(','))
+        input_voltage = float(data[1]) / 1000
+        return cls(output_faults, input_voltage)
 
 
 class MotorBoard(Board):
@@ -149,20 +169,16 @@ class MotorBoard(Board):
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
+    @property
     @log_to_debug
-    def status(self) -> tuple[list[bool], float]:
+    def input_voltage(self) -> float:
         """
-        Read the board's status.
+        The input voltage to the board.
 
-        :return: A tuple of the output faults and the input voltage.
+        :return: The input voltage to the board.
         """
         response = self._serial.query('*STATUS?')
-
-        data = response.split(':')
-        output_faults = [(port == '1') for port in data[0].split(',')]
-        input_voltage = float(data[1]) / 1000
-
-        return output_faults, input_voltage
+        return MotorStatus.from_status_response(response).input_voltage
 
     @log_to_debug
     def reset(self) -> None:
@@ -255,6 +271,17 @@ class Motor:
         """
         response = self._serial.query(f'MOT:{self._index}:I?')
         return float(response) / 1000
+
+    @property
+    @log_to_debug
+    def in_fault(self) -> bool:
+        """
+        Check if the motor is in a fault state.
+
+        :return: True if the motor is in a fault state, False otherwise.
+        """
+        response = self._serial.query('*STATUS?')
+        return MotorStatus.from_status_response(response).output_faults[self._index]
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__qualname__} index={self._index} {self._serial}>"

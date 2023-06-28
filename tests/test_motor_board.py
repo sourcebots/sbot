@@ -76,6 +76,8 @@ def test_motor_board(motorboard_serial: MockMotorBoard) -> None:
     serial_wrapper._add_responses([
         ("*IDN?", "Student Robotics:MCv4B:TEST456:4.4"),
         ("*STATUS?", "0,1:5432"),
+        ("*STATUS?", "0,1:5432"),
+        ("*STATUS?", "0,1:5432"),
         ("*RESET", "ACK"),
     ])
 
@@ -83,7 +85,9 @@ def test_motor_board(motorboard_serial: MockMotorBoard) -> None:
     assert motorboard.identify().sw_version == "4.4"
 
     # Test that we can get the motor board status
-    assert motorboard.status() == ([False, True], 5.432)
+    assert motorboard.input_voltage == 5.432
+    assert motorboard.motors[0].in_fault is False
+    assert motorboard.motors[1].in_fault is True
 
     # Test that we can reset the motor board
     motorboard.reset()

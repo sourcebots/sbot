@@ -5,6 +5,7 @@ import atexit
 import logging
 from enum import IntEnum
 from types import MappingProxyType
+from typing import NamedTuple
 
 from serial.tools.list_ports import comports
 
@@ -30,6 +31,30 @@ class PowerOutputPosition(IntEnum):
     L2 = 4
     L3 = 5
     FIVE_VOLT = 6
+
+
+class PowerStatus(NamedTuple):
+    """A named tuple containing the values of the power status output."""
+    overcurrent: tuple[bool, ...]
+    temperature: float
+    fan_running: bool
+    regulator_voltage: float
+
+    @classmethod
+    def from_status_response(cls, response: str) -> PowerStatus:
+        """
+        Create a PowerStatus object from the response to a status command.
+
+        :param response: The response from a *STATUS? command.
+        :return: A PowerStatus object.
+        """
+        oc_flags, temp, fan_running, raw_voltage, *_ = response.split(':')
+        return cls(
+            overcurrent=tuple((x == '1') for x in oc_flags.split(',')),
+            temperature=int(temp),
+            fan_running=(fan_running == '1'),
+            regulator_voltage=float(raw_voltage) / 1000,
+        )
 
 
 # This output is always on, and cannot be controlled via the API.
@@ -192,8 +217,7 @@ class PowerBoard(Board):
         :return: The temperature of the power board.
         """
         response = self._serial.query('*STATUS?')
-        _, temp, *_ = response.split(':')
-        return int(temp)
+        return PowerStatus.from_status_response(response).temperature
 
     @property
     @log_to_debug
@@ -206,8 +230,7 @@ class PowerBoard(Board):
         :return: Whether the fan is running.
         """
         response = self._serial.query('*STATUS?')
-        _, _, fan, *_ = response.split(':')
-        return fan == '1'
+        return PowerStatus.from_status_response(response).fan_running
 
     @property
     @log_to_debug
@@ -218,8 +241,7 @@ class PowerBoard(Board):
         :return: The voltage of the onboard 5V regulator.
         """
         response = self._serial.query('*STATUS?')
-        _, _, _, raw_voltage, *_ = response.split(':')
-        return float(raw_voltage) / 1000
+        return PowerStatus.from_status_response(response).regulator_voltage
 
     @log_to_debug
     def reset(self) -> None:
@@ -373,9 +395,7 @@ class Output:
         :return: Whether the output is in an overcurrent state.
         """
         response = self._serial.query('*STATUS?')
-        oc, *_ = response.split(':')
-        port_oc = [(x == '1') for x in oc.split(',')]
-        return port_oc[self._index]
+        return PowerStatus.from_status_response(response).overcurrent[self._index]
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__qualname__} index={self._index} {self._serial}>"

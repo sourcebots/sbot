@@ -4,6 +4,7 @@ from __future__ import annotations
 import atexit
 import logging
 from types import MappingProxyType
+from typing import NamedTuple
 
 from serial.tools.list_ports import comports
 
@@ -22,6 +23,27 @@ START_DUTY_MAX = 2000
 
 logger = logging.getLogger(__name__)
 BAUDRATE = 115200  # Since the servo board is a USB device, this is ignored
+
+
+class ServoStatus(NamedTuple):
+    """A named tuple containing the values of the servo status output."""
+    watchdog_failed: bool
+    power_good: bool
+
+    @classmethod
+    def from_status_response(cls, response: str) -> ServoStatus:
+        """
+        Create a ServoStatus from a status response.
+
+        :param response: The response from a *STATUS? command.
+        :return: The ServoStatus.
+        """
+        data = response.split(':')
+
+        return cls(
+            watchdog_failed=(data[0] == '1'),
+            power_good=(data[1] == '1'),
+        )
 
 
 class ServoBoard(Board):
@@ -145,19 +167,15 @@ class ServoBoard(Board):
         return BoardIdentity(*response.split(':'))
 
     @log_to_debug
-    def status(self) -> tuple[bool, bool]:
+    def status(self) -> ServoStatus:
         """
         Get the board's status.
 
-        :return: A tuple of the watchdog fail and pgood status.
+        :return: A named tuple of the watchdog fail and pgood status.
         """
         response = self._serial.query('*STATUS?')
 
-        data = response.split(':')
-        watchdog_fail = (data[0] == '1')
-        pgood = (data[1] == '1')
-
-        return watchdog_fail, pgood
+        return ServoStatus.from_status_response(response)
 
     @log_to_debug
     def reset(self) -> None:
