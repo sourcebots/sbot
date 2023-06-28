@@ -253,7 +253,7 @@ class Pin:
         """
         if not isinstance(value, GPIOPinMode):
             raise IOError('Pin mode only supports being set to a GPIOPinMode')
-        self._serial.write(f'PIN:{self._index}:MODE:SET:{value}')
+        self._serial.write(f'PIN:{self._index}:MODE:SET:{value.value}')
 
     @property
     @log_to_debug
