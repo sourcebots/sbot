@@ -1,4 +1,4 @@
-.PHONY: lint type test isort isort-check build upload
+.PHONY: lint type test test-html isort isort-check build upload
 
 PYMODULE:=sbot
 TESTS:=tests
@@ -13,6 +13,9 @@ type:
 
 test:
 	pytest --cov=$(PYMODULE) --cov-report=term --cov-report=xml $(TESTS)
+
+test-html:
+	pytest --cov=$(PYMODULE) --cov-report=html $(TESTS)
 
 isort-check:
 	python -m isort --check $(PYMODULE)
