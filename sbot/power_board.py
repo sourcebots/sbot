@@ -36,7 +36,7 @@ class PowerOutputPosition(IntEnum):
 class PowerStatus(NamedTuple):
     """A named tuple containing the values of the power status output."""
     overcurrent: tuple[bool, ...]
-    temperature: float
+    temperature: int
     fan_running: bool
     regulator_voltage: float
 
