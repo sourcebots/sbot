@@ -84,7 +84,10 @@ class Arduino(Board):
         )
 
         self._pins = (
-            tuple(Pin(self._serial, index, supports_analog=False) for index in range(14))
+            tuple(  # Pins 0 and 1 are reserved for serial comms
+                Pin(self._serial, index, supports_analog=False, disabled=True)
+                for index in range(2))
+            + tuple(Pin(self._serial, index, supports_analog=False) for index in range(2, 14))
             + tuple(Pin(self._serial, index, supports_analog=True) for index in range(14, 20))
         )
 
@@ -196,12 +199,12 @@ class Arduino(Board):
         :return: The distance measured by the ultrasound sensor in mm.
         """
         try:  # bounds check
-            _ = self.pins[pulse_pin]
-        except IndexError:
+            self.pins[pulse_pin]._check_if_disabled()
+        except (IndexError, IOError):
             raise ValueError("Invalid pulse pin provided") from None
         try:
-            _ = self.pins[echo_pin]
-        except IndexError:
+            self.pins[echo_pin]._check_if_disabled()
+        except (IndexError, IOError):
             raise ValueError("Invalid echo pin provided") from None
 
         response = self._serial.query(f'ULTRASOUND:{pulse_pin}:{echo_pin}:MEASURE?')
@@ -219,12 +222,19 @@ class Pin:
     :param index: The index of the pin.
     :param supports_analog: Whether the pin supports analog reads.
     """
-    __slots__ = ('_serial', '_index', '_supports_analog')
+    __slots__ = ('_serial', '_index', '_supports_analog', '_disabled')
 
-    def __init__(self, serial: SerialWrapper, index: int, supports_analog: bool):
+    def __init__(
+        self,
+        serial: SerialWrapper,
+        index: int,
+        supports_analog: bool,
+        disabled: bool = False
+    ):
         self._serial = serial
         self._index = index
         self._supports_analog = supports_analog
+        self._disabled = disabled
 
     @property
     @log_to_debug
@@ -234,8 +244,10 @@ class Pin:
 
         This is fetched from the board.
 
+        :raises IOError: If this pin cannot be controlled.
         :return: The mode of the pin.
         """
+        self._check_if_disabled()
         mode = self._serial.query(f'PIN:{self._index}:MODE:GET?')
         return GPIOPinMode(mode)
 
@@ -249,8 +261,10 @@ class Pin:
         To do digital writes set the mode to OUTPUT.
 
         :param value: The mode to set the pin to.
-        :raises IOError: If the pin mode is not a GPIOPinMode
+        :raises IOError: If the pin mode is not a GPIOPinMode.
+        :raises IOError: If this pin cannot be controlled.
         """
+        self._check_if_disabled()
         if not isinstance(value, GPIOPinMode):
             raise IOError('Pin mode only supports being set to a GPIOPinMode')
         self._serial.write(f'PIN:{self._index}:MODE:SET:{value.value}')
@@ -262,8 +276,10 @@ class Pin:
         Perform a digital read on the pin.
 
         :raises IOError: If the pin's current mode does not support digital read
+        :raises IOError: If this pin cannot be controlled.
         :return: The digital value of the pin.
         """
+        self._check_if_disabled()
         if self.mode not in DIGITAL_READ_MODES:
             raise IOError(f'Digital read is not supported in {self.mode}')
         response = self._serial.query(f'PIN:{self._index}:DIGITAL:GET?')
@@ -276,8 +292,10 @@ class Pin:
         Write a digital value to the pin.
 
         :param value: The value to write to the pin.
-        :raises IOError: If the pin's current mode does not support digital write
+        :raises IOError: If the pin's current mode does not support digital write.
+        :raises IOError: If this pin cannot be controlled.
         """
+        self._check_if_disabled()
         if self.mode not in DIGITAL_WRITE_MODES:
             raise IOError(f'Digital write is not supported in {self.mode}')
         if value:
@@ -293,12 +311,14 @@ class Pin:
 
         This is returned in volts. Only pins A0-A5 support analog reads.
 
-        :raises IOError: If the pin or its current mode does not support analog read
+        :raises IOError: If the pin or its current mode does not support analog read.
+        :raises IOError: If this pin cannot be controlled.
         :return: The analog voltage on the pin, ranges from 0 to 5.
         """
         ADC_MAX = 1023  # 10 bit ADC
         ADC_MIN = 0
 
+        self._check_if_disabled()
         if self.mode not in ANALOG_READ_MODES:
             raise IOError(f'Analog read is not supported in {self.mode}')
         if not self._supports_analog:
@@ -307,10 +327,20 @@ class Pin:
         # map the response from the ADC range to the voltage range
         return map_to_float(int(response), ADC_MIN, ADC_MAX, 0.0, 5.0)
 
+    def _check_if_disabled(self) -> None:
+        """
+        Check if the pin is disabled.
+
+        :raises IOError: If the pin is disabled.
+        """
+        if self._disabled:
+            raise IOError('This pin cannot be controlled.')
+
     def __repr__(self) -> str:
         return (
             f"<{self.__class__.__qualname__} "
-            f"index={self._index} analog={self._supports_analog} {self._serial}>"
+            f"index={self._index} analog={self._supports_analog} "
+            f"disabled={self._disabled} {self._serial}>"
         )
 
 

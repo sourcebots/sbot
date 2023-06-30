@@ -77,9 +77,11 @@ def test_arduino_ultrasound(arduino_serial: MockArduino) -> None:
 
     # Test that the ultrasound method checks the pin numbers are valid
     with pytest.raises(ValueError):
-        arduino.ultrasound_measure(0, 25)
+        arduino.ultrasound_measure(0, 1)
     with pytest.raises(ValueError):
-        arduino.ultrasound_measure(25, 0)
+        arduino.ultrasound_measure(2, 25)
+    with pytest.raises(ValueError):
+        arduino.ultrasound_measure(25, 2)
 
 
 def test_arduino_pins(arduino_serial: MockArduino) -> None:
