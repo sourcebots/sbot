@@ -98,13 +98,13 @@ def test_power_board(powerboard_serial: MockPowerBoard) -> None:
     assert power_board.battery_sensor.voltage == 12.45
 
     # Test that we can get the power board temperature
-    assert power_board.temperature == 39
+    assert power_board.status.temperature == 39
 
     # Test that we can get the power board fan status
-    assert power_board.fan is False
+    assert power_board.status.fan_running is False
 
     # Test that we can get the power board regulator voltage
-    assert power_board.regulator_voltage == 5.234
+    assert power_board.status.regulator_voltage == 5.234
 
     # Test that we can get the power board start button status
     assert power_board._start_button() is True

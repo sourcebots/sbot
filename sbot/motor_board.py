@@ -31,6 +31,7 @@ class MotorStatus(NamedTuple):
     """A tuple representing the status of the motor board."""
     output_faults: tuple[bool, ...]
     input_voltage: float
+    other: list[str] = []
 
     @classmethod
     def from_status_response(cls, response: str) -> MotorStatus:
@@ -38,12 +39,13 @@ class MotorStatus(NamedTuple):
         Create a MotorStatus object from the response to a status command.
 
         :param response: The response from a *STATUS? command.
+        :raise TypeError: If the response is invalid.
         :return: A MotorStatus object.
         """
-        data = response.split(':')
-        output_faults = tuple((port == '1') for port in data[0].split(','))
-        input_voltage = float(data[1]) / 1000
-        return cls(output_faults, input_voltage)
+        output_fault_str, input_voltage_mv, *other = response.split(':')
+        output_faults = tuple((port == '1') for port in output_fault_str.split(','))
+        input_voltage = float(input_voltage_mv) / 1000
+        return cls(output_faults, input_voltage, other)
 
 
 class MotorBoard(Board):
@@ -171,14 +173,14 @@ class MotorBoard(Board):
 
     @property
     @log_to_debug
-    def input_voltage(self) -> float:
+    def status(self) -> MotorStatus:
         """
-        The input voltage to the board.
+        The status of the board.
 
-        :return: The input voltage to the board.
+        :return: The status of the board.
         """
         response = self._serial.query('*STATUS?')
-        return MotorStatus.from_status_response(response).input_voltage
+        return MotorStatus.from_status_response(response)
 
     @log_to_debug
     def reset(self) -> None:

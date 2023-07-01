@@ -39,6 +39,7 @@ class PowerStatus(NamedTuple):
     temperature: int
     fan_running: bool
     regulator_voltage: float
+    other: list[str] = []
 
     @classmethod
     def from_status_response(cls, response: str) -> PowerStatus:
@@ -46,14 +47,16 @@ class PowerStatus(NamedTuple):
         Create a PowerStatus object from the response to a status command.
 
         :param response: The response from a *STATUS? command.
+        :raise TypeError: If the response is invalid.
         :return: A PowerStatus object.
         """
-        oc_flags, temp, fan_running, raw_voltage, *_ = response.split(':')
+        oc_flags, temp, fan_running, raw_voltage, *other = response.split(':')
         return cls(
             overcurrent=tuple((x == '1') for x in oc_flags.split(',')),
             temperature=int(temp),
             fan_running=(fan_running == '1'),
             regulator_voltage=float(raw_voltage) / 1000,
+            other=other,
         )
 
 
@@ -207,41 +210,14 @@ class PowerBoard(Board):
 
     @property
     @log_to_debug
-    def temperature(self) -> int:
+    def status(self) -> PowerStatus:
         """
-        Return the temperature of the power board.
+        Return the status of the power board.
 
-        This is measured with an external sensor between the high current outputs.
-        Measured in degrees Celsius.
-
-        :return: The temperature of the power board.
+        :return: The status of the power board.
         """
         response = self._serial.query('*STATUS?')
-        return PowerStatus.from_status_response(response).temperature
-
-    @property
-    @log_to_debug
-    def fan(self) -> bool:
-        """
-        Return the status of the fan.
-
-        The fan automatically turns on when the temperature exceeds 40 degrees Celsius.
-
-        :return: Whether the fan is running.
-        """
-        response = self._serial.query('*STATUS?')
-        return PowerStatus.from_status_response(response).fan_running
-
-    @property
-    @log_to_debug
-    def regulator_voltage(self) -> float:
-        """
-        Return the voltage of the onboard 5V regulator.
-
-        :return: The voltage of the onboard 5V regulator.
-        """
-        response = self._serial.query('*STATUS?')
-        return PowerStatus.from_status_response(response).regulator_voltage
+        return PowerStatus.from_status_response(response)
 
     @log_to_debug
     def reset(self) -> None:

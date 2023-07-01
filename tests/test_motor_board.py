@@ -85,7 +85,7 @@ def test_motor_board(motorboard_serial: MockMotorBoard) -> None:
     assert motorboard.identify().sw_version == "4.4"
 
     # Test that we can get the motor board status
-    assert motorboard.input_voltage == 5.432
+    assert motorboard.status.input_voltage == 5.432
     assert motorboard.motors[0].in_fault is False
     assert motorboard.motors[1].in_fault is True
 
