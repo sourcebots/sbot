@@ -111,7 +111,10 @@ def test_robot(monkeypatch, caplog) -> None:
         obtain_lock()
 
     # Check that an exception is raised if we try to access metadata before wait_start
-    with pytest.raises(MetadataNotReadyError):
+    with pytest.raises(
+        MetadataNotReadyError,
+        match=".*can only be used after wait_start has been called"
+    ):
         r.zone
 
     r.wait_start()
