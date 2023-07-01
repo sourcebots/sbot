@@ -1,6 +1,6 @@
 # sbot
 
-[![Lint & build](https://github.com/sourcebots/sbot/actions/workflows/check.yml/badge.svg)](https://github.com/sourcebots/sbot/actions/workflows/check.yml)
+[![Lint & build](https://github.com/sourcebots/sbot/actions/workflows/test_build.yml/badge.svg)](https://github.com/sourcebots/sbot/actions/workflows/test_build.yml)
 [![PyPI version](https://badge.fury.io/py/sbot.svg)](https://badge.fury.io/py/sbot)
 [![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=stable)](http://pip.pypa.io/en/stable/?badge=stable)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://opensource.org/licenses/MIT)
