@@ -1,85 +1,111 @@
 """
 Implementation of loading metadata.
 
-Metadata is a dictionary of arbitrary information about the environment that the robot is
-running in. It usually includes the starting zone and a flag indicating whether we are in
+Metadata is a dictionary of information about the environment that the robot is running in.
+It usually includes the starting zone and a flag indicating whether we are in
 competition or development mode. Metadata is stored in a JSON file, typically on a
 competition USB stick. The environment variable SBOT_METADATA_PATH specifies a directory
-that is (recursively) searched for a JSON file to load.
+where it, and its children, are searched for the JSON file to load.
 
 Example metadata file:
-
-    {
-        "arena": "A",
-        "zone": 2,
-        "is_competition": true
-    }
+```json
+{
+    "zone": 2,
+    "is_competition": true
+}
+```
 """
+from __future__ import annotations
 
 import json
 import logging
 import os
-from typing import Any, Dict, Optional
+from pathlib import Path
+from typing import TypedDict
 
-LOGGER = logging.getLogger(__name__)
+from .exceptions import MetadataKeyError
 
+logger = logging.getLogger(__name__)
+
+# The name of the environment variable that specifies the path to search
+# for metadata USB sticks
 METADATA_ENV_VAR = "SBOT_METADATA_PATH"
+# The name of the metadata file
+METADATA_NAME = "metadata.json"
 
 
-class MetadataKeyError(KeyError):
-    """Raised when trying to access a metadata key for which no value exists."""
-
-    def __init__(self, key: str):
-        self.key = key
-
-    def __str__(self) -> str:
-        return f"Key {self.key!r} not present in metadata, or no metadata was available"
-
-
-class MetadataNotReadyError(RuntimeError):
-    """Raised when trying to access metadata before it has been loaded."""
-
-    def __str__(self) -> str:
-        return (
-            "Metadata (e.g. zone or is_competition) can only be used after"
-            " wait_start has been called"
-        )
-
-
-def load(*, fallback: Dict[str, Any] = {}) -> Dict[str, Any]:
+class Metadata(TypedDict):
     """
-    Searches the path identified by METADATA_ENV_VAR for a JSON file and reads it.
+    The structure of the metadata dictionary.
 
-    If no file is found, it falls back to the `fallback` dict.
+    :param is_competition: Whether the robot is in competition mode
+    :param zone: The zone that the robot is in
+    """
+    is_competition: bool
+    zone: int
+
+
+# The default metadata to use if no file is found
+DEFAULT_METADATA: Metadata = {
+    "is_competition": False,
+    "zone": 0,
+}
+
+
+def load() -> Metadata:
+    """
+    Search for a metadata file and load it.
+
+    Searches the path identified by SBOT_METADATA_PATH and its children for
+    metadata.json (set by METADATA_NAME) and reads it.
+
+    :raises FileNotFoundError: If no metadata file is found
+    :return: The metadata dictionary, either loaded from a file or the default
     """
     search_path = os.environ.get(METADATA_ENV_VAR)
     if search_path:
-        path = _find_file(search_path)
-        if path:
-            LOGGER.info(f"Loading metadata from {path}")
-            return _read_file(path)
+        search_root = Path(search_path)
+        if not search_root.is_dir():
+            raise FileNotFoundError(f"Metaddata path {search_path} does not exist")
+        for item in Path(search_path).iterdir():
+            if item.is_dir():
+                if (item / METADATA_NAME).exists():
+                    return _load_metadata(item / METADATA_NAME)
+            else:
+                if item.name == METADATA_NAME:
+                    return _load_metadata(item)
         else:
-            LOGGER.info(f"No JSON metadata files found in {search_path}")
+            logger.info(f"No JSON metadata files found in {search_path}")
     else:
-        LOGGER.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
-    return fallback
+        logger.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
+    return DEFAULT_METADATA
 
 
-def _find_file(search_path: str) -> Optional[str]:
-    for dir_path, dir_names, file_names in os.walk(search_path):
-        for file_name in file_names:
-            if file_name.endswith(".json"):
-                return os.path.join(dir_path, file_name)
-    return None
+def _load_metadata(path: Path) -> Metadata:
+    """
+    Load the metadata from a JSON file, found by `load`.
 
+    The file must be a JSON dictionary with the keys `is_competition` and `zone`.
 
-def _read_file(path: str) -> Dict[str, Any]:
-    with open(path) as file:
+    :param path: The path to the metadata file
+    :raises RuntimeError: If the metadata file is invalid JSON
+    :raises TypeError: If the metadata file is not a JSON dictionary
+    :raises MetadataKeyError: If the metadata file is missing a required key
+    :return: The metadata dictionary
+    """
+    logger.info(f"Loading metadata from {path}")
+    with path.open() as file:
         try:
-            obj = json.load(file)
-        except json.decoder.JSONDecodeError:
-            raise RuntimeError("Unable to decode metadata. Ask a volunteer for help.")
-    if isinstance(obj, dict):
-        return obj
-    else:
-        raise TypeError("Top-level value in metadata file must be a JSON object")
+            obj: Metadata = json.load(file)
+        except json.decoder.JSONDecodeError as e:
+            raise RuntimeError("Unable to load metadata.") from e
+
+    if not isinstance(obj, dict):
+        raise TypeError(f"Found metadata file, but format is invalid. Got: {obj}")
+
+    # check required keys exist at runtime
+    for key in Metadata.__annotations__.keys():
+        if key not in obj.keys():
+            raise MetadataKeyError(key)
+
+    return obj

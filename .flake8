@@ -1,18 +1,14 @@
 [flake8]
-exclude =
-    .git,
-    .pybuild,
-    .eggs,
-    __pycache__,
-    .venv
-
+max_line_length = 95
 ignore =
-    #Don't require docstrings on magic methods.
+    # Don't require imperative mood docstrings.
+    D401,
+    # Ignore docstrings on magic methods
     D105,
-    #Don't require docstrings for __init__ methods.
-    D107
-    #Don't require imperative mood docstrings.
-    D401
-
-max_line_length = 90
+    # Ignore docstrings on init methods
+    D107,
+    # Allow line breaks before and after a binary operator
+    W503, W504,
+    # Ignore TODO comments
+    T000,
 

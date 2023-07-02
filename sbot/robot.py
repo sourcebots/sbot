@@ -1,189 +1,303 @@
-"""SourceBots Robot Definition."""
+"""The main entry point for the sbot package."""
+from __future__ import annotations
 
+import itertools
 import logging
-from datetime import timedelta
 from time import sleep
-from typing import Any, Dict, Optional, TypeVar, cast
+from types import MappingProxyType
+from typing import Mapping
 
-from j5 import BaseRobot, BoardGroup
-from j5 import __version__ as j5_version
-from j5.backends import Backend, CommunicationError, Environment
-from j5.boards import Board
-from j5.boards.sb import SBArduinoBoard
-from j5.boards.sr.v4 import MotorBoard, PowerBoard, ServoBoard
-from j5.components.piezo import Note
-from j5_zoloto import ZolotoCameraBoard
+from . import game_specific, metadata, timeout
+from ._version import __version__
+from .arduino import Arduino
+from .camera import AprilCamera, _setup_cameras
+from .exceptions import MetadataNotReadyError
+from .logging import log_to_debug, setup_logging
+from .metadata import Metadata
+from .motor_board import MotorBoard
+from .power_board import Note, PowerBoard
+from .servo_board import ServoBoard
+from .utils import obtain_lock, singular
 
-from . import metadata
-from .env import HardwareEnvironment
-from .timeout import kill_after_delay
-
-__version__ = "0.10.1"
-
-LOGGER = logging.getLogger(__name__)
-
-GAME_LENGTH = 120
-
-BoardT = TypeVar("BoardT", bound=Board)
-BackendT = TypeVar("BackendT", bound=Backend)
+logger = logging.getLogger(__name__)
 
 
-class Robot(BaseRobot):
-    """SourceBots robot."""
+class Robot:
+    """
+    The main robot class that provides access to all the boards.
+
+    There can be only one instance of this class active in your operating
+    system at a time, creating a second instance will raise an OSError.
+
+    :param debug: Enable debug logging to the console, defaults to False
+    :param wait_start: Wait in the constructor until the start button is pressed,
+        defaults to True
+    :param trace_logging: Enable trace level logging to the console, defaults to False
+    :param manual_boards: A dictionary of board types to a list of serial port paths
+        to allow for connecting to boards that are not automatically detected, defaults to None
+    """
+    __slots__ = (
+        '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
+        '_arduinos', '_cameras',
+    )
 
     def __init__(
-            self,
-            *,
-            debug: bool = False,
-            wait_start: bool = True,
-            require_all_boards: bool = True,
-            environment: Environment = HardwareEnvironment,
+        self,
+        *,
+        debug: bool = False,
+        wait_start: bool = True,
+        trace_logging: bool = False,
+        manual_boards: dict[str, list[str]] | None = None,
     ) -> None:
-        self._require_all_boards = require_all_boards
-        self._metadata: Optional[Dict[str, Any]] = None
-        self._environment = environment
+        self._lock = obtain_lock()
+        self._metadata: Metadata | None = None
 
-        if debug:
-            LOGGER.setLevel(logging.DEBUG)
-        LOGGER.info(f"SourceBots API v{__version__}")
-        LOGGER.debug("Debug Mode is enabled")
-        LOGGER.debug(f"j5 Version: {j5_version}")
+        setup_logging(debug, trace_logging)
 
-        self._init_power_board()
-        self._init_auxilliary_boards()
+        logger.info(f"SourceBots API v{__version__}")
+
+        if manual_boards:
+            self._init_power_board(manual_boards.get(PowerBoard.get_board_type(), []))
+            self._init_aux_boards(manual_boards)
+        else:
+            self._init_power_board()
+            self._init_aux_boards()
+        self._init_camera()
         self._log_connected_boards()
 
         if wait_start:
             self.wait_start()
 
-    def _init_power_board(self) -> None:
-        self._power_boards = BoardGroup.get_board_group(
-            PowerBoard,
-            self._environment.get_backend(PowerBoard),
-        )
-        self.power_board: PowerBoard = self._power_boards.singular()
+    def _init_power_board(self, manual_boards: list[str] | None = None) -> None:
+        """
+        Locate the PowerBoard and enable all the outputs to power the other boards.
 
-        # Power on robot, so that we can find other boards.
-        self.power_board.outputs.power_on()
+        :param manual_boards: Serial port paths to also check for power boards,
+            defaults to None
+        :raises RuntimeError: If exactly one PowerBoard is not found
+        """
+        power_boards = PowerBoard._get_supported_boards(manual_boards)
+        self._power_board = singular(power_boards)
+        self._power_board.outputs.power_on()
+        # TODO delay for boards to power up ???
 
-    def _init_auxilliary_boards(self) -> None:
-        self.motor_boards = self._environment.get_board_group(
-            MotorBoard,
-        )
+    def _init_aux_boards(self, manual_boards: dict[str, list[str]] | None = None) -> None:
+        """
+        Locate the motor boards, servo boards, and Arduinos.
 
-        self.servo_boards = self._environment.get_board_group(
-            ServoBoard,
-        )
+        All boards are located automatically, but additional serial ports can be
+        provided using the manual_boards parameter. Located boards are queried for
+        their identity and firmware version.
 
-        self.arduinos = self._environment.get_board_group(
-            SBArduinoBoard,
-        )
+        :param manual_boards:  A dictionary of board types to a list of additional
+            serial port paths that should be checked for boards of that type, defaults to None
+        """
+        if manual_boards is None:
+            manual_boards = {}
 
-        self.cameras = self._environment.get_board_group(
-            ZolotoCameraBoard,
-        )
+        manual_motorboards = manual_boards.get(MotorBoard.get_board_type(), [])
+        manual_servoboards = manual_boards.get(ServoBoard.get_board_type(), [])
+        manual_arduinos = manual_boards.get(Arduino.get_board_type(), [])
 
-    def _get_optional_board(
-            self,
-            board_group: BoardGroup[BoardT, BackendT],
-    ) -> Optional[BoardT]:
-        try:
-            return board_group.singular()
-        except CommunicationError:
-            if self._require_all_boards:
-                raise
-            else:
-                board_name = board_group.backend_class.board.__name__
-                LOGGER.info(f"Did not find a {board_name} (not required)")
-                return None
+        self._motor_boards = MotorBoard._get_supported_boards(manual_motorboards)
+        self._servo_boards = ServoBoard._get_supported_boards(manual_servoboards)
+        self._arduinos = Arduino._get_supported_boards(manual_arduinos)
+
+    def _init_camera(self) -> None:
+        """
+        Locate cameras that we have calibration data for.
+
+        These cameras are used for AprilTag detection and provide location data of
+        markers in its field of view.
+        """
+        self._cameras = MappingProxyType(_setup_cameras(game_specific.MARKER_SIZES))
 
     def _log_connected_boards(self) -> None:
-        for board in Board.BOARDS:
-            LOGGER.info(f"Found {board.name}, serial: {board.serial_number}")
-            LOGGER.debug(
-                f"Firmware Version of {board.serial_number}: {board.firmware_version}",
+        """
+        Log the board types and serial numbers of all the boards connected to the robot.
+
+        Firmware versions are also logged at debug level.
+        """
+        boards = itertools.chain(
+            [self.power_board],  # we only have one power board so make it iterable
+            self.motor_boards.values(),
+            self.servo_boards.values(),
+            self.arduinos.values(),
+            self._cameras.values(),
+        )
+        for board in boards:
+            identity = board.identify()
+            board_type = board.__class__.__name__
+            logger.info(f"Found {board_type}, serial: {identity.asset_tag}")
+            logger.debug(
+                f"Firmware Version of {identity.asset_tag}: {identity.sw_version}, "
+                f"reported type: {identity.board_type}",
             )
+
+    @property
+    def power_board(self) -> PowerBoard:
+        """
+        Access the power board connected to the robot.
+
+        :return: The power board object
+        """
+        return self._power_board
+
+    @property
+    def motor_boards(self) -> Mapping[str, MotorBoard]:
+        """
+        Access the motor boards connected to the robot.
+
+        These are indexed by their serial number.
+
+        :return: A mapping of serial numbers to motor boards
+        """
+        return self._motor_boards
 
     @property
     def motor_board(self) -> MotorBoard:
         """
-        Get the motor board.
+        Access the motor board connected to the robot.
 
-        A CommunicationError is raised if there isn't exactly one attached.
+        This can only be used if there is exactly one motor board connected.
+
+        :return: The motor board object
+        :raises RuntimeError: If there is not exactly one motor board connected
         """
-        return self.motor_boards.singular()
+        return singular(self._motor_boards)
+
+    @property
+    def servo_boards(self) -> Mapping[str, ServoBoard]:
+        """
+        Access the servo boards connected to the robot.
+
+        These are indexed by their serial number.
+
+        :return: A mapping of serial numbers to servo boards
+        """
+        return self._servo_boards
 
     @property
     def servo_board(self) -> ServoBoard:
         """
-        Get the servo board.
+        Access the servo board connected to the robot.
 
-        A CommunicationError is raised if there isn't exactly one attached.
+        This can only be used if there is exactly one servo board connected.
+
+        :return: The servo board object
+        :raises RuntimeError: If there is not exactly one servo board connected
         """
-        return self.servo_boards.singular()
+        return singular(self._servo_boards)
 
     @property
-    def arduino(self) -> SBArduinoBoard:
+    def arduinos(self) -> Mapping[str, Arduino]:
         """
-        Get the arduino.
+        Access the Arduinos connected to the robot.
 
-        A CommunicationError is raised if there isn't exactly one attached.
+        These are indexed by their serial number.
+
+        :return: A mapping of serial numbers to Arduinos
         """
-        return self.arduinos.singular()
+        return self._arduinos
 
     @property
-    def camera(self) -> ZolotoCameraBoard:
+    def arduino(self) -> Arduino:
         """
-        Get the robot's camera interface.
+        Access the Arduino connected to the robot.
 
-        :returns: a :class:`j5_zoloto.board.ZolotoCameraBoard`.
+        This can only be used if there is exactly one Arduino connected.
+
+        :return: The Arduino object
+        :raises RuntimeError: If there is not exactly one Arduino connected
         """
-        return self.cameras.singular()
-
-    # Metadata
+        return singular(self._arduinos)
 
     @property
-    def metadata(self) -> Dict[str, Any]:
-        """The game metadata."""
+    def camera(self) -> AprilCamera:
+        """
+        Access the camera connected to the robot.
+
+        This can only be used if there is exactly one camera connected.
+        The robot class currently only supports one camera.
+
+        :return: The camera object
+        :raises RuntimeError: If there is not exactly one camera connected
+        """
+        return singular(self._cameras)
+
+    @log_to_debug
+    def sleep(self, secs: float) -> None:
+        """
+        Sleep for a number of seconds.
+
+        This is a convenience method that can be used instead of time.sleep().
+
+        :param secs: The number of seconds to sleep for
+        """
+        sleep(secs)
+
+    @property
+    @log_to_debug
+    def metadata(self) -> Metadata:
+        """
+        Fetch the robot's current metadata.
+
+        See the metadata module for more information.
+
+        :raises MetadataNotReadyError: If the start button has not been pressed yet
+        :return: The metadata dictionary
+        """
         if self._metadata is None:
-            raise metadata.MetadataNotReadyError()
+            raise MetadataNotReadyError()
         else:
             return self._metadata
 
     @property
+    @log_to_debug
     def zone(self) -> int:
-        """The robot's starting zone in the arena (0, 1, 2 or 3)."""
-        try:
-            return cast(int, self.metadata["zone"])
-        except KeyError:
-            raise metadata.MetadataKeyError("zone") from None
+        """
+        Get the zone that the robot is in.
+
+        :return: The robot's zone number
+        :raises MetadataNotReadyError: If the start button has not been pressed yet
+        """
+        return self.metadata['zone']
 
     @property
+    @log_to_debug
     def is_competition(self) -> bool:
-        """Whether the robot is in a competition or development environment."""
-        try:
-            return cast(bool, self.metadata["is_competition"])
-        except KeyError:
-            raise metadata.MetadataKeyError("is_competition") from None
+        """
+        Find out if the robot is in competition mode.
 
-    def sleep(self, secs: float) -> None:
-        """Pause the program for secs seconds."""
-        sleep(secs)
+        :return: Whether the robot is in competition mode
+        :raises MetadataNotReadyError: If the start button has not been pressed yet
+        """
+        return self.metadata['is_competition']
 
-    # Custom functionality
-
+    @log_to_debug
     def wait_start(self) -> None:
-        """Wait for the start button to be pressed."""
-        LOGGER.info("Waiting for start button.")
-        self.power_board.piezo.buzz(timedelta(seconds=0.1), Note.A6)
-        self.power_board.wait_for_start_flash()
-        LOGGER.info("Start button pressed.")
+        """
+        Wait for the start button to be pressed.
 
-        default_metadata: Dict[str, Any] = {
-            "is_competition": False,
-            "zone": 0,
-        }
-        self._metadata = metadata.load(fallback=default_metadata)
+        The power board will beep once when waiting for the start button.
+        The power board's run LED will flash while waiting for the start button.
+        Once the start button is pressed, the metadata will be loaded and the timeout
+        will start if in competition mode.
+        """
+        # ignore previous button presses
+        _ = self.power_board._start_button()
+        logger.info('Waiting for start button.')
+
+        self.power_board.piezo.buzz(0.1, Note.A6)
+        self.power_board._run_led.flash()
+
+        while not self.power_board._start_button():
+            sleep(0.1)
+        logger.info("Start button pressed.")
+        self.power_board._run_led.on()
+
+        if self._metadata is None:
+            self._metadata = metadata.load()
 
         if self.is_competition:
-            kill_after_delay(GAME_LENGTH)
+            timeout.kill_after_delay(game_specific.GAME_LENGTH)

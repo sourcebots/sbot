@@ -1,26 +1,35 @@
 # sbot
 
-[![CircleCI](https://circleci.com/gh/sourcebots/sbot.svg?style=svg)](https://circleci.com/gh/sourcebots/sbot)
+[![Lint & build](https://github.com/sourcebots/sbot/actions/workflows/test_build.yml/badge.svg)](https://github.com/sourcebots/sbot/actions/workflows/test_build.yml)
 [![PyPI version](https://badge.fury.io/py/sbot.svg)](https://badge.fury.io/py/sbot)
 [![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=stable)](http://pip.pypa.io/en/stable/?badge=stable)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://opensource.org/licenses/MIT)
 ![Bees](https://img.shields.io/badge/bees-110%25-yellow.svg)
 
-`sbot` - SourceBots Robot API - Powered by j5
+`sbot` - SourceBots Robot API
 
-This is the API for SourceBots, based on the [j5](https://github.com/j5api/j5)
-library for writing Robotics APIs. It will first be deployed at Smallpeice 2019.
-
-Much like it's predecessor, [robot-api](https://github.com/sourcebots/robot-api), `sbot` supports
-multiple backends, although should be more reliable as there is no `UNIX-AF` socket layer.
+This is the API for SourceBots, library for writing Robotics APIs.
+It will first be deployed at Smallpeice 2023.
 
 ## Installation
 
-Install: `pip install sbot`
+If you wish to install openCV from your package manager, you can install the base package with:
 
-Install with vision support: `pip install sbot[vision]`
+```bash
+pip install sbot
+```
+
+To install the full package, including openCV, you can install with:
+
+```bash
+pip install sbot[vision]
+```
 
 ## Usage
+
+The main entry point for the API is the `Robot` class.
+Intantiating this class will automatically detect and connect to any SR v4 boards connected to the device.
+By default, the `Robot` class will wait for the start button on the power board to be pressed before continuing.
 
 ```python
 
@@ -30,7 +39,8 @@ r = Robot()
 
 ```
 
-Or alternatively:
+To disable the waiting for the start button, you can pass `wait_start=False` to the constructor.
+The `wait_start` method needs to be called before the metadata is available.
 
 ```python
 
@@ -44,17 +54,13 @@ r.wait_start()
 
 ```
 
-## Adding camera calibrations
+## Developer Notes
 
-You will need to print off a [chAruco marker grid](https://docs.opencv.org/4.5.3/charuco_board.png).
+There are a number of considerations that have been made in the design of this API.
+Some of these may not be immediately obvious, so they are documented below.
 
-`opencv_interactive-calibration -t=charuco -sz=GRID_SIZE`
-
-Replace GRID_SIZE with the length of one of the larger squares (in mm) from the printed marker grid.
-
-Use `-ci=1` for specifying camera index if multiple cameras are connected.
-
-Point the camera at the marker grid. Until DF is at or below 30 then press S to save.
-This will output a `cameraParameters.xml` file. Place this file in `sbot/vision/calibrations` named after the camera model.
-
-You will need to edit the calibration file used in `sbot/vision/backend.py`.
+- The API is designed to raise exceptions for incorrect actions, such as trying to modify the output dictionary or assign a value directly to the motor object.
+- `MappingProxyType` is used to prevent the user from adding, removing or overwriting keys in any parts of the API that return a dictionary.
+- `tuple` is used to prevent the user from adding, removing or overwriting items in any parts of the API that would return a list.
+- `__slots__` is used to prevent the user from adding, removing or overwriting attributes in any parts of the API.
+- `sbot.serial_wrapper.SerialWrapper` handles automatic reconnection to the serial port if the connection is lost and impleents 3 retries on any serial operation before raising a `BoardDisconnectionError`.
