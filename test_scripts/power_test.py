@@ -234,7 +234,17 @@ def main():
         if os.path.exists(args.log):
             new_log = False
         with open(args.log, 'a', newline='') as csvfile:
-            fieldnames = ['first_name', 'last_name']
+            fieldnames = [
+                'asset', 'sw_version', 'input_volt',
+                'reg_volt', 'reg_current', 'reg_off_current',
+                'out_H0_off_current', 'out_H0_current', 'out_H0_global_current',
+                'out_H1_off_current', 'out_H1_current', 'out_H1_global_current',
+                'out_L0_off_current', 'out_L0_current', 'out_L0_global_current',
+                'out_L1_off_current', 'out_L1_current', 'out_L1_global_current',
+                'out_L2_off_current', 'out_L2_current', 'out_L2_global_current',
+                'out_L3_off_current', 'out_L3_current', 'out_L3_global_current',
+                'out_low_global_current', 'out_global_current',
+                'fan', 'run_led', 'err_led', 'buzzer', 'start_btn']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
                 writer.writeheader()

@@ -100,7 +100,15 @@ def main():
         if os.path.exists(args.log):
             new_log = False
         with open(args.log, 'a', newline='') as csvfile:
-            fieldnames = ['first_name', 'last_name']
+            fieldnames = [
+                'asset', 'sw_version', 'input_volt',
+                'motor_0_off_current', 'motor_1_off_current',
+            ] + [
+                f'motor_{motor}_{power * direction:.0f}_current'
+                for power in range(100, 10, -10)
+                for direction in (1, -1)
+                for motor in range(2)
+            ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
                 writer.writeheader()

@@ -83,7 +83,7 @@ def main():
         if os.path.exists(args.log):
             new_log = False
         with open(args.log, 'a', newline='') as csvfile:
-            fieldnames = ['first_name', 'last_name']
+            fieldnames = ['asset', 'sw_version', 'input_volt', 'servos_move']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
                 writer.writeheader()
