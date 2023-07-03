@@ -15,17 +15,10 @@ The test will:
 
 This assumes that the 5V output is the brain power output
 """
-# Power board:
-# - output switch (+5v)
-# - output current sense (+5v)
-# - global current sense
-# - uvlo
-# - buzzer
-# - start button
-# - leds
 import logging
+from time import sleep
 
-from sbot.power_board import PowerBoard
+from sbot.power_board import PowerBoard, PowerOutputPosition
 from sbot.robot import setup_logging
 from sbot.utils import singular
 
@@ -33,42 +26,179 @@ HIGH_CURRENT_RESISTANCE = 4.7 / 2
 LOW_CURRENT_RESISTANCE = 4.7
 REGULATOR_RESISTANCE = 4.0
 
-setup_logging()
+setup_logging(False, False)
 logger = logging.getLogger("tester")
 
-board = singular(PowerBoard._get_supported_boards())
-board_identity = board.identify()
 
-logger.info(
-    f"Running power board test on board: {board_identity.asset_tag} "
-    f"running firmware version: {board_identity.sw_version}.")
+def test_board():
+    results = {}
+    board = singular(PowerBoard._get_supported_boards())
+    try:
+        board_identity = board.identify()
 
-input_voltage = board.battery_sensor.voltage()
-assert 11.5 < input_voltage < 12.5, \
-    f"Input voltage of {input_voltage:.3f}V is outside acceptable range."
-# TODO calc expected currents using this voltage
+        results['asset'] = board_identity.asset_tag
+        results['sw_version'] = board_identity.sw_version
+        logger.info(
+            f"Running power board test on board: {board_identity.asset_tag} "
+            f"running firmware version: {board_identity.sw_version}.")
 
-# test 5v voltage
-# test output current
-# disable brain output
-# test off current
+        board.reset()
+        sleep(2)
 
-# for output
-#   test off current
-#   enable output
-#   test output current
-#   test global current
+        input_voltage = board.battery_sensor.voltage
+        # expected currents are calculated using this voltage
+        logger.info(f"Detected input voltage {input_voltage:.3f}V")
+        results['input_volt'] = input_voltage
+        assert 11.5 < input_voltage < 12.5, \
+            f"Input voltage of {input_voltage:.3f}V is outside acceptable range of 12V±0.5V."
 
-# enable all low outputs
-# test global current
+        reg_voltage = board.regulator_voltage
+        logger.info(f"Detected regulator voltage: {reg_voltage:.3f}V")
+        results['reg_volt'] = reg_voltage
+        assert 4.5 < reg_voltage < 5.5, \
+            f"Regulator voltage of {reg_voltage:.3f}V is outside acceptable range of 5V±0.5V."
 
-# enable all outputs
-# test global current
+        # reg_current = board.outputs[PowerOutputPosition.FIVE_VOLT].current
+        # logger.info(f"Detected regulator current: {reg_current:.3f}A")
+        # results['reg_current'] = reg_current
+        # expected_reg_current = reg_voltage / REGULATOR_RESISTANCE
+        # assert (expected_reg_current * 0.9) < reg_current < (expected_reg_current * 1.1), (
+        #     f"Regulator current of {reg_current:.3f}A is outside acceptable "
+        #     f"range of {expected_reg_current:.3f}A±10%.")
 
-# fan?
+        # disable brain output
+        board._serial.write('*SYS:BRAIN:SET:0')
+        sleep(1)
 
-# leds
+        # test off current
+        reg_off_current = board.outputs[PowerOutputPosition.FIVE_VOLT].current
+        logger.info(f"Detected regulator off state current: {reg_off_current:.3f}A")
+        results['reg_off_current'] = reg_off_current
+        assert -0.2 < reg_off_current < 0.2, (
+            f"Regulator off state current of {reg_off_current:.3f}A is outside "
+            "acceptable range of -0.2-0.2A.")
 
-# start button
+        for output in PowerOutputPosition:
+            if output == PowerOutputPosition.FIVE_VOLT:
+                # skip brain output
+                continue
 
-# buzzer
+            # test off current
+            output_off_current = board.outputs[output].current
+            logger.info(
+                f"Detected output {output.name} off state current: {output_off_current:.3f}A")
+            results[f'out_{output.name}_off_current'] = output_off_current
+            assert -0.2 < output_off_current < 0.2, (
+                f"Output off state current of {output_off_current:.3f}A is outside "
+                "acceptable range of -0.2-0.2A.")
+
+            # enable output
+            board.outputs[output].is_enabled = True
+            sleep(1)
+
+            if output in {PowerOutputPosition.H0, PowerOutputPosition.H1}:
+                expected_out_current = input_voltage / HIGH_CURRENT_RESISTANCE
+            else:
+                expected_out_current = input_voltage / LOW_CURRENT_RESISTANCE
+
+            min_current_bound = (expected_out_current * 0.9)
+            max_current_bound = (expected_out_current * 1.1)
+
+            # test output current
+            output_current = board.outputs[output].current
+            logger.info(f"Detected output {output.name} current: {output_current:.3f}A")
+            results[f'out_{output.name}_current'] = output_current
+            assert min_current_bound < output_current < max_current_bound, (
+                f"Output current of {output_current:.3f}A is outside "
+                f"acceptable range of {expected_out_current:.3f}A±10%.")
+
+            # test global current
+            output_global_current = board.battery_sensor.current
+            logger.info(f"Detected global output current: {output_global_current:.3f}A")
+            results[f'out_{output.name}_global_current'] = output_global_current
+            assert min_current_bound < output_global_current < max_current_bound, (
+                f"Output current of {output_global_current:.3f}A is outside "
+                f"acceptable range of {expected_out_current:.3f}A±10%.")
+
+            # disable output
+            board.outputs[output].is_enabled = False
+            sleep(1)
+
+        # enable all low outputs
+        logger.info("Enabling all low current outputs")
+        board.outputs[PowerOutputPosition.L0].is_enabled = True
+        board.outputs[PowerOutputPosition.L1].is_enabled = True
+        board.outputs[PowerOutputPosition.L2].is_enabled = True
+        board.outputs[PowerOutputPosition.L3].is_enabled = True
+        sleep(1)
+
+        expected_out_current = 4 * input_voltage / LOW_CURRENT_RESISTANCE
+        min_current_bound = (expected_out_current * 0.9)
+        max_current_bound = (expected_out_current * 1.1)
+
+        # test global current
+        output_global_current = board.battery_sensor.current
+        logger.info(f"Detected global output current: {output_global_current:.3f}A")
+        results['out_low_global_current'] = output_global_current
+        assert min_current_bound < output_global_current < max_current_bound, (
+            f"Output current of {output_global_current:.3f}A is outside "
+            f"acceptable range of {expected_out_current:.3f}A±10%.")
+        board.outputs.power_off()
+
+        # enable all outputs
+        logger.info("Enabling all outputs")
+        board.outputs[PowerOutputPosition.H0].is_enabled = True
+        board.outputs[PowerOutputPosition.H1].is_enabled = True
+        board.outputs[PowerOutputPosition.L0].is_enabled = True
+        board.outputs[PowerOutputPosition.L1].is_enabled = True
+        board.outputs[PowerOutputPosition.L2].is_enabled = True
+        board.outputs[PowerOutputPosition.L3].is_enabled = True
+        sleep(5)
+
+        expected_out_current = (
+            2 * input_voltage / HIGH_CURRENT_RESISTANCE
+            + 4 * input_voltage / LOW_CURRENT_RESISTANCE
+        )
+        min_current_bound = (expected_out_current * 0.9)
+        max_current_bound = (expected_out_current * 1.1)
+
+        # test global current
+        output_global_current = board.battery_sensor.current
+        logger.info(f"Detected global output current: {output_global_current:.3f}A")
+        results['out_global_current'] = output_global_current
+        assert min_current_bound < output_global_current < max_current_bound, (
+            f"Output current of {output_global_current:.3f}A is outside "
+            f"acceptable range of {expected_out_current:.3f}A±10%.")
+        board.outputs.power_off()
+
+        # fan?
+
+        # leds
+        board._run_led.on()
+        board._run_led.off()
+        board._error_led.on()
+        board._error_led.off()
+
+        # start button
+        board._start_button()
+        logger.info("Please press the start button")
+        while not board._start_button():
+            sleep(0.1)
+
+        # buzzer
+        board.piezo.buzz(1000, 1000)
+
+        logger.info("Board passed")
+    finally:
+        print(results)
+        # Disable all outputs
+        board.outputs.power_off()
+        board._serial.write('*SYS:BRAIN:SET:0')
+
+
+def main():
+    test_board()
+
+
+if __name__ == '__main__':
+    main()
