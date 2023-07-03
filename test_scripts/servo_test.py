@@ -27,8 +27,12 @@ def test_board(output_writer, use_power_board):
     results = {}
     if use_power_board:
         pb = singular(PowerBoard._get_supported_boards())
-        pb.outputs[PowerOutputPosition.L1].is_enabled = True
-        board = singular(ServoBoard._get_supported_boards())
+        try:
+            pb.outputs[PowerOutputPosition.L1].is_enabled = True
+        except RuntimeError:
+            logger.warning("Failed to enable L2 on power board, this may be the brain port.")
+
+    board = singular(ServoBoard._get_supported_boards())
     try:
         board_identity = board.identify()
 
@@ -39,7 +43,7 @@ def test_board(output_writer, use_power_board):
             f"running firmware version: {board_identity.sw_version}.")
 
         board.reset()
-        sleep(2)
+        sleep(0.5)
 
         input_voltage = board.voltage
         # expected currents are calculated using this voltage

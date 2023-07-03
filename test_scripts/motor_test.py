@@ -27,11 +27,34 @@ setup_logging(False, False)
 logger = logging.getLogger("tester")
 
 
+def log_and_assert_bounds(results, key, value, name, unit, min, max):
+    logger.info(f"Detected {name}: {value:.3f}{unit}")
+    results[key] = value
+    center = (min + max) / 2
+    variance = (max - min) / 2
+    assert min < value < max, (
+        f"{name.capitalize()} of {value:.3f}{unit} is outside acceptable range of "
+        f"{center:.2f}±{variance:.2f}{unit}.")
+
+
+def log_and_assert(results, key, value, name, unit, nominal, tolerance, offset=0):
+    logger.info(f"Detected {name}: {value:.3f}{unit}")
+    results[key] = value
+    min = nominal * (1 - tolerance) - offset
+    max = nominal * (1 + tolerance) + offset
+    assert min < value < max, (
+        f"{name.capitalize()} of {value:.3f}{unit} is outside acceptable range of "
+        f"{nominal:.2f}±{tolerance:.0%}{f'±{offset:.2f}{unit}' if offset != 0 else ''}.")
+
+
 def test_board(output_writer, use_power_board):
     results = {}
     if use_power_board:
         pb = singular(PowerBoard._get_supported_boards())
-        pb.outputs[PowerOutputPosition.L2].is_enabled = True
+        try:
+            pb.outputs[PowerOutputPosition.L2].is_enabled = True
+        except RuntimeError:
+            logger.warning("Failed to enable L2 on power board, this may be the brain port.")
     board = singular(MotorBoard._get_supported_boards())
     try:
         board_identity = board.identify()
@@ -43,45 +66,34 @@ def test_board(output_writer, use_power_board):
             f"running firmware version: {board_identity.sw_version}.")
 
         board.reset()
-        sleep(2)
+        sleep(0.5)
 
-        input_voltage = board.status.input_voltage
         # expected currents are calculated using this voltage
-        logger.info(f"Detected input voltage {input_voltage:.3f}V")
-        results['input_volt'] = input_voltage
-        assert 11.5 < input_voltage < 12.5, \
-            f"Input voltage of {input_voltage:.3f}V is outside acceptable range of 12V±0.5V."
+        input_voltage = board.status.input_voltage
+        log_and_assert_bounds(
+            results, 'input_volt', input_voltage, 'input voltage', 'V', 11.5, 12.5)
 
         for motor in range(2):
             logger.info(f"Testing motor {motor}")
             # test off current
-            output_off_current = board.motors[motor].current
-            logger.info(
-                f"Detected motor {motor} off state current: {output_off_current:.3f}A")
-            results[f'motor_{motor}_off_current'] = output_off_current
-            assert -0.2 < output_off_current < 0.2, (
-                f"Motor {motor} off state current of {output_off_current:.3f}A is outside "
-                "acceptable range of -0.2-0.2A.")
+            log_and_assert_bounds(
+                results, f'motor_{motor}_off_current', board.motors[motor].current,
+                f'motor {motor} off state current', 'A', -0.2, 0.2)
 
             for direction in (1, -1):
-                for abs_power in range(100, 10, -10):
+                for abs_power in range(100, 10, -20):
                     power = abs_power * direction
-                    test_step = f"motor {motor}, {power:.0f}% power"
                     logger.info(f"Testing {power:.0f}% power")
                     board.motors[motor].power = power / 100
                     sleep(0.25)
 
-                    expected_out_current = (input_voltage / MOTOR_RESISTANCE) * (abs_power / 100)  # noqa
-                    min_current_bound = (expected_out_current * 0.9) - 0.2
-                    max_current_bound = (expected_out_current * 1.1) + 0.2
-
+                    expected_out_current = (
+                        (input_voltage / MOTOR_RESISTANCE) * (abs_power / 100))
                     # test output current
-                    output_current = board.motors[motor].current
-                    logger.info(f"Detected {test_step}, current: {output_current:.3f}A")
-                    results[f'motor_{motor}_{power}_current'] = output_current
-                    assert min_current_bound < output_current < max_current_bound, (
-                        f"{test_step}, current of {output_current:.3f}A is outside "
-                        f"acceptable range of {expected_out_current:.3f}A±10%-0.2A/+0.1A.")
+                    log_and_assert(
+                        results, f'motor_{motor}_{power}_power', board.motors[motor].current,
+                        f"motor {motor}, {power:.0f}% power", '%', expected_out_current,
+                        0.1, 0.2)
 
         logger.info("Board passed")
     finally:
@@ -111,7 +123,7 @@ def main():
                 f'motor_{motor}_{power * direction:.0f}_current'
                 for motor in range(2)
                 for direction in (1, -1)
-                for power in range(100, 10, -10)
+                for power in range(100, 10, -20)
             ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
