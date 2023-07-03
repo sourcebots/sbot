@@ -43,7 +43,7 @@ def test_board():
         assert 5 < input_voltage < 6, \
             f"Input voltage of {input_voltage:.3f}V is outside acceptable range of 5.5V±0.5V."
 
-        # TODO move all servos
+        # move all servos
         for i in range(12):
             board.servos[i].position = -0.8
         sleep(0.5)

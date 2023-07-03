@@ -16,6 +16,7 @@ The test will:
 This assumes that the 5V output is the brain power output
 """
 import logging
+import atexit
 from time import sleep
 
 from sbot.power_board import PowerBoard, PowerOutputPosition
@@ -34,6 +35,8 @@ def test_board():
     results = {}
     board = singular(PowerBoard._get_supported_boards())
     try:
+        # Unregister the cleanup as we have our own
+        atexit.unregister(board._cleanup)
         board_identity = board.identify()
 
         results['asset'] = board_identity.asset_tag
@@ -58,13 +61,13 @@ def test_board():
         assert 4.5 < reg_voltage < 5.5, \
             f"Regulator voltage of {reg_voltage:.3f}V is outside acceptable range of 5V±0.5V."
 
-        # reg_current = board.outputs[PowerOutputPosition.FIVE_VOLT].current
-        # logger.info(f"Detected regulator current: {reg_current:.3f}A")
-        # results['reg_current'] = reg_current
-        # expected_reg_current = reg_voltage / REGULATOR_RESISTANCE
-        # assert (expected_reg_current * 0.9) < reg_current < (expected_reg_current * 1.1), (
-        #     f"Regulator current of {reg_current:.3f}A is outside acceptable "
-        #     f"range of {expected_reg_current:.3f}A±10%.")
+        reg_current = board.outputs[PowerOutputPosition.FIVE_VOLT].current
+        logger.info(f"Detected regulator current: {reg_current:.3f}A")
+        results['reg_current'] = reg_current
+        expected_reg_current = reg_voltage / REGULATOR_RESISTANCE
+        assert (expected_reg_current * 0.9) < reg_current < (expected_reg_current * 1.1), (
+            f"Regulator current of {reg_current:.3f}A is outside acceptable "
+            f"range of {expected_reg_current:.3f}A±10%.")
 
         # disable brain output
         board._serial.write('*SYS:BRAIN:SET:0')
@@ -153,7 +156,7 @@ def test_board():
         board.outputs[PowerOutputPosition.L1].is_enabled = True
         board.outputs[PowerOutputPosition.L2].is_enabled = True
         board.outputs[PowerOutputPosition.L3].is_enabled = True
-        sleep(5)
+        sleep(1)
 
         expected_out_current = (
             2 * input_voltage / HIGH_CURRENT_RESISTANCE
@@ -172,27 +175,45 @@ def test_board():
         board.outputs.power_off()
 
         # fan?
+        # force the fan to run
+        board._serial.write('*SYS:FAN:SET:1')
+        fan_result = input("Is the fan running? [y/n]")
+        results['fan'] = fan_result
+        assert fan_result.lower() == 'y', "Reported that the fan didn't work."
+        board._serial.write('*SYS:FAN:SET:0')
 
         # leds
         board._run_led.on()
+        run_result = input("Is the run led green? [y/n]")
+        results['run_led'] = run_result
+        assert run_result.lower() == 'y', "Reported that the run LED didn't work."
+
         board._run_led.off()
         board._error_led.on()
+        err_led_result = input("Is the error led red? [y/n]")
+        results['err_led'] = err_led_result
+        assert err_led_result.lower() == 'y', "Reported that the error LED didn't work."
+
         board._error_led.off()
+
+        # buzzer
+        board.piezo.buzz(0.5, 1000)
+        buzz_result = input("Did the buzzer buzz? [y/n]")
+        results['buzzer'] = buzz_result
+        assert buzz_result.lower() == 'y', "Reported that the buzzer didn't buzz."
 
         # start button
         board._start_button()
         logger.info("Please press the start button")
         while not board._start_button():
             sleep(0.1)
-
-        # buzzer
-        board.piezo.buzz(1000, 1000)
+        results['start_btn'] = "y"
 
         logger.info("Board passed")
     finally:
         print(results)
         # Disable all outputs
-        board.outputs.power_off()
+        board.reset()
         board._serial.write('*SYS:BRAIN:SET:0')
 
 
