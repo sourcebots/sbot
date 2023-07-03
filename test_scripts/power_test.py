@@ -20,6 +20,7 @@ import atexit
 import csv
 import logging
 import os
+import textwrap
 from time import sleep
 
 from sbot.power_board import PowerBoard, PowerOutputPosition
@@ -223,7 +224,9 @@ def test_board(output_writer):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(__doc__))
     parser.add_argument('--log', default=None, help='A CSV file to save test results to.')
     args = parser.parse_args()
     if args.log:
