@@ -23,8 +23,8 @@ import os
 import textwrap
 from time import sleep
 
+from sbot.logging import setup_logging
 from sbot.power_board import PowerBoard, PowerOutputPosition
-from sbot.robot import setup_logging
 from sbot.utils import singular
 
 HIGH_CURRENT_RESISTANCE = 4.7 / 2
@@ -59,7 +59,7 @@ def test_board(output_writer):
         assert 11.5 < input_voltage < 12.5, \
             f"Input voltage of {input_voltage:.3f}V is outside acceptable range of 12V±0.5V."
 
-        reg_voltage = board.regulator_voltage
+        reg_voltage = board.status.regulator_voltage
         logger.info(f"Detected regulator voltage: {reg_voltage:.3f}V")
         results['reg_volt'] = reg_voltage
         assert 4.5 < reg_voltage < 5.5, \

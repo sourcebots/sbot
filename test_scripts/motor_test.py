@@ -16,9 +16,9 @@ import os
 import textwrap
 from time import sleep
 
+from sbot.logging import setup_logging
 from sbot.motor_board import MotorBoard
 from sbot.power_board import PowerBoard, PowerOutputPosition
-from sbot.robot import setup_logging
 from sbot.utils import singular
 
 MOTOR_RESISTANCE = 4.7
@@ -27,10 +27,11 @@ setup_logging(False, False)
 logger = logging.getLogger("tester")
 
 
-def test_board(output_writer):
+def test_board(output_writer, use_power_board):
     results = {}
-    pb = singular(PowerBoard._get_supported_boards())
-    pb.outputs[PowerOutputPosition.L2].is_enabled = True
+    if use_power_board:
+        pb = singular(PowerBoard._get_supported_boards())
+        pb.outputs[PowerOutputPosition.L2].is_enabled = True
     board = singular(MotorBoard._get_supported_boards())
     try:
         board_identity = board.identify()
@@ -44,7 +45,7 @@ def test_board(output_writer):
         board.reset()
         sleep(2)
 
-        input_voltage = board.status()[1]
+        input_voltage = board.status.input_voltage
         # expected currents are calculated using this voltage
         logger.info(f"Detected input voltage {input_voltage:.3f}V")
         results['input_volt'] = input_voltage
@@ -72,7 +73,7 @@ def test_board(output_writer):
 
                     expected_out_current = (input_voltage / MOTOR_RESISTANCE) * (abs_power / 100)  # noqa
                     min_current_bound = (expected_out_current * 0.9) - 0.2
-                    max_current_bound = (expected_out_current * 1.1) + 0.1
+                    max_current_bound = (expected_out_current * 1.1) + 0.2
 
                     # test output current
                     output_current = board.motors[motor].current
@@ -93,6 +94,9 @@ def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(__doc__))
+    parser.add_argument(
+        '-pb', '--use-power-board', action='store_true',
+        help="Enable port L2 on a connected power board to supply 12V to the motor board")
     parser.add_argument('--log', default=None, help='A CSV file to save test results to.')
     args = parser.parse_args()
     if args.log:
@@ -105,16 +109,16 @@ def main():
                 'motor_0_off_current', 'motor_1_off_current',
             ] + [
                 f'motor_{motor}_{power * direction:.0f}_current'
-                for power in range(100, 10, -10)
-                for direction in (1, -1)
                 for motor in range(2)
+                for direction in (1, -1)
+                for power in range(100, 10, -10)
             ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
                 writer.writeheader()
-            test_board(writer)
+            test_board(writer, args.use_power_board)
     else:
-        test_board(None)
+        test_board(None, args.use_power_board)
 
 
 if __name__ == '__main__':

@@ -14,8 +14,8 @@ import os
 import textwrap
 from time import sleep
 
+from sbot.logging import setup_logging
 from sbot.power_board import PowerBoard, PowerOutputPosition
-from sbot.robot import setup_logging
 from sbot.servo_board import ServoBoard
 from sbot.utils import singular
 
@@ -23,11 +23,12 @@ setup_logging(False, False)
 logger = logging.getLogger("tester")
 
 
-def test_board(output_writer):
+def test_board(output_writer, use_power_board):
     results = {}
-    pb = singular(PowerBoard._get_supported_boards())
-    pb.outputs[PowerOutputPosition.L1].is_enabled = True
-    board = singular(ServoBoard._get_supported_boards())
+    if use_power_board:
+        pb = singular(PowerBoard._get_supported_boards())
+        pb.outputs[PowerOutputPosition.L1].is_enabled = True
+        board = singular(ServoBoard._get_supported_boards())
     try:
         board_identity = board.identify()
 
@@ -76,6 +77,9 @@ def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(__doc__))
+    parser.add_argument(
+        '-pb', '--use-power-board', action='store_true',
+        help="Enable port L1 on a connected power board to supply 12V to the motor board")
     parser.add_argument('--log', default=None, help='A CSV file to save test results to.')
     args = parser.parse_args()
     if args.log:
@@ -87,9 +91,9 @@ def main():
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
                 writer.writeheader()
-            test_board(writer)
+            test_board(writer, args.use_power_board)
     else:
-        test_board(None)
+        test_board(None, args.use_power_board)
 
 
 if __name__ == '__main__':
