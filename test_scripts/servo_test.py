@@ -7,19 +7,22 @@ To run this with an SRv4 Servo Board connect servos to all outputs.
 The test will:
 - Move all 12 servos
 """
+import argparse
+import csv
 import logging
+import os
 from time import sleep
 
-from sbot.servo_board import ServoBoard
 from sbot.power_board import PowerBoard, PowerOutputPosition
 from sbot.robot import setup_logging
+from sbot.servo_board import ServoBoard
 from sbot.utils import singular
 
 setup_logging(False, False)
 logger = logging.getLogger("tester")
 
 
-def test_board():
+def test_board(output_writer):
     results = {}
     pb = singular(PowerBoard._get_supported_boards())
     pb.outputs[PowerOutputPosition.L1].is_enabled = True
@@ -62,12 +65,28 @@ def test_board():
 
         logger.info("Board passed")
     finally:
-        print(results)
+        if output_writer is not None:
+            output_writer.writerow(results)
+
         board.reset()
 
 
 def main():
-    test_board()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--log', default=None, help='A CSV file to save test results to.')
+    args = parser.parse_args()
+    if args.log:
+        new_log = True
+        if os.path.exists(args.log):
+            new_log = False
+        with open(args.log, 'a', newline='') as csvfile:
+            fieldnames = ['first_name', 'last_name']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            if new_log:
+                writer.writeheader()
+            test_board(writer)
+    else:
+        test_board(None)
 
 
 if __name__ == '__main__':

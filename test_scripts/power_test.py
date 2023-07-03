@@ -15,8 +15,11 @@ The test will:
 
 This assumes that the 5V output is the brain power output
 """
-import logging
+import argparse
 import atexit
+import csv
+import logging
+import os
 from time import sleep
 
 from sbot.power_board import PowerBoard, PowerOutputPosition
@@ -31,7 +34,7 @@ setup_logging(False, False)
 logger = logging.getLogger("tester")
 
 
-def test_board():
+def test_board(output_writer):
     results = {}
     board = singular(PowerBoard._get_supported_boards())
     try:
@@ -211,14 +214,30 @@ def test_board():
 
         logger.info("Board passed")
     finally:
-        print(results)
+        if output_writer is not None:
+            output_writer.writerow(results)
+
         # Disable all outputs
         board.reset()
         board._serial.write('*SYS:BRAIN:SET:0')
 
 
 def main():
-    test_board()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--log', default=None, help='A CSV file to save test results to.')
+    args = parser.parse_args()
+    if args.log:
+        new_log = True
+        if os.path.exists(args.log):
+            new_log = False
+        with open(args.log, 'a', newline='') as csvfile:
+            fieldnames = ['first_name', 'last_name']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            if new_log:
+                writer.writeheader()
+            test_board(writer)
+    else:
+        test_board(None)
 
 
 if __name__ == '__main__':

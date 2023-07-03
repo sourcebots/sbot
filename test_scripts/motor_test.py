@@ -9,7 +9,10 @@ is between 2A and 8A.
 The test will:
 - Test the current draw on each motor in both directions at a few duty cycles
 """
+import argparse
+import csv
 import logging
+import os
 from time import sleep
 
 from sbot.motor_board import MotorBoard
@@ -23,7 +26,7 @@ setup_logging(False, False)
 logger = logging.getLogger("tester")
 
 
-def test_board():
+def test_board(output_writer):
     results = {}
     pb = singular(PowerBoard._get_supported_boards())
     pb.outputs[PowerOutputPosition.L2].is_enabled = True
@@ -80,12 +83,27 @@ def test_board():
 
         logger.info("Board passed")
     finally:
-        print(results)
+        if output_writer is not None:
+            output_writer.writerow(results)
         board.reset()
 
 
 def main():
-    test_board()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--log', default=None, help='A CSV file to save test results to.')
+    args = parser.parse_args()
+    if args.log:
+        new_log = True
+        if os.path.exists(args.log):
+            new_log = False
+        with open(args.log, 'a', newline='') as csvfile:
+            fieldnames = ['first_name', 'last_name']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            if new_log:
+                writer.writeheader()
+            test_board(writer)
+    else:
+        test_board(None)
 
 
 if __name__ == '__main__':
