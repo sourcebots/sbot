@@ -57,6 +57,7 @@ def test_board(output_writer, use_power_board):
             logger.warning("Failed to enable L2 on power board, this may be the brain port.")
     board = singular(MotorBoard._get_supported_boards())
     try:
+        results['passed'] = False  # default to failure
         board_identity = board.identify()
 
         results['asset'] = board_identity.asset_tag
@@ -85,17 +86,18 @@ def test_board(output_writer, use_power_board):
                     power = abs_power * direction
                     logger.info(f"Testing {power:.0f}% power")
                     board.motors[motor].power = power / 100
-                    sleep(0.25)
+                    sleep(0.1)
 
                     expected_out_current = (
                         (input_voltage / MOTOR_RESISTANCE) * (abs_power / 100))
                     # test output current
                     log_and_assert(
-                        results, f'motor_{motor}_{power}_power', board.motors[motor].current,
-                        f"motor {motor}, {power:.0f}% power", '%', expected_out_current,
+                        results, f'motor_{motor}_{power}_current', board.motors[motor].current,
+                        f"motor {motor}, {power:.0f}% power", 'A', expected_out_current,
                         0.1, 0.2)
 
         logger.info("Board passed")
+        results['passed'] = True
     finally:
         if output_writer is not None:
             output_writer.writerow(results)
@@ -117,7 +119,7 @@ def main():
             new_log = False
         with open(args.log, 'a', newline='') as csvfile:
             fieldnames = [
-                'asset', 'sw_version', 'input_volt',
+                'asset', 'sw_version', 'passed', 'input_volt',
                 'motor_0_off_current', 'motor_1_off_current',
             ] + [
                 f'motor_{motor}_{power * direction:.0f}_current'

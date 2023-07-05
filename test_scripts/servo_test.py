@@ -34,6 +34,7 @@ def test_board(output_writer, use_power_board):
 
     board = singular(ServoBoard._get_supported_boards())
     try:
+        results['passed'] = False  # default to failure
         board_identity = board.identify()
 
         results['asset'] = board_identity.asset_tag
@@ -70,6 +71,7 @@ def test_board(output_writer, use_power_board):
         assert move_result.lower() == 'y', "Reported that the servos didn't move."
 
         logger.info("Board passed")
+        results['passed'] = True
     finally:
         if output_writer is not None:
             output_writer.writerow(results)
@@ -91,7 +93,7 @@ def main():
         if os.path.exists(args.log):
             new_log = False
         with open(args.log, 'a', newline='') as csvfile:
-            fieldnames = ['asset', 'sw_version', 'input_volt', 'servos_move']
+            fieldnames = ['asset', 'sw_version', 'passed', 'input_volt', 'servos_move']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
                 writer.writeheader()

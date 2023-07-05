@@ -24,6 +24,9 @@ import textwrap
 import threading
 from time import sleep
 
+import serial
+import sbot.power_board
+from sbot.exceptions import BoardDisconnectionError
 from sbot.logging import setup_logging
 from sbot.power_board import PowerBoard, PowerOutputPosition
 from sbot.utils import singular
@@ -41,6 +44,8 @@ OUTPUT_RESISTANCE = [
 
 setup_logging(False, False)
 logger = logging.getLogger("tester")
+# monkey patch which output is the brain output
+sbot.power_board.BRAIN_OUTPUT = BRAIN_OUTPUT
 run_led_thread = True
 
 
@@ -143,6 +148,7 @@ def test_board(output_writer, test_uvlo):
 
     board = singular(PowerBoard._get_supported_boards())
     try:
+        results['passed'] = False  # default to failure
         # Unregister the cleanup as we have our own
         atexit.unregister(board._cleanup)
         board_identity = board.identify()
@@ -210,6 +216,7 @@ def test_board(output_writer, test_uvlo):
                 break
 
             board.outputs[output].is_enabled = True
+            sleep(0.5)
             log_and_assert(
                 results, f'sum_out_{output.name}_current', board.battery_sensor.current,
                 f'output current up to {output.name}', 'A', total_expected_current, 0.1)
@@ -219,8 +226,56 @@ def test_board(output_writer, test_uvlo):
         board.outputs.power_off()
 
         if test_uvlo:
-            # TODO test UVLO
-            pass
+            try:
+                psu = serial.serial_for_url('hwgrep://0416:5011')
+            except serial.SerialException:
+                logger.error("Failed to connect to PSU")
+                return
+            psu.write(b'VSET1:11.5\n')
+            # Enable output
+            psu.write(b'VOUT1\n')
+            # start at 11.5V and drop to 10V
+            for voltx10 in range(115, 100, -1):
+                psu.write(f'VSET1:{voltx10 / 10}\n'.encode('ascii'))
+                sleep(0.1)
+                # stop when serial is lost
+                try:
+                    meas_voltage = board.battery_sensor.voltage
+                    logger.info(f"Measured voltage: {meas_voltage}V for {voltx10 / 10}V")
+                except BoardDisconnectionError:
+                    logger.info(f"Software UVLO triggered at {voltx10 / 10}V")
+                    results['soft_uvlo'] = voltx10 / 10
+                    break
+            else:
+                assert False, "Software UVLO didn't function at 10V."
+
+            # set to 9.5V and ask if leds are off
+            psu.write(b'VSET1:9.5\n')
+            sleep(0.1)
+            hard_uvlo_result = input("Have all the LEDs turned off? [y/n]")
+            results['hard_uvlo'] = hard_uvlo_result
+            assert hard_uvlo_result.lower() == 'y', \
+                "Reported that hardware UVLO didn't function."
+
+            # set to 10.9V-11.3V and check if serial is back
+            for voltx10 in range(109, 114):
+                psu.write(f'VSET1:{voltx10 / 10}\n'.encode('ascii'))
+                sleep(2)
+                # stop when serial is back
+                try:
+                    meas_voltage = board.battery_sensor.voltage
+                    logger.info(f"Measured voltage: {meas_voltage}V for {voltx10 / 10}V")
+                except BoardDisconnectionError:
+                    pass
+                else:
+                    logger.info(f"Hardware UVLO cleared at {voltx10 / 10}V")
+                    results['hard_uvlo_hyst'] = voltx10 / 10
+                    break
+            else:
+                assert False, "Hardware UVLO didn't clear at 11.3V."
+
+            # Disable output
+            psu.write(b'VOUT0\n')
 
         logger.info("Board passed")
         results['passed'] = True
@@ -246,7 +301,7 @@ def main():
             new_log = False
         with open(args.log, 'a', newline='') as csvfile:
             fieldnames = [
-                'asset', 'sw_version', 'input_volt',
+                'asset', 'sw_version', 'passed', 'input_volt',
                 'reg_volt', 'reg_current', 'reg_off_current',
                 'out_H0_off_current', 'out_H0_current', 'out_H0_global_current',
                 'out_H1_off_current', 'out_H1_current', 'out_H1_global_current',
@@ -257,7 +312,8 @@ def main():
                 'sum_out_H0_current', 'sum_out_H1_current', 'sum_out_L0_current',
                 'sum_out_L1_current', 'sum_out_L2_current', 'sum_out_L3_current',
                 'sum_out_FIVE_VOLT_current',
-                'fan', 'leds', 'buzzer', 'start_btn', 'passed']
+                'fan', 'leds', 'buzzer', 'start_btn',
+                'soft_uvlo', 'hard_uvlo', 'hard_uvlo_hyst']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if new_log:
                 writer.writeheader()
