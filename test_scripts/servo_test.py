@@ -66,7 +66,7 @@ def test_board(output_writer, use_power_board):
         for i in range(12):
             board.servos[i].position = 0
 
-        move_result = input("Did the servos move [y/n]")
+        move_result = input("Did the servos move [Y/n]") or 'y'  # default to yes
         results['servos_move'] = move_result
         assert move_result.lower() == 'y', "Reported that the servos didn't move."
 

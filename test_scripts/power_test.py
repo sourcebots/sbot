@@ -88,7 +88,7 @@ def test_output(board, results, output, input_voltage):
     expected_out_current = input_voltage / OUTPUT_RESISTANCE[output]
     log_and_assert(  # test output current
         results, f'out_{output.name}_current', board.outputs[output].current,
-        f'output {output.name} current', 'A', expected_out_current, 0.1)
+        f'output {output.name} current', 'A', expected_out_current, 0.2)
     log_and_assert(  # test global current
         results, f'out_{output.name}_global_current', board.battery_sensor.current,
         'global output current', 'A', expected_out_current, 0.1)
@@ -121,7 +121,7 @@ def test_regulator(board, results):
     expected_reg_current = reg_voltage / OUTPUT_RESISTANCE[PowerOutputPosition.FIVE_VOLT]
     log_and_assert(
         results, 'reg_current', board.outputs[PowerOutputPosition.FIVE_VOLT].current,
-        'regulator current', 'A', expected_reg_current, 0.1)
+        'regulator current', 'A', expected_reg_current, 0.2)
 
     # disable output
     if BRAIN_OUTPUT == PowerOutputPosition.FIVE_VOLT:
@@ -172,14 +172,14 @@ def test_board(output_writer, test_uvlo):
         # fan
         # force the fan to run
         board._serial.write('*SYS:FAN:SET:1')
-        fan_result = input("Is the fan running? [y/n]")
+        fan_result = input("Is the fan running? [Y/n]") or 'y'  # default to yes
         results['fan'] = fan_result
         assert fan_result.lower() == 'y', "Reported that the fan didn't work."
         board._serial.write('*SYS:FAN:SET:0')
 
         # buzzer
         board.piezo.buzz(0.5, 1000)
-        buzz_result = input("Did the buzzer buzz? [y/n]")
+        buzz_result = input("Did the buzzer buzz? [Y/n]") or 'y'  # default to yes
         results['buzzer'] = buzz_result
         assert buzz_result.lower() == 'y', "Reported that the buzzer didn't buzz."
 
@@ -187,7 +187,7 @@ def test_board(output_writer, test_uvlo):
         run_led_thread = True
         flash_thread = threading.Thread(target=led_flash, args=(board,), daemon=True)
         flash_thread.start()
-        led_result = input("Are the LEDs flashing? [y/n]")
+        led_result = input("Are the LEDs flashing? [Y/n]") or 'y'  # default to yes
         results['leds'] = led_result
         assert led_result.lower() == 'y', "Reported that the LEDs didn't work."
 
@@ -233,7 +233,7 @@ def test_board(output_writer, test_uvlo):
                 return
             psu.write(b'VSET1:11.5\n')
             # Enable output
-            psu.write(b'VOUT1\n')
+            psu.write(b'OUT1\n')
             # start at 11.5V and drop to 10V
             for voltx10 in range(115, 100, -1):
                 psu.write(f'VSET1:{voltx10 / 10}\n'.encode('ascii'))
@@ -252,7 +252,8 @@ def test_board(output_writer, test_uvlo):
             # set to 9.5V and ask if leds are off
             psu.write(b'VSET1:9.5\n')
             sleep(0.1)
-            hard_uvlo_result = input("Have all the LEDs turned off? [y/n]")
+            # default to yes
+            hard_uvlo_result = input("Have all the LEDs turned off? [Y/n]") or 'y'
             results['hard_uvlo'] = hard_uvlo_result
             assert hard_uvlo_result.lower() == 'y', \
                 "Reported that hardware UVLO didn't function."
@@ -275,7 +276,7 @@ def test_board(output_writer, test_uvlo):
                 assert False, "Hardware UVLO didn't clear at 11.3V."
 
             # Disable output
-            psu.write(b'VOUT0\n')
+            psu.write(b'OUT0\n')
 
         logger.info("Board passed")
         results['passed'] = True

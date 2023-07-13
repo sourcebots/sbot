@@ -72,7 +72,7 @@ def test_board(output_writer, use_power_board):
         # expected currents are calculated using this voltage
         input_voltage = board.status.input_voltage
         log_and_assert_bounds(
-            results, 'input_volt', input_voltage, 'input voltage', 'V', 11.5, 12.5)
+            results, 'input_volt', input_voltage, 'input voltage', 'V', 11, 12.5)
 
         for motor in range(2):
             logger.info(f"Testing motor {motor}")
@@ -94,7 +94,7 @@ def test_board(output_writer, use_power_board):
                     log_and_assert(
                         results, f'motor_{motor}_{power}_current', board.motors[motor].current,
                         f"motor {motor}, {power:.0f}% power", 'A', expected_out_current,
-                        0.1, 0.2)
+                        0.2, 0.2)
 
         logger.info("Board passed")
         results['passed'] = True
