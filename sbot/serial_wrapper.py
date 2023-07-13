@@ -68,6 +68,7 @@ def retry(
                 try:
                     return func(*args, **kwargs)
                 except exceptions:
+                    time.sleep(attempt * 0.5)
                     attempt += 1
             return func(*args, **kwargs)
         return retryfn
