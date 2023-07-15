@@ -1,6 +1,7 @@
 """Functions for killing the robot after a certain amount of time."""
-import _thread
 import logging
+import os
+import signal
 from threading import Timer
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ def timeout_handler() -> None:
     In order for this to work, any threads that are created must be daemons.
     """
     logger.info("Timeout expired: Game Over!")
-    _thread.interrupt_main()
+    os.kill(os.getpid(), signal.SIGTERM)
 
 
 def kill_after_delay(timeout_seconds: int) -> None:
