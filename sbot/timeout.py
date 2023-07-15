@@ -1,28 +1,20 @@
 """Functions for killing the robot after a certain amount of time."""
+import _thread
 import logging
-import signal
-import sys
-from types import FrameType
+from threading import Timer
 
 logger = logging.getLogger(__name__)
 
-# TODO make this work on Windows
 
-
-def timeout_handler(signal_type: signal.Signals, stack_frame: FrameType) -> None:
+def timeout_handler() -> None:
     """
-    Handle the `SIGALRM` to kill the current process.
+    Handle the timeout to kill the current process.
 
     This function is called when the timeout expires and will stop the robot's main process.
     In order for this to work, any threads that are created must be daemons.
-
-    NOTE: This function is not called on Windows.
-
-    :param signal_type: The sginal that triggered this handler
-    :param stack_frame: The stack frame at the time of the signal
-    :raises SystemExit: To stop the robot's execution after the timeout
     """
-    raise SystemExit("Timeout expired: Game Over!")
+    logger.info("Timeout expired: Game Over!")
+    _thread.interrupt_main()
 
 
 def kill_after_delay(timeout_seconds: int) -> None:
@@ -31,16 +23,8 @@ def kill_after_delay(timeout_seconds: int) -> None:
 
     Interrupts main process after the given delay.
 
-    NOTE: This functionality does not work on Windows,
-    so the robot will not stop after the timeout.
-
     :param timeout_seconds: The number of seconds to wait before killing the robot
     """
-    if sys.platform == "win32":
-        logger.warning(
-            "Game timeout is not supported on Windows. "
-            "The code will not stop after the timeout.")
-    else:
-        logger.debug(f"Kill Signal Timeout set: {timeout_seconds}s")
-        signal.signal(signal.SIGALRM, timeout_handler)  # type: ignore
-        signal.alarm(timeout_seconds)
+    timer = Timer(timeout_seconds, timeout_handler)
+    logger.debug(f"Kill Signal Timeout set: {timeout_seconds}s")
+    timer.start()
