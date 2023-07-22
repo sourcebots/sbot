@@ -3,6 +3,8 @@ from time import sleep
 
 import os
 import signal
+import subprocess
+import sys
 
 from sbot.timeout import kill_after_delay
 from unittest.mock import Mock
@@ -21,3 +23,17 @@ def test_kill_after_delay(monkeypatch) -> None:
 
     sleep(1.5)  # Give the kernel a chance.
     kill.assert_called_once_with(pid, signal.SIGTERM)
+
+
+def test_kill_after_delay_e2e() -> None:
+    child = subprocess.Popen([
+        sys.executable,
+        "-c",
+        'from sbot.timeout import kill_after_delay; import time; kill_after_delay(2); time.sleep(10)'
+    ])
+
+    sleep(1)
+    assert child.poll() is None
+
+    sleep(2)
+    assert abs(child.poll()) == signal.SIGTERM
