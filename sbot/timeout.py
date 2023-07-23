@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 IS_LINUX = platform.system() == "Linux"
-TERMINATING_SIGNAL = signal.SIGALRM if IS_LINUX else signal.SIGTERM
+
+# `SIGALRM` will only exist on Linux
+TERMINATING_SIGNAL = getattr(signal, "SIGALRM", signal.SIGTERM)
 
 
 def raise_signal(signum: int) -> None:
