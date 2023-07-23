@@ -1,12 +1,17 @@
 """Functions for killing the robot after a certain amount of time."""
 import logging
 import os
+import platform
 import signal
 from threading import Timer
 from types import FrameType
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+IS_LINUX = platform.system() == "Linux"
+TERMINATING_SIGNAL = signal.SIGALRM if IS_LINUX else signal.SIGTERM
 
 
 def raise_signal(signum: int) -> None:
@@ -40,9 +45,10 @@ def kill_after_delay(timeout_seconds: int) -> None:
     :param timeout_seconds: The number of seconds to wait before killing the robot
     """
 
-    signal.signal(signal.SIGTERM, timeout_handler)
+    if IS_LINUX:
+        signal.signal(TERMINATING_SIGNAL, timeout_handler)
 
-    timer = Timer(timeout_seconds, lambda: raise_signal(signal.SIGTERM))
+    timer = Timer(timeout_seconds, lambda: raise_signal(TERMINATING_SIGNAL))
 
     logger.debug(f"Kill Signal Timeout set: {timeout_seconds}s")
     timer.start()
