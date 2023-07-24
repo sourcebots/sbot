@@ -30,7 +30,7 @@ class Robot:
     system at a time, creating a second instance will raise an OSError.
 
     :param debug: Enable debug logging to the console, defaults to False
-    :param wait_start: Wait in the constructor until the start button is pressed,
+    :param wait_for_start: Wait in the constructor until the start button is pressed,
         defaults to True
     :param trace_logging: Enable trace level logging to the console, defaults to False
     :param manual_boards: A dictionary of board types to a list of serial port paths
@@ -45,7 +45,7 @@ class Robot:
         self,
         *,
         debug: bool = False,
-        wait_start: bool = True,
+        wait_for_start: bool = True,
         trace_logging: bool = False,
         manual_boards: dict[str, list[str]] | None = None,
     ) -> None:
@@ -65,7 +65,7 @@ class Robot:
         self._init_camera()
         self._log_connected_boards()
 
-        if wait_start:
+        if wait_for_start:
             self.wait_start()
 
     def _init_power_board(self, manual_boards: list[str] | None = None) -> None:
