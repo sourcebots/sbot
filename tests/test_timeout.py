@@ -6,17 +6,32 @@ import signal
 import subprocess
 import sys
 import pytest
-
+from unittest.mock import Mock
 
 from sbot.timeout import kill_after_delay
 
-
-def test_kill_after_delay(monkeypatch) -> None:
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on Windows")
+def test_kill_after_delay() -> None:
     """Test that the process is killed within the time."""
-
     with pytest.raises(SystemExit):
         kill_after_delay(2)
         sleep(3)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="only runs on Windows")
+def test_kill_after_delay_windows(monkeypatch) -> None:
+    """Test that the process is killed within the time on windows."""
+    kill = Mock()
+    pid = os.getpid()
+    monkeypatch.setattr(os, "kill", kill)
+
+    kill_after_delay(2)
+    sleep(1)
+
+    kill.assert_not_called()
+
+    sleep(1.5)
+    kill.assert_called_once_with(pid, signal.SIGTERM)
 
 
 def test_kill_after_delay_e2e() -> None:
