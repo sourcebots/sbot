@@ -39,14 +39,14 @@ r = Robot()
 
 ```
 
-To disable the waiting for the start button, you can pass `wait_start=False` to the constructor.
-The `wait_start` method needs to be called before the metadata is available.
+To disable the waiting for the start button, you can pass `wait_for_start=False` to the constructor.
+The `wait_for_start` method needs to be called before the metadata is available.
 
 ```python
 
 from sbot import Robot
 
-r = Robot(wait_start=False)
+r = Robot(wait_for_start=False)
 
 # Setup in here
 

@@ -77,7 +77,7 @@ def test_robot(monkeypatch, caplog) -> None:
     lock.close()  # release the lock
 
     # Test that we can create a robot object
-    r = Robot(wait_start=False, manual_boards=manual_boards, debug=True)
+    r = Robot(wait_for_start=False, manual_boards=manual_boards, debug=True)
     assert caplog.record_tuples[1:] == [
         # First line contains the version number
         ('sbot.robot', logging.INFO, 'Found PowerBoard, serial: POW123'),
@@ -127,7 +127,7 @@ def test_robot(monkeypatch, caplog) -> None:
 def test_robot_discovery() -> None:
     """Test that we can discover all the boards when creating a Robot object."""
     from sbot import Robot
-    robot = Robot(wait_start=False)
+    robot = Robot(wait_for_start=False)
 
     # Test that we can access the singular boards
     power_asset_tag = robot.power_board.identify().asset_tag
