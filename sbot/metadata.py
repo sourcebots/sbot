@@ -69,12 +69,10 @@ def load() -> Metadata:
             raise FileNotFoundError(f"Metaddata path {search_path} does not exist")
         for item in Path(search_path).iterdir():
             try:
-                if item.is_dir():
-                    if (item / METADATA_NAME).exists():
-                        return _load_metadata(item / METADATA_NAME)
-                else:
-                    if item.name == METADATA_NAME:
-                        return _load_metadata(item)
+                if item.is_dir() and (item / METADATA_NAME).exists():
+                    return _load_metadata(item / METADATA_NAME)
+                elif item.name == METADATA_NAME:
+                    return _load_metadata(item)
             except PermissionError:
                 logger.debug(f"Unable to read {item}")
         else:
