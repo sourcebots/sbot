@@ -288,7 +288,7 @@ class Robot:
         _ = self.power_board._start_button()
         logger.info('Waiting for start button.')
 
-        self.power_board.piezo.buzz(0.1, Note.A6)
+        self.power_board.piezo.buzz(Note.A6, 0.1)
         self.power_board._run_led.flash()
 
         while not self.power_board._start_button():
