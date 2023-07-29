@@ -110,9 +110,9 @@ def test_power_board(powerboard_serial: MockPowerBoard) -> None:
     assert power_board._start_button() is True
 
     # Test that we can play a note using the Note class
-    power_board.piezo.buzz(0.1, Note.C6)
+    power_board.piezo.buzz(Note.C6, 0.1)
     # And using a float
-    power_board.piezo.buzz(0.2345, 261.63)
+    power_board.piezo.buzz(261.63, 0.2345)
 
     # Test that we can reset the power board
     power_board.reset()
@@ -311,29 +311,29 @@ def test_power_board_bounds_check(powerboard_serial: MockPowerBoard) -> None:
 
     # Test that we can't buzz an invalid note frequency
     with pytest.raises(ValueError):
-        power_board.piezo.buzz(0.1, -1)
+        power_board.piezo.buzz(-1, 0.1)
     with pytest.raises(ValueError):
-        power_board.piezo.buzz(0.1, 0)
+        power_board.piezo.buzz(0, 0.1)
     with pytest.raises(ValueError):
-        power_board.piezo.buzz(0.1, 10001)
+        power_board.piezo.buzz(10001, 0.1)
 
     # Test that we can't buzz an invalid note frequency type
     with pytest.raises(TypeError):
-        power_board.piezo.buzz(0.1, None)
+        power_board.piezo.buzz(None, 0.1)
     with pytest.raises(TypeError):
-        power_board.piezo.buzz(0.1, {})
+        power_board.piezo.buzz({}, 0.1)
 
     # Test that we can't buzz an invalid note duration
     with pytest.raises(ValueError):
-        power_board.piezo.buzz(-1, 1000)
+        power_board.piezo.buzz(1000, -1)
     with pytest.raises(ValueError):
-        power_board.piezo.buzz(10**100, 1000)
+        power_board.piezo.buzz(1000, 10**100)
 
     # Test that we can't buzz an invalid note duration type
     with pytest.raises(TypeError):
-        power_board.piezo.buzz(None, 1000)
+        power_board.piezo.buzz(1000, None)
     with pytest.raises(TypeError):
-        power_board.piezo.buzz({}, 1000)
+        power_board.piezo.buzz(1000, {})
 
 
 def test_power_board_discovery(monkeypatch) -> None:
