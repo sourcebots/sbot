@@ -59,7 +59,7 @@ dependencies = [
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Operating System :: OS Independent",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Typing :: Typed",
     "Topic :: Education",
 ]
