@@ -3,13 +3,16 @@ import logging
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Union
 
+from april_vision import CalibratedCamera, Frame
+from april_vision import Marker as AprilMarker
 from april_vision import (
-    CalibratedCamera, Frame, Marker, Processor, USBCamera, __version__,
-    calibrations, find_cameras, generate_marker_size_mapping,
+    Processor, USBCamera, __version__, calibrations,
+    find_cameras, generate_marker_size_mapping,
 )
 from april_vision.helpers import Base64Sender
 from numpy.typing import NDArray
 
+from .marker import Marker
 from .utils import Board, BoardIdentity
 
 LOGGER = logging.getLogger(__name__)
@@ -105,7 +108,8 @@ class AprilCamera(Board):
         :param frame: An image to detect markers in, instead of capturing a new one,
         :returns: list of markers that the camera could see.
         """
-        return self._cam.see(frame=frame)
+        markers = self._cam.see(frame=frame)
+        return [Marker.from_april_vision_marker(marker) for marker in markers]
 
     def capture(self) -> NDArray:
         """
@@ -140,7 +144,10 @@ class AprilCamera(Board):
         """
         self._cam.set_marker_sizes(tag_sizes)
 
-    def _set_detection_hook(self, callback: Callable[[Frame, List[Marker]], None]) -> None:
+    def _set_detection_hook(
+        self,
+        callback: Callable[[Frame, List[AprilMarker]], None],
+    ) -> None:
         """
         Setup a callback to be run after each detection.
 
