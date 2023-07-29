@@ -468,15 +468,15 @@ class Piezo:
         self._serial = serial
 
     @log_to_debug
-    def buzz(self, duration: float, frequency: float) -> None:
+    def buzz(self, frequency: float, duration: float) -> None:
         """
         Produce a tone on the piezo.
 
         This method is non-blocking, and sending another tone while one is
         playing will cancel the first.
 
-        :param duration: The duration of the tone, in seconds.
         :param frequency: The frequency of the tone, in Hz.
+        :param duration: The duration of the tone, in seconds.
         """
         frequency_int = int(float_bounds_check(
             frequency, 8, 10_000, "Frequency is a float in Hz between 0 and 10000"))
