@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import atexit
+import json
 import logging
 import os
 from typing import Any, Callable, TypedDict
@@ -130,6 +131,20 @@ class MQTTClient:
             self._client.publish(topic, payload=payload, retain=retain, qos=1)
         except ValueError as e:
             raise ValueError(f"Cannot publish to MQTT topic: {topic}") from e
+
+    def wrapped_publish(
+        self,
+        topic: str,
+        payload: bytes | str,
+        retain: bool = False,
+        *,
+        abs_topic: bool = False,
+    ) -> None:
+        """Wrap a payload up to be decodable as JSON."""
+        self.publish(
+            topic, 
+            json.dumps({"data": payload}), 
+            retain=retain, abs_topic=abs_topic)
 
     def _on_connect(
         self, client: mqtt.Client, userdata: Any, flags: dict[str, int], rc: int,

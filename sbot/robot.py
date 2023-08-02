@@ -121,7 +121,7 @@ class Robot:
             self._mqttc = MQTTClient.establish(**mqtt_config)
             self._cameras = MappingProxyType(_setup_cameras(
                 game_specific.MARKER_SIZES,
-                self._mqttc.publish,
+                self._mqttc.wrapped_publish,
             ))
         else:
             self._cameras = MappingProxyType(_setup_cameras(game_specific.MARKER_SIZES))
