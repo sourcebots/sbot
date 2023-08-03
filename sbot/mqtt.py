@@ -141,9 +141,11 @@ class MQTTClient:
         abs_topic: bool = False,
     ) -> None:
         """Wrap a payload up to be decodable as JSON."""
+        if isinstance(payload, bytes):
+            payload = payload.decode('utf-8')
         self.publish(
-            topic, 
-            json.dumps({"data": payload}), 
+            topic,
+            json.dumps({"data": payload}),
             retain=retain, abs_topic=abs_topic)
 
     def _on_connect(
