@@ -98,6 +98,6 @@ class Marker(NamedTuple):
     def __repr__(self) -> str:
         return (
             f"<{self.__class__.__name__} id={self.id} distance={self.distance:.0f}mm "
-            f"bearing={self.azimuth:.0f}rad elevation={self.elevation:.0f}rad "
+            f"bearing={self.azimuth:.2f}rad elevation={self.elevation:.2f}rad "
             f"size={self.size}mm>"
         )
