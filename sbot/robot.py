@@ -19,6 +19,11 @@ from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
 from .utils import obtain_lock, singular
 
+try:
+    from .mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
+except ImportError:
+    MQTT_VALID = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +43,7 @@ class Robot:
     """
     __slots__ = (
         '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
-        '_arduinos', '_cameras',
+        '_arduinos', '_cameras', '_mqttc',
     )
 
     def __init__(
@@ -110,7 +115,16 @@ class Robot:
         These cameras are used for AprilTag detection and provide location data of
         markers in its field of view.
         """
-        self._cameras = MappingProxyType(_setup_cameras(game_specific.MARKER_SIZES))
+        if MQTT_VALID:
+            # get the config from env vars
+            mqtt_config = get_mqtt_variables()
+            self._mqttc = MQTTClient.establish(**mqtt_config)
+            self._cameras = MappingProxyType(_setup_cameras(
+                game_specific.MARKER_SIZES,
+                self._mqttc.wrapped_publish,
+            ))
+        else:
+            self._cameras = MappingProxyType(_setup_cameras(game_specific.MARKER_SIZES))
 
     def _log_connected_boards(self) -> None:
         """
