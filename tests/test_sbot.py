@@ -3,6 +3,7 @@ import logging
 import socket
 
 import pytest
+import signal
 
 from sbot import Robot
 from sbot.exceptions import MetadataNotReadyError
@@ -120,6 +121,9 @@ def test_robot(monkeypatch, caplog) -> None:
     r.wait_start()
 
     assert r.zone == 0
+
+    # Check _something_ is configured to handle SIGTERM
+    assert signal.getsignal(signal.SIGTERM) != signal.SIG_DFL
 
 
 @pytest.hookimpl(trylast=True)
