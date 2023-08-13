@@ -61,9 +61,12 @@ def test_kill_after_delay_e2e(test_file: Path) -> None:
     if sys.platform == "win32":
         # Windows terminates uncleanly
         assert child.returncode == signal.SIGTERM
+    elif run_time < 4:
+        # If the process terminated quickly, it should be successful
+        assert child.returncode == 0
     else:
-        # Either the process was killed cleanly, or the fallback did
-        assert child.returncode in [0, -signal.SIGALRM]
+        # If the process took too long, it was killed ungracefully
+        assert child.returncode == -signal.SIGALRM
 
 def test_early_exit() -> None:
     start_time = time()
