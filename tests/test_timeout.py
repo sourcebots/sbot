@@ -42,7 +42,7 @@ def test_kill_after_delay_windows(monkeypatch) -> None:
 
 @pytest.mark.parametrize(
     "test_file",
-    [str(f) for f in TEST_FILES],
+    TEST_FILES,
     ids=[f.name for f in TEST_FILES]
 )
 def test_kill_after_delay_e2e(test_file: Path) -> None:
@@ -55,7 +55,10 @@ def test_kill_after_delay_e2e(test_file: Path) -> None:
     child.wait(timeout=6)
     run_time = time() - start_time
 
-    assert 2 < run_time < 6
+    assert run_time < 6
+
+    if test_file.name != "early-exit.py":
+        assert run_time > 2
 
     if sys.platform == "win32":
         # Windows terminates uncleanly
