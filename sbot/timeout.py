@@ -29,9 +29,11 @@ def timeout_handler(signal_type: int, stack_frame: Optional[FrameType]) -> None:
     """
     logger.info(TIMEOUT_MESSAGE)
 
-    # If the process doesn't terminate in a given time, exit less cleanly
-    signal.signal(signal.SIGALRM, signal.SIG_DFL)
-    signal.alarm(2)
+    # This condition is needed to keep MyPy happy
+    if sys.platform != "win32":
+        # If the process doesn't terminate in a given time, exit less cleanly
+        signal.signal(signal.SIGALRM, signal.SIG_DFL)
+        signal.alarm(2)
 
     # Exit cleanly
     exit(0)
