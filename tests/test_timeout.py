@@ -2,6 +2,7 @@
 from time import sleep, time
 
 import os
+from pathlib import Path
 import signal
 import subprocess
 import sys
@@ -10,12 +11,17 @@ from unittest.mock import Mock
 
 from sbot.timeout import kill_after_delay
 
+TEST_FILES = list((Path(__file__).parent / 'test_data/timeout_scripts').iterdir())
+
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on Windows")
 def test_kill_after_delay() -> None:
     """Test that the process is killed within the time."""
     with pytest.raises(SystemExit):
         kill_after_delay(2)
         sleep(3)
+
+    # Clear the set alarm
+    signal.alarm(0)
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="only runs on Windows")
@@ -34,20 +40,26 @@ def test_kill_after_delay_windows(monkeypatch) -> None:
     kill.assert_called_once_with(pid, signal.SIGTERM)
 
 
-def test_kill_after_delay_e2e() -> None:
+@pytest.mark.parametrize(
+    "test_file",
+    [str(f) for f in TEST_FILES],
+    ids=[f.name for f in TEST_FILES]
+)
+def test_kill_after_delay_e2e(test_file: Path) -> None:
     start_time = time()
     child = subprocess.Popen([
         sys.executable,
-        "-c",
-        'from sbot.timeout import kill_after_delay; import time; kill_after_delay(2); time.sleep(10)',
+        str(test_file),
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    child.wait(timeout=5)
+    child.wait(timeout=6)
+    run_time = time() - start_time
 
-    assert time() - start_time == pytest.approx(2, rel=1)
+    assert 2 < run_time < 6
 
     if sys.platform == "win32":
         # Windows terminates uncleanly
         assert child.returncode == signal.SIGTERM
     else:
-        assert child.returncode == 0
+        # Either the process was killed cleanly, or the fallback did
+        assert child.returncode in [0, -signal.SIGALRM]
