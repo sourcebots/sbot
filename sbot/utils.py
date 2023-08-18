@@ -6,7 +6,7 @@ import signal
 import socket
 from abc import ABC, abstractmethod
 from types import FrameType
-from typing import Any, Mapping, NamedTuple, Optional, TypeVar
+from typing import Any, Mapping, NamedTuple, TypeVar
 
 from serial.tools.list_ports_common import ListPortInfo
 
@@ -216,7 +216,7 @@ def ensure_atexit_on_term() -> None:
         # this is sufficient for `atexit` to trigger, so do nothing.
         return
 
-    def handle_signal(handled_signum: int, frame: Optional[FrameType]) -> None:
+    def handle_signal(handled_signum: int, frame: FrameType | None) -> None:
         """
         Handle the given signal by outputting some text and terminating the process.
 
