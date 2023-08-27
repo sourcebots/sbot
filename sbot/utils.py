@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import logging
+import signal
 import socket
 from abc import ABC, abstractmethod
+from types import FrameType
 from typing import Any, Mapping, NamedTuple, TypeVar
 
 from serial.tools.list_ports_common import ListPortInfo
@@ -199,3 +201,29 @@ def get_USB_identity(port: ListPortInfo) -> BoardIdentity:
         logger.warning(
             f"Failed to pull identifying information from serial device {port.device}")
         return BoardIdentity()
+
+
+def ensure_atexit_on_term() -> None:
+    """
+    Ensure `atexit` triggers on `SIGTERM`.
+
+    > The functions registered via [`atexit`] are not called when the program is
+      killed by a signal not handled by Python
+    """
+
+    if signal.getsignal(signal.SIGTERM) != signal.SIG_DFL:
+        # If a signal handler is already present for SIGTERM,
+        # this is sufficient for `atexit` to trigger, so do nothing.
+        return
+
+    def handle_signal(handled_signum: int, frame: FrameType | None) -> None:
+        """
+        Handle the given signal by outputting some text and terminating the process.
+
+        This will trigger `atexit`.
+        """
+        logger.info(signal.strsignal(handled_signum))
+        exit(1)
+
+    # Add the null-ish signal handler
+    signal.signal(signal.SIGTERM, handle_signal)

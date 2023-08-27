@@ -17,7 +17,7 @@ from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
-from .utils import obtain_lock, singular
+from .utils import ensure_atexit_on_term, obtain_lock, singular
 
 try:
     from .mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
@@ -58,6 +58,7 @@ class Robot:
         self._metadata: Metadata | None = None
 
         setup_logging(debug, trace_logging)
+        ensure_atexit_on_term()
 
         logger.info(f"SourceBots API v{__version__}")
 
