@@ -81,4 +81,4 @@ dev = [
     "types-paho-mqtt",
 ]
 vision = ["opencv-python-headless >=4,<5"]
-mqtt = ["paho-mqtt >=1.6,<2"]
+mqtt = ["paho-mqtt >=1.6,<3"]
