@@ -65,7 +65,6 @@ def test_servo_board_identify(servoboard_serial: MockServoBoard) -> None:
     assert servo_board.identify().asset_tag == "TEST456"
 
 
-@pytest.mark.skip(reason="TODO update servo values")
 def test_servo_board(servoboard_serial: MockServoBoard) -> None:
     """
     Test that the servo board functionality works.
@@ -97,7 +96,6 @@ def test_servo_board(servoboard_serial: MockServoBoard) -> None:
     assert servo_board.voltage == 5.432
 
 
-@pytest.mark.skip(reason="TODO update servo values")
 def test_servo_board_servos(servoboard_serial: MockServoBoard) -> None:
     """
     Test that the servo board servo functionality works.
@@ -119,6 +117,7 @@ def test_servo_board_servos(servoboard_serial: MockServoBoard) -> None:
     ])
     # Test that we can set the duty cycle limits
     servo_board.servos[0].set_duty_limits(1000, 1100)
+    servo_board.servos[1].set_duty_limits(1000, 2000)
 
     # Test that we can get the duty cycle limits
     assert servo_board.servos[0].get_duty_limits() == (1000, 1100)
