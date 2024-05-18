@@ -96,6 +96,7 @@ class SerialWrapper:
             port,
             baudrate=baud,
             timeout=timeout,
+            write_timeout=timeout,
             do_not_open=True,
         )
 
