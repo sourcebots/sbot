@@ -1,6 +1,7 @@
 """The main entry point for the sbot package."""
 from __future__ import annotations
 
+import os
 import itertools
 import logging
 from time import sleep
@@ -25,6 +26,7 @@ except ImportError:
     MQTT_VALID = False
 
 logger = logging.getLogger(__name__)
+IN_SIMULATOR = os.environ.get('WEBOTS_SIMULATOR', '') == '1'
 
 
 class Robot:
@@ -307,12 +309,13 @@ class Robot:
         self.power_board._run_led.flash()
 
         while not self.power_board._start_button():
-            sleep(0.1)
+            self.sleep(0.1)
         logger.info("Start button pressed.")
         self.power_board._run_led.on()
 
         if self._metadata is None:
             self._metadata = metadata.load()
 
-        if self.is_competition:
+        # Simulator timeout is handled by the simulator supervisor
+        if self.is_competition and not IN_SIMULATOR:
             timeout.kill_after_delay(game_specific.GAME_LENGTH)
