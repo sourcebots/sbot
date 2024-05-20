@@ -1,6 +1,7 @@
 """The Arduino module provides an interface to the Arduino firmware."""
 from __future__ import annotations
 
+import os
 import logging
 from enum import Enum, IntEnum
 from types import MappingProxyType
@@ -10,7 +11,7 @@ from serial.tools.list_ports import comports
 from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
-from .utils import Board, BoardIdentity, get_USB_identity, map_to_float
+from .utils import Board, BoardIdentity, get_simulator_boards, get_USB_identity, map_to_float
 
 logger = logging.getLogger(__name__)
 BAUDRATE = 115200
@@ -97,6 +98,39 @@ class Arduino(Board):
         self._serial.set_identity(self._identity)
 
     @classmethod
+    def _get_simulator_boards(cls) -> MappingProxyType[str, Arduino]:
+        """
+        Get the simulator boards.
+
+        :return: A mapping of board serial numbers to Arduinos
+        """
+        boards = {}
+        # The filter here is the name of the emulated board in the simulator
+        for board in get_simulator_boards('Arduino'):
+
+            # Create board identity from the info given
+            initial_identity = BoardIdentity(
+                manufacturer='sbot_simulator',
+                board_type=board.type_str,
+                asset_tag=board.serial_number,
+            )
+
+            try:
+                board = cls(board.url, initial_identity)
+            except BoardDisconnectionError:
+                logger.warning(
+                    f"Simulator specified arduino at port {board.url!r}, "
+                    "could not be identified. Ignoring this device")
+                continue
+            except IncorrectBoardError as err:
+                logger.warning(
+                    f"Board returned type {err.returned_type!r}, "
+                    f"expected {err.expected_type!r}. Ignoring this device")
+                continue
+            boards[board._identity.asset_tag] = board
+        return MappingProxyType(boards)
+
+    @classmethod
     def _get_supported_boards(
         cls, manual_boards: list[str] | None = None,
     ) -> MappingProxyType[str, Arduino]:
@@ -107,6 +141,9 @@ class Arduino(Board):
             defaults to None
         :return: A mapping of board serial numbers to Arduinos
         """
+        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+            return cls._get_simulator_boards()
+
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
