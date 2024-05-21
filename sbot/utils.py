@@ -249,7 +249,7 @@ def get_simulator_boards(board_filter: str = '') -> list[BoardInfo]:
     :return: A list of board connection information
     """
     if 'WEBOTS_ROBOT' not in os.environ:
-        return {}
+        return []
 
     simulator_data = os.environ['WEBOTS_ROBOT'].splitlines()
     simulator_boards = []
