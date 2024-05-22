@@ -1,7 +1,6 @@
 """The servo board module provides an interface to the servo board firmware over serial."""
 from __future__ import annotations
 
-import os
 import atexit
 import logging
 from types import MappingProxyType
@@ -13,8 +12,8 @@ from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
-    Board, BoardIdentity, float_bounds_check, get_simulator_boards,
-    get_USB_identity, map_to_float, map_to_int,
+    IN_SIMULATOR, Board, BoardIdentity, float_bounds_check,
+    get_simulator_boards, get_USB_identity, map_to_float, map_to_int,
 )
 
 DUTY_MIN = 300
@@ -135,7 +134,7 @@ class ServoBoard(Board):
             to connect to, defaults to None
         :return: A mapping of serial numbers to servo boards.
         """
-        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+        if IN_SIMULATOR:
             return cls._get_simulator_boards()
 
         boards = {}

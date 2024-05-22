@@ -1,7 +1,6 @@
 """The main entry point for the sbot package."""
 from __future__ import annotations
 
-import os
 import itertools
 import logging
 from time import sleep
@@ -19,7 +18,7 @@ from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
 from .simulator.time_server import TimeServer
-from .utils import ensure_atexit_on_term, obtain_lock, singular
+from .utils import IN_SIMULATOR, ensure_atexit_on_term, obtain_lock, singular
 
 try:
     from .mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
@@ -27,7 +26,6 @@ except ImportError:
     MQTT_VALID = False
 
 logger = logging.getLogger(__name__)
-IN_SIMULATOR = os.environ.get('WEBOTS_SIMULATOR', '') == '1'
 
 
 class Robot:

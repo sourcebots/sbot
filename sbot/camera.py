@@ -1,7 +1,6 @@
 """An implementation of a camera board using the april_vision library."""
 from __future__ import annotations
 
-import os
 import logging
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Union
@@ -16,7 +15,9 @@ from april_vision.helpers import Base64Sender
 from numpy.typing import NDArray
 
 from .marker import Marker
-from .utils import Board, BoardIdentity, BoardInfo, get_simulator_boards
+from .utils import (
+    IN_SIMULATOR, Board, BoardIdentity, BoardInfo, get_simulator_boards,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class AprilCamera(Board):
 
         :return: A dict of cameras, keyed by their name and index.
         """
-        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+        if IN_SIMULATOR:
             return {
                 camera_info.serial_number: cls.from_webots_camera(camera_info)
                 for camera_info in get_simulator_boards('CameraBoard')
