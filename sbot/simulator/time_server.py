@@ -34,7 +34,7 @@ class TimeServer:
             BAUDRATE,
             identity=initial_identity,
             # Disable the timeout so sleep works properly
-            timeout=None,  # type: ignore[arg-type]
+            timeout=None,
         )
 
         self._identity = self.identify()
