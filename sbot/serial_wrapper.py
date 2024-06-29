@@ -31,7 +31,7 @@ RetType = TypeVar("RetType")
 E = TypeVar("E", bound=BaseException)
 
 if IN_SIMULATOR:
-    BASE_TIMEOUT = 5
+    BASE_TIMEOUT = 5.0
 else:
     BASE_TIMEOUT = 0.5
 

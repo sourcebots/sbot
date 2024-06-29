@@ -92,7 +92,8 @@ class AprilCamera(Board):
         """
         Create a camera from a webots camera.
 
-        :param camera_info: The information about the virtual camera, including the url to connect to.
+        :param camera_info: The information about the virtual camera,
+                            including the url to connect to.
         :return: The camera object.
         """
         from .simulator.camera import WebotsRemoteCameraSource
@@ -106,7 +107,12 @@ class AprilCamera(Board):
         )
 
     @classmethod
-    def from_id(cls, camera_id: int, camera_data: CalibratedCamera, serial_num: str) -> 'AprilCamera':
+    def from_id(
+        cls,
+        camera_id: int,
+        camera_data: CalibratedCamera,
+        serial_num: str,
+    ) -> 'AprilCamera':
         """
         Create a camera from an ID.
 

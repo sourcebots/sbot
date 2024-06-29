@@ -83,11 +83,11 @@ class TimeServer:
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
-    def get_time(self):
+    def get_time(self) -> float:
         time_str = self._serial.query('TIME?')
         return datetime.fromisoformat(time_str).timestamp()
 
-    def sleep(self, duration: int) -> None:
+    def sleep(self, duration: float) -> None:
         if duration < 0:
             raise ValueError("sleep length must be non-negative")
 

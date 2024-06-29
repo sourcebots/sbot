@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+from socket import socket
 from time import sleep
 from types import MappingProxyType
 from typing import Mapping
@@ -55,10 +56,13 @@ class Robot:
         trace_logging: bool = False,
         manual_boards: dict[str, list[str]] | None = None,
     ) -> None:
+        self._lock: TimeServer | socket | None
         if IN_SIMULATOR:
             self._lock = TimeServer.initialise()
             if self._lock is None:
-                raise OSError('Unable to obtain lock, Is another robot instance already running?')
+                raise OSError(
+                    'Unable to obtain lock, Is another robot instance already running?'
+                )
         else:
             self._lock = obtain_lock()
         self._metadata: Metadata | None = None

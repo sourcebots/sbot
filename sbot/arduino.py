@@ -108,20 +108,20 @@ class Arduino(Board):
         """
         boards = {}
         # The filter here is the name of the emulated board in the simulator
-        for board in get_simulator_boards('Arduino'):
+        for board_info in get_simulator_boards('Arduino'):
 
             # Create board identity from the info given
             initial_identity = BoardIdentity(
                 manufacturer='sbot_simulator',
-                board_type=board.type_str,
-                asset_tag=board.serial_number,
+                board_type=board_info.type_str,
+                asset_tag=board_info.serial_number,
             )
 
             try:
-                board = cls(board.url, initial_identity)
+                board = cls(board_info.url, initial_identity)
             except BoardDisconnectionError:
                 logger.warning(
-                    f"Simulator specified arduino at port {board.url!r}, "
+                    f"Simulator specified arduino at port {board_info.url!r}, "
                     "could not be identified. Ignoring this device")
                 continue
             except IncorrectBoardError as err:

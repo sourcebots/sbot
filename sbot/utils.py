@@ -35,6 +35,7 @@ class BoardIdentity(NamedTuple):
     asset_tag: str = ""
     sw_version: str = ""
 
+
 class BoardInfo(NamedTuple):
     """
     A container for the information about a board connection.
@@ -44,6 +45,7 @@ class BoardInfo(NamedTuple):
     url: str
     serial_number: str
     type_str: str
+
 
 class Board(ABC):
     """

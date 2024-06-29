@@ -1,4 +1,5 @@
 import struct
+from typing import cast
 
 import cv2
 import numpy as np
@@ -14,20 +15,22 @@ class WebotsRemoteCameraSource(FrameSource):
     COLOURSPACE = cv2.COLOR_BGRA2GRAY
 
     def __init__(self, camera_info: BoardInfo) -> None:
-        self.calibration = (0, 0, 0, 0)
+        self.calibration = (0.0, 0.0, 0.0, 0.0)
         # Use pyserial to give a nicer interface for connecting to the camera socket
         self._serial = serial_for_url(camera_info.url, baudrate=115200, timeout=1)
 
         # Check the camera is connected
         response = self._make_request("*IDN?")
         if not response.split(b":")[1].lower().startswith(b"cam"):
-            raise RuntimeError(f"Camera not connected to a camera, returned: {response}")
+            raise RuntimeError(f"Camera not connected to a camera, returned: {response!r}")
 
         # Get the calibration data for this camera
         response = self._make_request("CAM:CALIBRATION?")
 
         # The calibration data is returned as a string of floats separated by colons
-        self.calibration = tuple(map(float, response.split(b":")))
+        new_calibration = tuple(map(float, response.split(b":")))
+        assert len(new_calibration) == 4, f"Invalid calibration data: {new_calibration}"
+        self.calibration = cast(tuple[float, float, float, float], new_calibration)
         assert len(self.calibration) == 4, f"Invalid calibration data: {self.calibration}"
 
         # Get the image size for this camera
@@ -67,5 +70,5 @@ class WebotsRemoteCameraSource(FrameSource):
         self._serial.write(command.encode() + b"\n")
         response = self._serial.readline()
         if not response.endswith(b"\n") or response.startswith(b"NACK:"):
-            raise RuntimeError(f"Failed to communicate with camera, returned: {response}")
+            raise RuntimeError(f"Failed to communicate with camera, returned: {response!r}")
         return response
