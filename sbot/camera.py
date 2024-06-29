@@ -120,7 +120,9 @@ class AprilCamera(Board):
         markers = self._cam.see(frame=frame)
 
         if save:
-            raise NotImplementedError
+            # TODO: temporary implementation to be replaced by april_vision==2.2.0
+            april_frame = Frame.from_colour_frame(frame)
+            self._cam._save(frame=april_frame, name=save)
         return [Marker.from_april_vision_marker(marker) for marker in markers]
 
     def capture(self, *, save: Union[PathLike, None] = None) -> NDArray:
@@ -133,7 +135,8 @@ class AprilCamera(Board):
         """
         raw_frame = self._cam.capture()
         if save:
-            raise NotImplementedError
+            # TODO: temporary implementation to be replaced by april_vision==2.2.0
+            self._cam.save(name=save, frame=raw_frame)
         return raw_frame
 
     def _set_marker_sizes(
