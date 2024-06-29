@@ -15,6 +15,7 @@ from numpy.typing import NDArray
 from .marker import Marker
 from .utils import Board, BoardIdentity
 
+PathLike = Union[Path, str]
 LOGGER = logging.getLogger(__name__)
 
 
@@ -99,36 +100,41 @@ class AprilCamera(Board):
         """
         self._cam.close()
 
-    def see(self, *, eager: bool = True, frame: Optional[NDArray] = None) -> List[Marker]:
+    def see(
+        self,
+        *,
+        frame: Union[NDArray, None] = None,
+        save: Union[PathLike, None] = None,
+    ) -> List[Marker]:
         """
         Capture an image and identify fiducial markers.
 
-        :param eager: Process the pose estimations of markers immediately,
-            currently unused.
         :param frame: An image to detect markers in, instead of capturing a new one,
+        :param save: If given, save the annotated frame to the path.
+                     This is given a JPEG extension if none is provided.
         :returns: list of markers that the camera could see.
         """
+        if frame is None:
+            frame = self._cam.capture()
+
         markers = self._cam.see(frame=frame)
+
+        if save:
+            raise NotImplementedError
         return [Marker.from_april_vision_marker(marker) for marker in markers]
 
-    def capture(self) -> NDArray:
+    def capture(self, *, save: Union[PathLike, None] = None) -> NDArray:
         """
         Get the raw image data from the camera.
 
+        :param save: If given, save the unannotated frame to the path.
+                     This is given a JPEG extension if none is provided.
         :returns: Camera pixel data
         """
-        return self._cam.capture()
-
-    def save(self, path: Union[Path, str], *, frame: Optional[NDArray] = None) -> None:
-        """
-        Save an annotated image to a path.
-
-        :param path: The path to save the image to,
-            this is given a JPEG extension if none is provided.
-        :param frame: An image to annotate and save, instead of capturing a new one,
-            defaults to None
-        """
-        self._cam.save(path, frame=frame)
+        raw_frame = self._cam.capture()
+        if save:
+            raise NotImplementedError
+        return raw_frame
 
     def _set_marker_sizes(
         self,
