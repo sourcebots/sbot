@@ -5,6 +5,7 @@ import json
 import logging
 import os
 from typing import Any, Callable, TypedDict
+from urllib.parse import urlparse
 
 import paho.mqtt.client as mqtt
 
@@ -181,36 +182,17 @@ def get_mqtt_variables() -> MQTTVariables:
     # url format: mqtt[s]://<username>:<password>@<host>:<port>/<topic_root>
     mqtt_url = os.environ['SBOT_MQTT_URL']
 
-    scheme, rest = mqtt_url.split('://', maxsplit=1)
-    # username and password are optional
-    try:
-        user_pass, host_port_topic = rest.rsplit('@', maxsplit=1)
-    except ValueError:
-        username, password = None, None
-        host_port_topic = rest
-    else:
-        try:
-            username, password = user_pass.split(':', maxsplit=1)
-        except ValueError:
-            # username can be supplied without password
-            username = user_pass
-            password = None
+    url_parts = urlparse(mqtt_url, allow_fragments=False)
+    use_tls = (url_parts.scheme == 'mqtts')
 
-    host_port, topic_root = host_port_topic.split('/', maxsplit=1)
-    use_tls = (scheme == 'mqtts')
-    try:
-        host, port_str = host_port.split(':', maxsplit=1)
-        port = int(port_str)
-    except ValueError:
-        # use default port for scheme
-        host = host_port
-        port = 8883 if use_tls else 1883
+    if url_parts.hostname is None:
+        raise ValueError("MQTT URL is missing a hostname.")
 
     return MQTTVariables(
-        host=host,
-        port=port,
-        topic_prefix=topic_root,
+        host=url_parts.hostname,
+        port=url_parts.port or (8883 if use_tls else 1883),
+        topic_prefix=url_parts.path.lstrip('/'),
         use_tls=use_tls,
-        username=username,
-        password=password,
+        username=url_parts.username,
+        password=url_parts.password,
     )
