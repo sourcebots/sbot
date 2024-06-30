@@ -163,8 +163,7 @@ class MQTTClient:
     ) -> None:
         if reason_code.is_failure:
             LOGGER.warning(
-                "Failed to connect to MQTT broker. "
-                f"Return code: {reason_code.getName()}"  # type: ignore[no-untyped-call]
+                f"Failed to connect to MQTT broker. Return code: {reason_code.getName()}"  # type: ignore[no-untyped-call] # noqa: E501
             )
             return
 
