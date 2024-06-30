@@ -20,7 +20,7 @@ class MQTTClient:
         self,
         client_name: str | None = None,
         topic_prefix: str | None = None,
-        mqtt_version: int = mqtt.MQTTv5,
+        mqtt_version: mqtt.MQTTProtocolVersion = mqtt.MQTTProtocolVersion.MQTTv5,
         use_tls: bool | str = False,
         username: str = '',
         password: str = '',
@@ -32,7 +32,11 @@ class MQTTClient:
         self._client_name = client_name
         self._img_topic = 'img'
 
-        self._client = mqtt.Client(client_id=client_name, protocol=mqtt_version)
+        self._client = mqtt.Client(
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
+            client_id=client_name,
+            protocol=mqtt_version,
+        )
         self._client.on_connect = self._on_connect
 
         if use_tls:
@@ -150,12 +154,17 @@ class MQTTClient:
             retain=retain, abs_topic=abs_topic)
 
     def _on_connect(
-        self, client: mqtt.Client, userdata: Any, flags: dict[str, int], rc: int,
+        self,
+        client: mqtt.Client,
+        userdata: Any,
+        connect_flags: mqtt.ConnectFlags,
+        reason_code: mqtt.ReasonCode,
         properties: mqtt.Properties | None = None,
     ) -> None:
-        if rc != mqtt.CONNACK_ACCEPTED:
+        if reason_code.is_failure:
             LOGGER.warning(
-                f"Failed to connect to MQTT broker. Return code: {mqtt.error_string(rc)}"
+                "Failed to connect to MQTT broker. "
+                f"Return code: {reason_code.getName()}"  # type: ignore[no-untyped-call]
             )
             return
 
