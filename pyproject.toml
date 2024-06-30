@@ -53,7 +53,7 @@ dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
     "pyserial >=3,<4",
-    "april_vision@git+https://github.com/WillB97/april_vision.git@save-functionality",
+    "april_vision==2.2.0a1",
     "typing-extensions; python_version<'3.10'",
 ]
 classifiers = [
