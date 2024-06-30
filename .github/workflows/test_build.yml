@@ -8,16 +8,16 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py_version: ["3.8", "3.9", "3.10", "3.11"]
+        py_version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         include:
           - os: windows-latest
             py_version: "3.8"
           - os: windows-latest
-            py_version: "3.11"
+            py_version: "3.12"
           - os: macos-latest
             py_version: "3.8"
           - os: macos-latest
-            py_version: "3.11"
+            py_version: "3.12"
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
