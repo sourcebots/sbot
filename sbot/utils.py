@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import signal
 import socket
 from abc import ABC, abstractmethod
@@ -12,6 +13,8 @@ from serial.tools.list_ports_common import ListPortInfo
 
 T = TypeVar('T')
 logger = logging.getLogger(__name__)
+
+IN_SIMULATOR = os.environ.get('WEBOTS_SIMULATOR', '') == '1'
 
 
 class BoardIdentity(NamedTuple):
@@ -31,6 +34,17 @@ class BoardIdentity(NamedTuple):
     board_type: str = ""
     asset_tag: str = ""
     sw_version: str = ""
+
+
+class BoardInfo(NamedTuple):
+    """
+    A container for the information about a board connection.
+
+
+    """
+    url: str
+    serial_number: str
+    type_str: str
 
 
 class Board(ABC):
@@ -227,3 +241,33 @@ def ensure_atexit_on_term() -> None:
 
     # Add the null-ish signal handler
     signal.signal(signal.SIGTERM, handle_signal)
+
+
+def get_simulator_boards(board_filter: str = '') -> list[BoardInfo]:
+    """
+    Get a list of all boards configured in the simulator.
+
+    This is used to support discovery of boards in the simulator environment.
+
+    :param board_filter: A filter to only return boards of a certain type
+    :return: A list of board connection information
+    """
+    if 'WEBOTS_ROBOT' not in os.environ:
+        return []
+
+    simulator_data = os.environ['WEBOTS_ROBOT'].splitlines()
+    simulator_boards = []
+
+    for board_data in simulator_data:
+        board_data = board_data.rstrip('/')
+        board_fragment, serial_number = board_data.rsplit('/', 1)
+        board_url, board_type = board_fragment.rsplit('/', 1)
+
+        board_info = BoardInfo(url=board_url, serial_number=serial_number, type_str=board_type)
+
+        if board_filter and board_info.type_str != board_filter:
+            continue
+
+        simulator_boards.append(board_info)
+
+    return simulator_boards

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+from socket import socket
 from time import sleep
 from types import MappingProxyType
 from typing import Mapping
@@ -17,7 +18,8 @@ from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
-from .utils import ensure_atexit_on_term, obtain_lock, singular
+from .simulator.time_server import TimeServer
+from .utils import IN_SIMULATOR, ensure_atexit_on_term, obtain_lock, singular
 
 try:
     from .mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
@@ -43,7 +45,7 @@ class Robot:
     """
     __slots__ = (
         '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
-        '_arduinos', '_cameras', '_mqttc',
+        '_arduinos', '_cameras', '_mqttc', '_time_server',
     )
 
     def __init__(
@@ -54,7 +56,15 @@ class Robot:
         trace_logging: bool = False,
         manual_boards: dict[str, list[str]] | None = None,
     ) -> None:
-        self._lock = obtain_lock()
+        self._lock: TimeServer | socket | None
+        if IN_SIMULATOR:
+            self._lock = TimeServer.initialise()
+            if self._lock is None:
+                raise OSError(
+                    'Unable to obtain lock, Is another robot instance already running?'
+                )
+        else:
+            self._lock = obtain_lock()
         self._metadata: Metadata | None = None
 
         setup_logging(debug, trace_logging)
@@ -249,7 +259,11 @@ class Robot:
 
         :param secs: The number of seconds to sleep for
         """
-        sleep(secs)
+        if IN_SIMULATOR:
+            assert isinstance(self._lock, TimeServer)
+            self._lock.sleep(secs)
+        else:
+            sleep(secs)
 
     @property
     @log_to_debug
@@ -307,12 +321,13 @@ class Robot:
         self.power_board._run_led.flash()
 
         while not self.power_board._start_button():
-            sleep(0.1)
+            self.sleep(0.1)
         logger.info("Start button pressed.")
         self.power_board._run_led.on()
 
         if self._metadata is None:
             self._metadata = metadata.load()
 
-        if self.is_competition:
+        # Simulator timeout is handled by the simulator supervisor
+        if self.is_competition and not IN_SIMULATOR:
             timeout.kill_after_delay(game_specific.GAME_LENGTH)
