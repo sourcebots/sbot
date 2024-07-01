@@ -78,7 +78,7 @@ dev = [
     "types-pyserial",
     "pytest",
     "pytest-cov",
-    "types-paho-mqtt",
+    "paho-mqtt >=2,<3"
 ]
 vision = ["opencv-python-headless >=4,<5"]
-mqtt = ["paho-mqtt >=1.6,<2"]
+mqtt = ["paho-mqtt >=2,<3"]
