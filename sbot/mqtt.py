@@ -4,6 +4,7 @@ import atexit
 import json
 import logging
 import os
+import time
 from typing import Any, Callable, TypedDict
 from urllib.parse import urlparse
 
@@ -150,7 +151,10 @@ class MQTTClient:
             payload = payload.decode('utf-8')
         self.publish(
             topic,
-            json.dumps({"data": payload}),
+            json.dumps({
+                "timestamp": time.time(),
+                "data": payload,
+            }),
             retain=retain, abs_topic=abs_topic)
 
     def _on_connect(
