@@ -22,8 +22,8 @@ def test_robot(monkeypatch, caplog) -> None:
         ("OUT:1:SET:1", "ACK"),
         ("OUT:2:SET:1", "ACK"),
         ("OUT:3:SET:1", "ACK"),
-        ("OUT:4:SET:1", "ACK"),
         ("OUT:5:SET:1", "ACK"),
+        ("OUT:6:SET:1", "ACK"),
         ("*IDN?", "Student Robotics:PBv4B:POW123:4.4.1"),
         ("BTN:START:GET?", "0:1"),
         ("NOTE:1760:100", "ACK"),  # Start up sound
