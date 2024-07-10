@@ -165,15 +165,14 @@ class LED:
         self._led = led
 
     @property
-    def colour(self) -> tuple[bool, bool, bool]:
+    def colour(self) -> Colour:
         """Get the colour of the user LED."""
-        return False, False, False
+        return Colour.OFF
 
     @colour.setter
-    def colour(self, value: tuple[bool, bool, bool]) -> None:
+    def colour(self, value: Colour) -> None:
         """Set the colour of the user LED."""
-        if not isinstance(value, (tuple, list)) or len(value) != 3:
-            raise ValueError("The LED requires 3 values for its colour")
+        pass
 
 
 class PhysicalLED(LED):
@@ -188,24 +187,21 @@ class PhysicalLED(LED):
         self._led = led
 
     @property
-    def colour(self) -> tuple[bool, bool, bool]:
+    def colour(self) -> Colour:
         """Get the colour of the user LED."""
-        return (
+        return Colour((
             GPIO.input(self._led.red),
             GPIO.input(self._led.green),
             GPIO.input(self._led.blue),
-        )
+        ))
 
     @colour.setter
-    def colour(self, value: tuple[bool, bool, bool]) -> None:
+    def colour(self, value: Colour) -> None:
         """Set the colour of the user LED."""
-        if not isinstance(value, (tuple, list)) or len(value) != 3:
-            raise ValueError("The LED requires 3 values for its colour")
-
         GPIO.output(
             self._led,
             tuple(
-                GPIO.HIGH if v else GPIO.LOW for v in value
+                GPIO.HIGH if v else GPIO.LOW for v in value.value
             ),
         )
 
@@ -313,21 +309,18 @@ class SimulationLED(LED):
         self._server = server
 
     @property
-    def colour(self) -> tuple[bool, bool, bool]:
+    def colour(self) -> Colour:
         """Get the colour of the user LED."""
-        return self._server.get_leds(self._led_num)
+        return Colour(self._server.get_leds(self._led_num))
 
     @colour.setter
-    def colour(self, value: tuple[bool, bool, bool]) -> None:
+    def colour(self, value: Colour) -> None:
         """Set the colour of the user LED."""
-        if not isinstance(value, (tuple, list)) or len(value) != 3:
-            raise ValueError("The LED requires 3 values for its colour")
-
         self._server.set_leds(
             self._led_num,
             (
-                bool(value[0]),
-                bool(value[1]),
-                bool(value[2]),
+                bool(value.value[0]),
+                bool(value.value[1]),
+                bool(value.value[2]),
             )
         )
