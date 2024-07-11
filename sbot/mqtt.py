@@ -149,12 +149,18 @@ class MQTTClient:
         """Wrap a payload up to be decodable as JSON."""
         if isinstance(payload, bytes):
             payload = payload.decode('utf-8')
+
+        payload_dict = {
+            "timestamp": time.time(),
+            "data": payload,
+        }
+
+        if 'run_uuid' in os.environ:
+            payload_dict['run_uuid'] = os.environ['run_uuid']
+
         self.publish(
             topic,
-            json.dumps({
-                "timestamp": time.time(),
-                "data": payload,
-            }),
+            json.dumps(payload_dict),
             retain=retain, abs_topic=abs_topic)
 
     def _on_connect(
