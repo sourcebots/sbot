@@ -20,7 +20,9 @@ from .servo_board import ServoBoard
 from .utils import ensure_atexit_on_term, obtain_lock, singular
 
 try:
-    from .mqtt import MQTT_VALID, MQTTClient, RemoteStartButton, get_mqtt_variables
+    from .mqtt import (
+        MQTT_VALID, MQTTClient, RemoteStartButton, get_mqtt_variables,
+    )
 except ImportError:
     MQTT_VALID = False
 
