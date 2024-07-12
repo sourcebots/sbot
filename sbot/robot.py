@@ -20,7 +20,9 @@ from .servo_board import ServoBoard
 from .utils import ensure_atexit_on_term, obtain_lock, singular
 
 try:
-    from .mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
+    from .mqtt import (
+        MQTT_VALID, MQTTClient, RemoteStartButton, get_mqtt_variables,
+    )
 except ImportError:
     MQTT_VALID = False
 
@@ -43,7 +45,7 @@ class Robot:
     """
     __slots__ = (
         '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
-        '_arduinos', '_cameras', '_mqttc',
+        '_arduinos', '_cameras', '_mqttc', '_start_button',
     )
 
     def __init__(
@@ -61,6 +63,12 @@ class Robot:
         ensure_atexit_on_term()
 
         logger.info(f"SourceBots API v{__version__}")
+
+        if MQTT_VALID:
+            # get the config from env vars
+            mqtt_config = get_mqtt_variables()
+            self._mqttc = MQTTClient.establish(**mqtt_config)
+            self._start_button = RemoteStartButton(self._mqttc)
 
         if manual_boards:
             self._init_power_board(manual_boards.get(PowerBoard.get_board_type(), []))
@@ -117,9 +125,6 @@ class Robot:
         markers in its field of view.
         """
         if MQTT_VALID:
-            # get the config from env vars
-            mqtt_config = get_mqtt_variables()
-            self._mqttc = MQTTClient.establish(**mqtt_config)
             self._cameras = MappingProxyType(_setup_cameras(
                 game_specific.MARKER_SIZES,
                 self._mqttc.wrapped_publish,
@@ -299,14 +304,22 @@ class Robot:
         Once the start button is pressed, the metadata will be loaded and the timeout
         will start if in competition mode.
         """
+        if MQTT_VALID:
+            remote_start_pressed = self._start_button.get_start_button_pressed
+        else:
+            def null_button_pressed() -> bool:
+                return False
+            remote_start_pressed = null_button_pressed
+
         # ignore previous button presses
         _ = self.power_board._start_button()
+        _ = remote_start_pressed()
         logger.info('Waiting for start button.')
 
         self.power_board.piezo.buzz(Note.A6, 0.1)
         self.power_board._run_led.flash()
 
-        while not self.power_board._start_button():
+        while not self.power_board._start_button() and not remote_start_pressed():
             sleep(0.1)
         logger.info("Start button pressed.")
         self.power_board._run_led.on()

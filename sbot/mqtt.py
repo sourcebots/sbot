@@ -4,6 +4,8 @@ import atexit
 import json
 import logging
 import os
+import time
+from threading import Event
 from typing import Any, Callable, TypedDict
 from urllib.parse import urlparse
 
@@ -148,9 +150,18 @@ class MQTTClient:
         """Wrap a payload up to be decodable as JSON."""
         if isinstance(payload, bytes):
             payload = payload.decode('utf-8')
+
+        payload_dict = {
+            "timestamp": time.time(),
+            "data": payload,
+        }
+
+        if 'run_uuid' in os.environ:
+            payload_dict['run_uuid'] = os.environ['run_uuid']
+
         self.publish(
             topic,
-            json.dumps({"data": payload}),
+            json.dumps(payload_dict),
             retain=retain, abs_topic=abs_topic)
 
     def _on_connect(
@@ -204,3 +215,37 @@ def get_mqtt_variables() -> MQTTVariables:
         username=url_parts.username,
         password=url_parts.password,
     )
+
+
+class RemoteStartButton:
+    def __init__(self, mqtt_client: MQTTClient) -> None:
+        self._mqtt_client = mqtt_client
+        self._start_pressed = Event()
+
+        self._mqtt_client.subscribe('start_button', self._process_start_message)
+
+    def _process_start_message(
+        self,
+        client: mqtt.Client,
+        userdata: Any,
+        message: mqtt.MQTTMessage,
+    ) -> None:
+        try:
+            payload = json.loads(message.payload)
+        except json.JSONDecodeError:
+            LOGGER.warning("Failed to decode start button message.")
+            return
+        else:
+            if 'pressed' in payload.keys():
+                if payload['pressed']:
+                    self._start_pressed.set()
+                    LOGGER.debug("Start button pressed.")
+                else:
+                    self._start_pressed.clear()
+                    LOGGER.debug("Start button cleared.")
+
+    def get_start_button_pressed(self) -> bool:
+        """Get the start button pressed status."""
+        pressed = self._start_pressed.is_set()
+        self._start_pressed.clear()
+        return pressed
