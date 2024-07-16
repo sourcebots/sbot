@@ -98,7 +98,6 @@ class Robot:
             power_boards = PowerBoard._get_supported_boards(manual_boards)
             self._power_board = singular(power_boards)
             self._power_board.outputs.power_on()
-            # TODO delay for boards to power up ???
 
     def _init_aux_boards(self, manual_boards: dict[str, list[str]] | None = None) -> None:
         """
