@@ -42,10 +42,12 @@ class Robot:
     :param trace_logging: Enable trace level logging to the console, defaults to False
     :param manual_boards: A dictionary of board types to a list of serial port paths
         to allow for connecting to boards that are not automatically detected, defaults to None
+    :param no_powerboard: If True, initialize the robot without a powerboard, defaults to False
     """
     __slots__ = (
         '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
         '_arduinos', '_cameras', '_mqttc', '_start_button',
+        '_no_pb',
     )
 
     def __init__(
@@ -55,9 +57,11 @@ class Robot:
         wait_for_start: bool = True,
         trace_logging: bool = False,
         manual_boards: dict[str, list[str]] | None = None,
+        no_powerboard: bool = False,
     ) -> None:
         self._lock = obtain_lock()
         self._metadata: Metadata | None = None
+        self._no_pb = no_powerboard
 
         setup_logging(debug, trace_logging)
         ensure_atexit_on_term()
@@ -90,10 +94,10 @@ class Robot:
             defaults to None
         :raises RuntimeError: If exactly one PowerBoard is not found
         """
-        power_boards = PowerBoard._get_supported_boards(manual_boards)
-        self._power_board = singular(power_boards)
-        self._power_board.outputs.power_on()
-        # TODO delay for boards to power up ???
+        if not self._no_pb:
+            power_boards = PowerBoard._get_supported_boards(manual_boards)
+            self._power_board = singular(power_boards)
+            self._power_board.outputs.power_on()
 
     def _init_aux_boards(self, manual_boards: dict[str, list[str]] | None = None) -> None:
         """
@@ -138,8 +142,10 @@ class Robot:
 
         Firmware versions are also logged at debug level.
         """
+        # we only have one power board so make it iterable
+        power_board = [] if self._no_pb else [self.power_board]
         boards = itertools.chain(
-            [self.power_board],  # we only have one power board so make it iterable
+            power_board,
             self.motor_boards.values(),
             self.servo_boards.values(),
             self.arduinos.values(),
@@ -161,7 +167,10 @@ class Robot:
 
         :return: The power board object
         """
-        return self._power_board
+        if not self._no_pb:
+            return self._power_board
+        else:
+            raise RuntimeError("No power board was initialized")
 
     @property
     def motor_boards(self) -> Mapping[str, MotorBoard]:
@@ -304,25 +313,35 @@ class Robot:
         Once the start button is pressed, the metadata will be loaded and the timeout
         will start if in competition mode.
         """
+        def null_button_pressed() -> bool:
+            return False
+
         if MQTT_VALID:
             remote_start_pressed = self._start_button.get_start_button_pressed
         else:
-            def null_button_pressed() -> bool:
-                return False
             remote_start_pressed = null_button_pressed
 
+        if not self._no_pb:
+            start_button_pressed = self.power_board._start_button
+        else:
+            # null out the start button function
+            start_button_pressed = null_button_pressed
+
         # ignore previous button presses
-        _ = self.power_board._start_button()
+        _ = start_button_pressed()
         _ = remote_start_pressed()
         logger.info('Waiting for start button.')
 
-        self.power_board.piezo.buzz(Note.A6, 0.1)
-        self.power_board._run_led.flash()
+        if not self._no_pb:
+            self.power_board.piezo.buzz(Note.A6, 0.1)
+            self.power_board._run_led.flash()
 
-        while not self.power_board._start_button() and not remote_start_pressed():
+        while not start_button_pressed() and not remote_start_pressed():
             sleep(0.1)
         logger.info("Start button pressed.")
-        self.power_board._run_led.on()
+
+        if not self._no_pb:
+            self.power_board._run_led.on()
 
         if self._metadata is None:
             self._metadata = metadata.load()
