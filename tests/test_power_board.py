@@ -155,14 +155,14 @@ def test_power_board_outputs(powerboard_serial: MockPowerBoard) -> None:
         ("OUT:1:SET:1", "ACK"),
         ("OUT:2:SET:1", "ACK"),
         ("OUT:3:SET:1", "ACK"),
-        ("OUT:4:SET:1", "ACK"),
         ("OUT:5:SET:1", "ACK"),
+        ("OUT:6:SET:1", "ACK"),
         ("OUT:0:SET:0", "ACK"),
         ("OUT:1:SET:0", "ACK"),
         ("OUT:2:SET:0", "ACK"),
         ("OUT:3:SET:0", "ACK"),
-        ("OUT:4:SET:0", "ACK"),
         ("OUT:5:SET:0", "ACK"),
+        ("OUT:6:SET:0", "ACK"),
     ])
     power_board.outputs.power_on()
     power_board.outputs.power_off()
@@ -177,10 +177,10 @@ def test_power_board_outputs(powerboard_serial: MockPowerBoard) -> None:
         ("OUT:2:SET:0", "ACK"),
         ("OUT:3:SET:1", "ACK"),
         ("OUT:3:SET:0", "ACK"),
-        ("OUT:4:SET:1", "ACK"),
-        ("OUT:4:SET:0", "ACK"),
         ("OUT:5:SET:1", "ACK"),
         ("OUT:5:SET:0", "ACK"),
+        ("OUT:6:SET:1", "ACK"),
+        ("OUT:6:SET:0", "ACK"),
     ])
     power_board.outputs[PowerOutputPosition.H0].is_enabled = True
     power_board.outputs[PowerOutputPosition.H0].is_enabled = False
@@ -190,14 +190,14 @@ def test_power_board_outputs(powerboard_serial: MockPowerBoard) -> None:
     power_board.outputs[PowerOutputPosition.L0].is_enabled = False
     power_board.outputs[PowerOutputPosition.L1].is_enabled = True
     power_board.outputs[PowerOutputPosition.L1].is_enabled = False
-    power_board.outputs[PowerOutputPosition.L2].is_enabled = True
-    power_board.outputs[PowerOutputPosition.L2].is_enabled = False
     power_board.outputs[PowerOutputPosition.L3].is_enabled = True
     power_board.outputs[PowerOutputPosition.L3].is_enabled = False
+    power_board.outputs[PowerOutputPosition.FIVE_VOLT].is_enabled = True
+    power_board.outputs[PowerOutputPosition.FIVE_VOLT].is_enabled = False
 
-    # Test that we can't enable or disable the 5V output
+    # Test that we can't enable or disable the brain output
     with pytest.raises(RuntimeError, match=r"Brain output cannot be controlled.*"):
-        power_board.outputs[PowerOutputPosition.FIVE_VOLT].is_enabled = True
+        power_board.outputs[PowerOutputPosition.L2].is_enabled = True
 
     # Test that we can detect whether the power board outputs are enabled
     powerboard_serial.serial_wrapper._add_responses([
