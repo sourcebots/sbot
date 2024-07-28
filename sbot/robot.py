@@ -50,8 +50,7 @@ class Robot:
     __slots__ = (
         '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
         '_arduinos', '_cameras', '_mqttc', '_start_button', '_time_server', '_user_leds',
-        '_start_led',
-        '_no_pb',
+        '_start_led', '_no_pb',
     )
 
     def __init__(
