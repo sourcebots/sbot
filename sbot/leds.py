@@ -247,7 +247,7 @@ class LedServer(Board):
     def initialise(cls) -> 'LedServer' | None:
         """Initialise the LED server using simulator discovery."""
         # The filter here is the name of the emulated board in the simulator
-        boards = get_simulator_boards('KCHv1B')
+        boards = get_simulator_boards('LedBoard')
 
         if not boards:
             return None
