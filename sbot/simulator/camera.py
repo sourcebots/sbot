@@ -16,7 +16,7 @@ class WebotsRemoteCameraSource(FrameSource):
     def __init__(self, camera_info: BoardInfo) -> None:
         self.calibration = (0.0, 0.0, 0.0, 0.0)
         # Use pyserial to give a nicer interface for connecting to the camera socket
-        self._serial = serial_for_url(camera_info.url, baudrate=115200, timeout=1)
+        self._serial = serial_for_url(camera_info.url, baudrate=115200, timeout=None)
 
         # Check the camera is connected
         response = self._make_request("*IDN?")
