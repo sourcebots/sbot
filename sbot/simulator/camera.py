@@ -1,5 +1,4 @@
 import struct
-from typing import cast
 
 import cv2
 import numpy as np
@@ -30,7 +29,7 @@ class WebotsRemoteCameraSource(FrameSource):
         # The calibration data is returned as a string of floats separated by colons
         new_calibration = tuple(map(float, response.split(b":")))
         assert len(new_calibration) == 4, f"Invalid calibration data: {new_calibration}"
-        self.calibration = cast(tuple[float, float, float, float], new_calibration)
+        self.calibration = new_calibration
         assert len(self.calibration) == 4, f"Invalid calibration data: {self.calibration}"
 
         # Get the image size for this camera
