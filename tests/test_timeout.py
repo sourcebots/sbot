@@ -53,10 +53,10 @@ def test_kill_after_delay_e2e(test_file: Path) -> None:
         str(test_file),
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    child.wait(timeout=6)
+    child.wait(timeout=8)
     run_time = time() - start_time
 
-    assert 2 < run_time < 6
+    assert 2 < run_time < 8
 
     if sys.platform == "win32":
         # Windows terminates uncleanly

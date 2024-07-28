@@ -1,4 +1,5 @@
 """Functions for killing the robot after a certain amount of time."""
+import atexit
 import logging
 import os
 import signal
@@ -10,6 +11,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 TIMEOUT_MESSAGE = "Timeout expired: Game Over!"
+EXIT_ATTEMPTS = 0
 
 
 def timeout_handler(signal_type: int, stack_frame: Optional[FrameType]) -> None:
@@ -27,16 +29,26 @@ def timeout_handler(signal_type: int, stack_frame: Optional[FrameType]) -> None:
     :param signal_type: The sginal that triggered this handler
     :param stack_frame: The stack frame at the time of the signal
     """
-    logger.info(TIMEOUT_MESSAGE)
+    global EXIT_ATTEMPTS
+    EXIT_ATTEMPTS += 1
 
-    # This condition is needed to keep MyPy happy
-    if sys.platform != "win32":
-        # If the process doesn't terminate in a given time, exit less cleanly
-        signal.signal(signal.SIGALRM, signal.SIG_DFL)
+    if sys.platform == "win32":
+        raise AssertionError("This function should not be called on Windows")
+
+    if EXIT_ATTEMPTS == 1:
+        # Allow 2 seconds for the process to exit cleanly before killing it
         signal.alarm(2)
+        logger.info(TIMEOUT_MESSAGE)
+        # Exit cleanly
+        exit(0)
+    else:
+        # The process didn't exit cleanly, so first call the cleanup handlers
+        # and use an unhanded alarm to force python to exit with a core dump
+        signal.signal(signal.SIGALRM, signal.SIG_DFL)
+        signal.alarm(2)  # Allow 2 seconds for cleanup
 
-    # Exit cleanly
-    exit(0)
+        atexit._run_exitfuncs()
+        exit(0)
 
 
 def win_timeout_handler() -> None:
