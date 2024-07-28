@@ -18,6 +18,7 @@ from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
+from .simulator.time_server import TimeServer
 from .utils import ensure_atexit_on_term, obtain_lock, singular
 
 try:
@@ -48,7 +49,7 @@ class Robot:
     """
     __slots__ = (
         '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
-        '_arduinos', '_cameras', '_mqttc', '_start_button',
+        '_arduinos', '_cameras', '_mqttc', '_start_button', '_time_server',
         '_no_pb',
     )
 
@@ -69,6 +70,10 @@ class Robot:
         ensure_atexit_on_term()
 
         logger.info(f"SourceBots API v{__version__}")
+        if IN_SIMULATOR:
+            self._time_server = TimeServer.initialise()
+        else:
+            self._time_server = None
 
         if MQTT_VALID:
             # get the config from env vars
@@ -265,7 +270,10 @@ class Robot:
 
         :param secs: The number of seconds to sleep for
         """
-        sleep(secs)
+        if IN_SIMULATOR:
+            self._time_server.sleep(secs)
+        else:
+            sleep(secs)
 
     @property
     @log_to_debug
