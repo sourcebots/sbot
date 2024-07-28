@@ -17,7 +17,7 @@ import serial
 
 from .exceptions import BoardDisconnectionError
 from .logging import TRACE
-from .utils import BoardIdentity
+from .utils import IN_SIMULATOR, BoardIdentity
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,12 @@ Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
 
 E = TypeVar("E", bound=BaseException)
+BASE_TIMEOUT: float | None
+
+if IN_SIMULATOR:
+    BASE_TIMEOUT = None  # Disable timeouts while in the simulator to allow for pausing
+else:
+    BASE_TIMEOUT = 0.5
 
 
 def retry(
@@ -80,7 +86,7 @@ class SerialWrapper:
         self,
         port: str,
         baud: int,
-        timeout: float = 0.5,
+        timeout: float | None = BASE_TIMEOUT,
         identity: BoardIdentity = BoardIdentity(),
         delay_after_connect: float = 0,
     ):
@@ -202,9 +208,10 @@ class SerialWrapper:
         """
         try:
             self.serial.open()
-            # Wait for the board to be ready to receive data
-            # Certain boards will reset when the serial port is opened
-            time.sleep(self.delay_after_connect)
+            if not IN_SIMULATOR:
+                # Wait for the board to be ready to receive data
+                # Certain boards will reset when the serial port is opened
+                time.sleep(self.delay_after_connect)
         except serial.SerialException:
             logger.error((
                 'Failed to connect to board '

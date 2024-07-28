@@ -3,21 +3,24 @@ from __future__ import annotations
 
 import itertools
 import logging
+from socket import socket
 from time import sleep
 from types import MappingProxyType
-from typing import Mapping
+from typing import Literal, Mapping
 
 from . import game_specific, metadata, timeout
 from ._version import __version__
 from .arduino import Arduino
 from .camera import AprilCamera, _setup_cameras
 from .exceptions import MetadataNotReadyError
+from .leds import LED, StartLed, get_user_leds
 from .logging import log_to_debug, setup_logging
 from .metadata import Metadata
 from .motor_board import MotorBoard
 from .power_board import Note, PowerBoard
 from .servo_board import ServoBoard
-from .utils import ensure_atexit_on_term, obtain_lock, singular
+from .simulator.time_server import TimeServer
+from .utils import IN_SIMULATOR, ensure_atexit_on_term, obtain_lock, singular
 
 try:
     from .mqtt import (
@@ -46,8 +49,8 @@ class Robot:
     """
     __slots__ = (
         '_lock', '_metadata', '_power_board', '_motor_boards', '_servo_boards',
-        '_arduinos', '_cameras', '_mqttc', '_start_button',
-        '_no_pb',
+        '_arduinos', '_cameras', '_mqttc', '_start_button', '_time_server', '_user_leds',
+        '_start_led', '_no_pb',
     )
 
     def __init__(
@@ -59,7 +62,15 @@ class Robot:
         manual_boards: dict[str, list[str]] | None = None,
         no_powerboard: bool = False,
     ) -> None:
-        self._lock = obtain_lock()
+        self._lock: TimeServer | socket | None
+        if IN_SIMULATOR:
+            self._lock = TimeServer.initialise()
+            if self._lock is None:
+                raise OSError(
+                    'Unable to obtain lock, Is another robot instance already running?'
+                )
+        else:
+            self._lock = obtain_lock()
         self._metadata: Metadata | None = None
         self._no_pb = no_powerboard
 
@@ -120,6 +131,9 @@ class Robot:
         self._motor_boards = MotorBoard._get_supported_boards(manual_motorboards)
         self._servo_boards = ServoBoard._get_supported_boards(manual_servoboards)
         self._arduinos = Arduino._get_supported_boards(manual_arduinos)
+
+        self._user_leds = get_user_leds()
+        self._start_led = StartLed()
 
     def _init_camera(self) -> None:
         """
@@ -254,6 +268,15 @@ class Robot:
         """
         return singular(self._cameras)
 
+    @property
+    def leds(self) -> Mapping[Literal['A', 'B', 'C'], LED]:
+        """
+        Access the user LEDs connected to the robot.
+
+        :return: A mapping of colours to user LEDs
+        """
+        return self._user_leds
+
     @log_to_debug
     def sleep(self, secs: float) -> None:
         """
@@ -263,7 +286,11 @@ class Robot:
 
         :param secs: The number of seconds to sleep for
         """
-        sleep(secs)
+        if IN_SIMULATOR:
+            assert isinstance(self._lock, TimeServer)
+            self._lock.sleep(secs)
+        else:
+            sleep(secs)
 
     @property
     @log_to_debug
@@ -335,16 +362,19 @@ class Robot:
         if not self._no_pb:
             self.power_board.piezo.buzz(Note.A6, 0.1)
             self.power_board._run_led.flash()
+        self._start_led.flash_start()
 
         while not start_button_pressed() and not remote_start_pressed():
-            sleep(0.1)
+            self.sleep(0.1)
         logger.info("Start button pressed.")
 
         if not self._no_pb:
             self.power_board._run_led.on()
+        self._start_led.set_state(False)
 
         if self._metadata is None:
             self._metadata = metadata.load()
 
-        if self.is_competition:
+        # Simulator timeout is handled by the simulator supervisor
+        if self.is_competition and not IN_SIMULATOR:
             timeout.kill_after_delay(game_specific.GAME_LENGTH)

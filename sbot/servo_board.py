@@ -12,8 +12,8 @@ from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
-    Board, BoardIdentity, float_bounds_check,
-    get_USB_identity, map_to_float, map_to_int,
+    IN_SIMULATOR, Board, BoardIdentity, float_bounds_check,
+    get_simulator_boards, get_USB_identity, map_to_float, map_to_int,
 )
 
 DUTY_MIN = 300
@@ -89,6 +89,39 @@ class ServoBoard(Board):
         atexit.register(self._cleanup)
 
     @classmethod
+    def _get_simulator_boards(cls) -> MappingProxyType[str, ServoBoard]:
+        """
+        Get the simulator boards.
+
+        :return: A mapping of board serial numbers to boards.
+        """
+        boards = {}
+        # The filter here is the name of the emulated board in the simulator
+        for board_info in get_simulator_boards('ServoBoard'):
+
+            # Create board identity from the info given
+            initial_identity = BoardIdentity(
+                manufacturer='sbot_simulator',
+                board_type=board_info.type_str,
+                asset_tag=board_info.serial_number,
+            )
+
+            try:
+                board = cls(board_info.url, initial_identity)
+            except BoardDisconnectionError:
+                logger.warning(
+                    f"Simulator specified servo board at port {board_info.url!r}, "
+                    "could not be identified. Ignoring this device")
+                continue
+            except IncorrectBoardError as err:
+                logger.warning(
+                    f"Board returned type {err.returned_type!r}, "
+                    f"expected {err.expected_type!r}. Ignoring this device")
+                continue
+            boards[board._identity.asset_tag] = board
+        return MappingProxyType(boards)
+
+    @classmethod
     def _get_supported_boards(
         cls, manual_boards: list[str] | None = None,
     ) -> MappingProxyType[str, 'ServoBoard']:
@@ -101,6 +134,9 @@ class ServoBoard(Board):
             to connect to, defaults to None
         :return: A mapping of serial numbers to servo boards.
         """
+        if IN_SIMULATOR:
+            return cls._get_simulator_boards()
+
         boards = {}
         serial_ports = comports()
         for port in serial_ports:

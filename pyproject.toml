@@ -74,7 +74,7 @@ dev = [
     "flake8",
     "isort",
     "mypy==1.10.0; python_version<'3.9'",
-    "mypy; python_version>='3.9'",
+    "mypy>=1.7,<2; python_version>='3.9'",
     "build",
     "types-pyserial",
     "pytest",
