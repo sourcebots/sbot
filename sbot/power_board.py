@@ -1,6 +1,7 @@
 """The power board module provides an interface to the power board firmware over serial."""
 from __future__ import annotations
 
+import os
 import atexit
 import logging
 from enum import IntEnum
@@ -12,7 +13,10 @@ from serial.tools.list_ports import comports
 from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
-from .utils import Board, BoardIdentity, float_bounds_check, get_USB_identity
+from .utils import (
+    Board, BoardIdentity, float_bounds_check,
+    get_simulator_boards, get_USB_identity,
+)
 
 logger = logging.getLogger(__name__)
 BAUDRATE = 115200  # Since the power board is a USB device, this is ignored
@@ -109,6 +113,39 @@ class PowerBoard(Board):
         atexit.register(self._cleanup)
 
     @classmethod
+    def _get_simulator_boards(cls) -> MappingProxyType[str, PowerBoard]:
+        """
+        Get the simulator boards.
+
+        :return: A mapping of board serial numbers to boards.
+        """
+        boards = {}
+        # The filter here is the name of the emulated board in the simulator
+        for board in get_simulator_boards('PowerBoard'):
+
+            # Create board identity from the info given
+            initial_identity = BoardIdentity(
+                manufacturer='sbot_simulator',
+                board_type=board.type_str,
+                asset_tag=board.serial_number,
+            )
+
+            try:
+                board = cls(board.url, initial_identity)
+            except BoardDisconnectionError:
+                logger.warning(
+                    f"Simulator specified power board at port {board.url!r}, "
+                    "could not be identified. Ignoring this device")
+                continue
+            except IncorrectBoardError as err:
+                logger.warning(
+                    f"Board returned type {err.returned_type!r}, "
+                    f"expected {err.expected_type!r}. Ignoring this device")
+                continue
+            boards[board._identity.asset_tag] = board
+        return MappingProxyType(boards)
+
+    @classmethod
     def _get_supported_boards(
         cls, manual_boards: list[str] | None = None,
     ) -> MappingProxyType[str, PowerBoard]:
@@ -120,6 +157,9 @@ class PowerBoard(Board):
         :param manual_boards: A list of manually specified serial ports to also attempt
             to connect to, defaults to None
         """
+        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+            return cls._get_simulator_boards()
+
         boards = {}
         serial_ports = comports()
         for port in serial_ports:
