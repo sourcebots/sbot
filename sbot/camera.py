@@ -1,9 +1,12 @@
 """An implementation of a camera board using the april_vision library."""
+from __future__ import annotations
+
+import os
 import logging
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Union
 
-from april_vision import CalibratedCamera, Frame
+from april_vision import CalibratedCamera, Frame, FrameSource
 from april_vision import Marker as AprilMarker
 from april_vision import (
     Processor, USBCamera, __version__, calibrations,
@@ -13,7 +16,7 @@ from april_vision.helpers import Base64Sender
 from numpy.typing import NDArray
 
 from .marker import Marker
-from .utils import Board, BoardIdentity
+from .utils import Board, BoardIdentity, BoardInfo, get_simulator_boards
 
 PathLike = Union[Path, str]
 LOGGER = logging.getLogger(__name__)
@@ -27,9 +30,11 @@ class AprilCamera(Board):
     in order to determine the spatial positon and orientation of the markers
     that it has detected.
 
-    :param camera_id: The index of the camera to use.
-    :param camera_data: The calibration data for the camera.
+    :param camera_source: The source of the camera frames.
+    :param calibration: The intrinsic calibration of the camera.
     :param serial_num: The serial number of the camera.
+    :param name: The name of the camera.
+    :param vidpid: The VID:PID of the camera.
     """
     __slots__ = ('_serial_num', '_cam')
 
@@ -53,28 +58,76 @@ class AprilCamera(Board):
 
         :return: A dict of cameras, keyed by their name and index.
         """
+        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+            return {
+                camera_info.serial_number: cls.from_webots_camera(camera_info)
+                for camera_info in get_simulator_boards('CameraBoard')
+            }
+
         return {
             (serial := f"{camera_data.name} - {camera_data.index}"):
-            cls(camera_data.index, camera_data=camera_data, serial_num=serial)
+            cls.from_id(camera_data.index, camera_data=camera_data, serial_num=serial)
             for camera_data in find_cameras(calibrations)
         }
 
-    def __init__(self, camera_id: int, camera_data: CalibratedCamera, serial_num: str) -> None:
+    def __init__(
+        self, camera_source: FrameSource,
+        calibration: tuple[float, float, float, float] | None,
+        serial_num: str,
+        name: str,
+        vidpid: str = "",
+    ) -> None:
+        # The processor handles the detection and pose estimation
+        self._cam = Processor(
+            camera_source,
+            calibration=calibration,
+            name=name,
+            vidpid=vidpid,
+            mask_unknown_size_tags=True,
+        )
+        self._serial_num = serial_num
+
+    @classmethod
+    def from_webots_camera(cls, camera_info: BoardInfo) -> 'AprilCamera':
+        """
+        Create a camera from a webots camera.
+
+        :param camera_info: The information about the virtual camera, including the url to connect to.
+        :return: The camera object.
+        """
+        from .simulator.camera import WebotsRemoteCameraSource
+
+        camera_source = WebotsRemoteCameraSource(camera_info)
+        return cls(
+            camera_source,
+            calibration=camera_source.calibration,
+            serial_num=camera_info.serial_number,
+            name=camera_info.serial_number,
+        )
+
+    @classmethod
+    def from_id(cls, camera_id: int, camera_data: CalibratedCamera, serial_num: str) -> 'AprilCamera':
+        """
+        Create a camera from an ID.
+
+        :param camera_id: The ID of the camera to create.
+        :param camera_data: The calibration data for the camera.
+        :param serial_num: The serial number of the camera.
+        :return: The camera object.
+        """
         # The camera source handles the connection between the camera and the processor
         camera_source = USBCamera.from_calibration_file(
             camera_id,
             calibration_file=camera_data.calibration,
             vidpid=camera_data.vidpid,
         )
-        # The processor handles the detection and pose estimation
-        self._cam = Processor(
+        return cls(
             camera_source,
             calibration=camera_source.calibration,
+            serial_num=serial_num,
             name=camera_data.name,
             vidpid=camera_data.vidpid,
-            mask_unknown_size_tags=True,
         )
-        self._serial_num = serial_num
 
     def identify(self) -> BoardIdentity:
         """
