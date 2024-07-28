@@ -20,19 +20,19 @@ class WebotsRemoteCameraSource(FrameSource):
 
         # Check the camera is connected
         response = self._make_request("*IDN?")
-        if response.split(b":")[1].lower().startswith(b"cam"):
+        if not response.split(b":")[1].lower().startswith(b"cam"):
             raise RuntimeError(f"Camera not connected to a camera, returned: {response}")
 
         # Get the calibration data for this camera
         response = self._make_request("CAM:CALIBRATION?")
 
         # The calibration data is returned as a string of floats separated by colons
-        self.calibration = tuple(map(float, response.split(b":")[1].split(b":")))
+        self.calibration = tuple(map(float, response.split(b":")))
         assert len(self.calibration) == 4, f"Invalid calibration data: {self.calibration}"
 
         # Get the image size for this camera
         response = self._make_request("CAM:RESOLUTION?")
-        self.image_size = tuple(map(int, response.split(b":")[1].split(b"x")))
+        self.image_size = tuple(map(int, response.split(b":")))
         assert len(self.image_size) == 2, f"Invalid image dimensions: {self.image_size}"
 
     def read(self, fresh: bool = True) -> NDArray:

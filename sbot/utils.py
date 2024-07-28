@@ -257,7 +257,7 @@ def get_simulator_boards(board_filter: str = '') -> list[BoardInfo]:
     for board_data in simulator_data:
         board_data = board_data.rstrip('/')
         board_fragment, serial_number = board_data.rsplit('/', 1)
-        board_url, board_type = board_fragment.split('/', 1)
+        board_url, board_type = board_fragment.rsplit('/', 1)
 
         board_info = BoardInfo(url=board_url, serial_number=serial_number, type_str=board_type)
 
