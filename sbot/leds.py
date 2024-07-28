@@ -4,7 +4,7 @@ from __future__ import annotations
 import atexit
 import logging
 import warnings
-from enum import IntEnum, unique
+from enum import Enum, IntEnum, unique
 from types import MappingProxyType
 from typing import Literal, Mapping, NamedTuple, Optional
 
@@ -63,7 +63,7 @@ class RobotLEDs(IntEnum):
         }
 
 
-class Colour():
+class Colour(Enum):
     """User LED colours."""
 
     OFF = (False, False, False)
