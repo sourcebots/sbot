@@ -9,6 +9,8 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+TIMEOUT_MESSAGE = "Timeout expired: Game Over!"
+
 
 def timeout_handler(signal_type: int, stack_frame: Optional[FrameType]) -> None:
     """
@@ -17,12 +19,21 @@ def timeout_handler(signal_type: int, stack_frame: Optional[FrameType]) -> None:
     This function is called when the timeout expires and will stop the robot's main process.
     In order for this to work, any threads that are created must be daemons.
 
+    If the process doesn't terminate clearly (perhaps because the exception was caught),
+    exit less cleanly.
+
     NOTE: This function is not called on Windows.
 
     :param signal_type: The sginal that triggered this handler
     :param stack_frame: The stack frame at the time of the signal
     """
-    logger.info("Timeout expired: Game Over!")
+    logger.info(TIMEOUT_MESSAGE)
+
+    # If the process doesn't terminate in a given time, exit less cleanly
+    signal.signal(signal.SIGALRM, signal.SIG_DFL)
+    signal.alarm(2)
+
+    # Exit cleanly
     exit(0)
 
 
@@ -35,7 +46,7 @@ def win_timeout_handler() -> None:
 
     NOTE: This function is only called on Windows.
     """
-    logger.info("Timeout expired: Game Over!")
+    logger.info(TIMEOUT_MESSAGE)
     os.kill(os.getpid(), signal.SIGTERM)
 
 
