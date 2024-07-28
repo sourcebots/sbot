@@ -63,7 +63,7 @@ class TimeServer:
             board = cls(board_info.url, initial_identity)
         except BoardDisconnectionError:
             logger.warning(
-                f"Simulator specified power board at port {board_info.url!r}, "
+                f"Simulator specified time server at port {board_info.url!r}, "
                 "could not be identified. Ignoring this device")
             return None
         except IncorrectBoardError as err:
