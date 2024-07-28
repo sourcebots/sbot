@@ -29,9 +29,10 @@ Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
 
 E = TypeVar("E", bound=BaseException)
+BASE_TIMEOUT: float | None
 
 if IN_SIMULATOR:
-    BASE_TIMEOUT = 5.0
+    BASE_TIMEOUT = None  # Disable timeouts while in the simulator to allow for pausing
 else:
     BASE_TIMEOUT = 0.5
 
@@ -85,7 +86,7 @@ class SerialWrapper:
         self,
         port: str,
         baud: int,
-        timeout: float = BASE_TIMEOUT,
+        timeout: float | None = BASE_TIMEOUT,
         identity: BoardIdentity = BoardIdentity(),
         delay_after_connect: float = 0,
     ):
