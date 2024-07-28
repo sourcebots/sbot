@@ -65,6 +65,7 @@ def kill_after_delay(timeout_seconds: int) -> None:
         # Windows doesn't have SIGALRM,
         # so we approximate its functionality using a delayed SIGTERM
         timer = Timer(timeout_seconds, win_timeout_handler)
+        timer.daemon = True
         timer.start()
     else:
         signal.signal(signal.SIGALRM, timeout_handler)
