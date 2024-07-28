@@ -1,7 +1,6 @@
 """The motor board module provides an interface to the motor board firmware over serial."""
 from __future__ import annotations
 
-import os
 import atexit
 import logging
 from enum import IntEnum
@@ -14,8 +13,8 @@ from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
-    Board, BoardIdentity, float_bounds_check, get_simulator_boards,
-    get_USB_identity, map_to_float, map_to_int,
+    IN_SIMULATOR, Board, BoardIdentity, float_bounds_check,
+    get_simulator_boards, get_USB_identity, map_to_float, map_to_int,
 )
 
 logger = logging.getLogger(__name__)
@@ -138,7 +137,7 @@ class MotorBoard(Board):
             to connect to, defaults to None
         :return: A mapping of serial numbers to motor boards.
         """
-        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+        if IN_SIMULATOR:
             return cls._get_simulator_boards()
 
         boards = {}

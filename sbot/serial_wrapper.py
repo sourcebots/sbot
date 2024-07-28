@@ -6,7 +6,6 @@ and for handling port timeouts and disconnections.
 """
 from __future__ import annotations
 
-import os
 import logging
 import sys
 import threading
@@ -18,7 +17,7 @@ import serial
 
 from .exceptions import BoardDisconnectionError
 from .logging import TRACE
-from .utils import BoardIdentity
+from .utils import IN_SIMULATOR, BoardIdentity
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ RetType = TypeVar("RetType")
 
 E = TypeVar("E", bound=BaseException)
 
-if os.environ.get('WEBOTS_SIMULATOR', '') == '1':
+if IN_SIMULATOR:
     BASE_TIMEOUT = 5
 else:
     BASE_TIMEOUT = 0.5
@@ -208,9 +207,10 @@ class SerialWrapper:
         """
         try:
             self.serial.open()
-            # Wait for the board to be ready to receive data
-            # Certain boards will reset when the serial port is opened
-            time.sleep(self.delay_after_connect)
+            if not IN_SIMULATOR:
+                # Wait for the board to be ready to receive data
+                # Certain boards will reset when the serial port is opened
+                time.sleep(self.delay_after_connect)
         except serial.SerialException:
             logger.error((
                 'Failed to connect to board '

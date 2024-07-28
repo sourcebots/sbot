@@ -1,8 +1,8 @@
 """General utility functions and classes for the sbot package."""
 from __future__ import annotations
 
-import os
 import logging
+import os
 import signal
 import socket
 from abc import ABC, abstractmethod
@@ -13,6 +13,8 @@ from serial.tools.list_ports_common import ListPortInfo
 
 T = TypeVar('T')
 logger = logging.getLogger(__name__)
+
+IN_SIMULATOR = os.environ.get('WEBOTS_SIMULATOR', '') == '1'
 
 
 class BoardIdentity(NamedTuple):

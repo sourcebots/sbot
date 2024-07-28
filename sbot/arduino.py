@@ -1,7 +1,6 @@
 """The Arduino module provides an interface to the Arduino firmware."""
 from __future__ import annotations
 
-import os
 import logging
 from enum import Enum, IntEnum
 from types import MappingProxyType
@@ -11,7 +10,10 @@ from serial.tools.list_ports import comports
 from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
-from .utils import Board, BoardIdentity, get_simulator_boards, get_USB_identity, map_to_float
+from .utils import (
+    IN_SIMULATOR, Board, BoardIdentity,
+    get_simulator_boards, get_USB_identity, map_to_float,
+)
 
 logger = logging.getLogger(__name__)
 BAUDRATE = 115200
@@ -141,7 +143,7 @@ class Arduino(Board):
             defaults to None
         :return: A mapping of board serial numbers to Arduinos
         """
-        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+        if IN_SIMULATOR:
             return cls._get_simulator_boards()
 
         boards = {}

@@ -1,7 +1,6 @@
 """The power board module provides an interface to the power board firmware over serial."""
 from __future__ import annotations
 
-import os
 import atexit
 import logging
 from enum import IntEnum
@@ -14,7 +13,7 @@ from .exceptions import BoardDisconnectionError, IncorrectBoardError
 from .logging import log_to_debug
 from .serial_wrapper import SerialWrapper
 from .utils import (
-    Board, BoardIdentity, float_bounds_check,
+    IN_SIMULATOR, Board, BoardIdentity, float_bounds_check,
     get_simulator_boards, get_USB_identity,
 )
 
@@ -157,7 +156,7 @@ class PowerBoard(Board):
         :param manual_boards: A list of manually specified serial ports to also attempt
             to connect to, defaults to None
         """
-        if os.environ.get('WEBOTS_SIMULATOR') == '1':
+        if IN_SIMULATOR:
             return cls._get_simulator_boards()
 
         boards = {}
