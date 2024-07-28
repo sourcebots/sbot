@@ -73,7 +73,8 @@ Documentation = "https://docs.sourcebots.co.uk"
 dev = [
     "flake8",
     "isort",
-    "mypy",
+    "mypy==1.10.0; python_version<'3.9'",
+    "mypy; python_version>='3.9'",
     "build",
     "types-pyserial",
     "pytest",
