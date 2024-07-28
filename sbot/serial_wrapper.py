@@ -6,6 +6,7 @@ and for handling port timeouts and disconnections.
 """
 from __future__ import annotations
 
+import os
 import logging
 import sys
 import threading
@@ -29,6 +30,11 @@ Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
 
 E = TypeVar("E", bound=BaseException)
+
+if os.environ.get('WEBOTS_SIMULATOR', '') == '1':
+    BASE_TIMEOUT = 5
+else:
+    BASE_TIMEOUT = 0.5
 
 
 def retry(
@@ -80,7 +86,7 @@ class SerialWrapper:
         self,
         port: str,
         baud: int,
-        timeout: float = 0.5,
+        timeout: float = BASE_TIMEOUT,
         identity: BoardIdentity = BoardIdentity(),
         delay_after_connect: float = 0,
     ):
