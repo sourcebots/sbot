@@ -12,6 +12,7 @@ from unittest.mock import Mock
 from sbot.timeout import kill_after_delay
 
 TEST_FILES = list((Path(__file__).parent / 'test_data/timeout_scripts').iterdir())
+EXTRA_TEST_FILES_DIR = Path(__file__).parent / 'test_data/timeout_scripts_extra'
 
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on Windows")
 def test_kill_after_delay() -> None:
@@ -43,7 +44,7 @@ def test_kill_after_delay_windows(monkeypatch) -> None:
 @pytest.mark.parametrize(
     "test_file",
     TEST_FILES,
-    ids=[f.name for f in TEST_FILES]
+    ids=[f.stem for f in TEST_FILES]
 )
 def test_kill_after_delay_e2e(test_file: Path) -> None:
     start_time = time()
@@ -55,10 +56,7 @@ def test_kill_after_delay_e2e(test_file: Path) -> None:
     child.wait(timeout=6)
     run_time = time() - start_time
 
-    assert run_time < 6
-
-    if test_file.name != "early-exit.py":
-        assert run_time > 2
+    assert 2 < run_time < 6
 
     if sys.platform == "win32":
         # Windows terminates uncleanly
@@ -66,3 +64,33 @@ def test_kill_after_delay_e2e(test_file: Path) -> None:
     else:
         # Either the process was killed cleanly, or the fallback did
         assert child.returncode in [0, -signal.SIGALRM]
+
+def test_early_exit() -> None:
+    start_time = time()
+    child = subprocess.Popen([
+        sys.executable,
+        str(EXTRA_TEST_FILES_DIR / "early-exit.py"),
+    ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    child.wait(timeout=6)
+
+    run_time = time() - start_time
+
+    assert run_time < 2
+
+    assert child.returncode == 0
+
+def test_exception() -> None:
+    start_time = time()
+    child = subprocess.Popen([
+        sys.executable,
+        str(EXTRA_TEST_FILES_DIR / "exception.py"),
+    ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    child.wait(timeout=6)
+
+    run_time = time() - start_time
+
+    assert run_time < 2
+
+    assert child.returncode == 1
