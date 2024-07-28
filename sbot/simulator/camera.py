@@ -8,6 +8,9 @@ from serial import serial_for_url
 
 from ..utils import BoardInfo
 
+HEADER_SIZE = 5  # 1 byte for the type, 4 bytes for the length
+IMAGE_TAG_ID = 0
+
 
 class WebotsRemoteCameraSource(FrameSource):
     # Webots cameras include an alpha channel, this informs april_vision of how to handle it
@@ -30,7 +33,6 @@ class WebotsRemoteCameraSource(FrameSource):
         new_calibration = tuple(map(float, response.split(b":")))
         assert len(new_calibration) == 4, f"Invalid calibration data: {new_calibration}"
         self.calibration = new_calibration
-        assert len(self.calibration) == 4, f"Invalid calibration data: {self.calibration}"
 
         # Get the image size for this camera
         response = self._make_request("CAM:RESOLUTION?")
@@ -47,10 +49,10 @@ class WebotsRemoteCameraSource(FrameSource):
         self._serial.write(b"CAM:FRAME!\n")
         # The image is encoded as a TLV (Type, Length, Value) packet
         # so we need to read the header to get the type and length of the image
-        header = self._serial.read(5)
-        assert len(header) == 5, f"Invalid header length: {len(header)}"
+        header = self._serial.read(HEADER_SIZE)
+        assert len(header) == HEADER_SIZE, f"Invalid header length: {len(header)}"
         img_tag, img_len = struct.unpack('>BI', header)
-        assert img_tag == 0, f"Invalid image tag: {img_tag}"
+        assert img_tag == IMAGE_TAG_ID, f"Invalid image tag: {img_tag}"
 
         # Get the image data now we know the length
         img_data = self._serial.read(img_len)
