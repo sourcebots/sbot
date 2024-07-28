@@ -195,7 +195,7 @@ def test_power_board_outputs(powerboard_serial: MockPowerBoard) -> None:
     power_board.outputs[PowerOutputPosition.FIVE_VOLT].is_enabled = True
     power_board.outputs[PowerOutputPosition.FIVE_VOLT].is_enabled = False
 
-    # Test that we can't enable or disable the 5V output
+    # Test that we can't enable or disable the brain output
     with pytest.raises(RuntimeError, match=r"Brain output cannot be controlled.*"):
         power_board.outputs[PowerOutputPosition.L2].is_enabled = True
 
