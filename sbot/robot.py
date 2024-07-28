@@ -60,7 +60,12 @@ class Robot:
         manual_boards: dict[str, list[str]] | None = None,
         no_powerboard: bool = False,
     ) -> None:
-        self._lock = obtain_lock()
+        if IN_SIMULATOR:
+            self._lock = TimeServer.initialise()
+            if self._lock is None:
+                raise OSError('Unable to obtain lock, Is another robot instance already running?')
+        else:
+            self._lock = obtain_lock()
         self._metadata: Metadata | None = None
         self._no_pb = no_powerboard
 
@@ -68,10 +73,6 @@ class Robot:
         ensure_atexit_on_term()
 
         logger.info(f"SourceBots API v{__version__}")
-        if IN_SIMULATOR:
-            self._time_server = TimeServer.initialise()
-        else:
-            self._time_server = None
 
         if MQTT_VALID:
             # get the config from env vars
@@ -269,7 +270,8 @@ class Robot:
         :param secs: The number of seconds to sleep for
         """
         if IN_SIMULATOR:
-            self._time_server.sleep(secs)
+            assert isinstance(self._lock, TimeServer)
+            self._lock.sleep(secs)
         else:
             sleep(secs)
 
