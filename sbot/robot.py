@@ -6,11 +6,12 @@ import logging
 from socket import socket
 from time import sleep
 from types import MappingProxyType
-from typing import Literal, Mapping
+from typing import Literal, Mapping, cast
 
 from . import game_specific, metadata, timeout
 from ._version import __version__
 from .arduino import Arduino
+from .background_motor_board import BackgroundMotorBoard
 from .camera import AprilCamera, _setup_cameras
 from .exceptions import MetadataNotReadyError
 from .leds import LED, StartLed, get_user_leds
@@ -131,6 +132,19 @@ class Robot:
         self._motor_boards = MotorBoard._get_supported_boards(manual_motorboards)
         self._servo_boards = ServoBoard._get_supported_boards(manual_servoboards)
         self._arduinos = Arduino._get_supported_boards(manual_arduinos)
+
+        # If we are using the background motor boards, set them up now
+        if not IN_SIMULATOR:
+            background_motor_boards = {
+                serial: BackgroundMotorBoard(board)
+                for serial, board in self._motor_boards.items()
+            }
+            for board in background_motor_boards.values():
+                board.start_thread()
+            self._motor_boards = MappingProxyType(cast(
+                Mapping[str, MotorBoard],
+                background_motor_boards,
+            ))
 
         self._user_leds = get_user_leds()
         self._start_led = StartLed()
