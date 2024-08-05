@@ -358,11 +358,19 @@ class Pin:
         ADC_MIN = 0
 
         self._check_if_disabled()
-        if self.mode not in ANALOG_READ_MODES:
-            raise IOError(f'Analog read is not supported in {self.mode}')
         if not self._supports_analog:
-            raise IOError('Pin does not support analog read')
-        response = self._serial.query(f'PIN:{self._index}:ANALOG:GET?')
+            raise IOError(f'Analog read is not supported on pin {self._index}')
+
+        # Combine the mode and response queries into a single pipeline
+        mode, response = self._serial.query_multi([
+            f'PIN:{self._index}:MODE:GET?',
+            f'PIN:{self._index}:ANALOG:GET?',
+        ])
+        mode = GPIOPinMode(mode)
+
+        if mode not in ANALOG_READ_MODES:
+            raise IOError(f'Analog read is not supported in {self.mode}')
+
         # map the response from the ADC range to the voltage range
         return map_to_float(int(response), ADC_MIN, ADC_MAX, 0.0, 5.0)
 

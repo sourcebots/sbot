@@ -65,13 +65,18 @@ class MockSerialWrapper:
         """
         # Assert that we have not run out of responses
         # and that the request is the next one we expect
-        assert self.request_index < len(self.responses)
+        if self.request_index >= len(self.responses):
+            raise AssertionError(f"Unexpected request: {request}")
         assert request == self.responses[self.request_index][0]
 
         # Fetch the response and increment the request index
         response = self.responses[self.request_index][1]
         self.request_index += 1
         return response
+
+    def query_multi(self, commands: list[str]) -> list[str]:
+        """Send multiple commands and return the responses."""
+        return [self.query(command) for command in commands]
 
     def write(self, request: str) -> None:
         """Send a command without waiting for a response."""
