@@ -358,8 +358,8 @@ class Pin:
         ADC_MIN = 0
 
         self._check_if_disabled()
-        if self.mode not in ANALOG_READ_MODES:
-            raise IOError(f'Analog read is not supported in {self.mode}')
+        # if self.mode not in ANALOG_READ_MODES:
+        #     raise IOError(f'Analog read is not supported in {self.mode}')
         if not self._supports_analog:
             raise IOError('Pin does not support analog read')
         response = self._serial.query(f'PIN:{self._index}:ANALOG:GET?')
