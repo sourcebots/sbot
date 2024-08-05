@@ -6,7 +6,7 @@ This test uses a mock serial wrapper to simulate the connection to the arduino b
 from __future__ import annotations
 
 import re
-from typing import NamedTuple
+from typing import NamedTuple, Generator
 
 import pytest
 
@@ -25,7 +25,7 @@ class MockArduino(NamedTuple):
 
 
 @pytest.fixture
-def arduino_serial(monkeypatch) -> None:
+def arduino_serial(monkeypatch) -> Generator[MockArduino, None, None]:
     serial_wrapper = MockSerialWrapper([
         ("*IDN?", "Student Robotics:Arduino:X:2.0"),  # Called by Arduino.__init__
     ])
