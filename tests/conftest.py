@@ -73,6 +73,10 @@ class MockSerialWrapper:
         self.request_index += 1
         return response
 
+    def query_multi(self, commands: list[str]) -> list[str]:
+        """Send multiple commands and return the responses."""
+        return [self.query(command) for command in commands]
+
     def write(self, request: str) -> None:
         """Send a command without waiting for a response."""
         _ = self.query(request)
