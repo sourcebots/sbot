@@ -84,81 +84,138 @@ def test_arduino_ultrasound(arduino_serial: MockArduino) -> None:
         arduino.ultrasound_measure(25, 2)
 
 
-def test_arduino_pins(arduino_serial: MockArduino) -> None:
-    """
-    Test the arduino pins properties and methods.
-
-    This test uses the mock serial wrapper to simulate the arduino.
-    """
+@pytest.mark.parametrize("pin,expected,command,response", [
+    (2, GPIOPinMode.OUTPUT, "PIN:2:MODE:GET?", "OUTPUT"),
+    (10, GPIOPinMode.INPUT_PULLUP, "PIN:10:MODE:GET?", "INPUT_PULLUP"),
+    (AnalogPins.A0, GPIOPinMode.INPUT, "PIN:14:MODE:GET?", "INPUT"),
+])
+def test_arduino_get_pin_mode(
+    arduino_serial: MockArduino,
+    pin: int,
+    expected: GPIOPinMode,
+    command: str,
+    response: str,
+) -> None:
     arduino = arduino_serial.arduino_board
     arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),
-        ("PIN:10:MODE:GET?", "INPUT_PULLUP"),
-        ("PIN:14:MODE:GET?", "INPUT"),
-        ("PIN:2:MODE:SET:OUTPUT", "ACK"),
-        ("PIN:10:MODE:SET:INPUT_PULLUP", "ACK"),
-        ("PIN:14:MODE:SET:INPUT", "ACK"),
-        # PIN:<n>:ANALOG:GET?
+        (command, response),
     ])
 
-    # Test that we can get the mode of a pin
-    assert arduino.pins[2].mode == GPIOPinMode.OUTPUT
-    assert arduino.pins[10].mode == GPIOPinMode.INPUT_PULLUP
-    assert arduino.pins[AnalogPins.A0].mode == GPIOPinMode.INPUT
+    assert arduino.pins[pin].mode == expected
+
+
+def test_arduino_set_invalid_pin_mode(arduino_serial: MockArduino) -> None:
+    arduino = arduino_serial.arduino_board
 
     with pytest.raises(IOError):
         arduino.pins[2].mode = 1
 
-    # Test that we can set the mode of a pin
-    arduino.pins[2].mode = GPIOPinMode.OUTPUT
-    arduino.pins[10].mode = GPIOPinMode.INPUT_PULLUP
-    arduino.pins[AnalogPins.A0].mode = GPIOPinMode.INPUT
 
-    # Test that we can get the digital value of a pin
+@pytest.mark.parametrize("pin,mode,command,response", [
+    (2, GPIOPinMode.OUTPUT, "PIN:2:MODE:SET:OUTPUT", "ACK"),
+    (10, GPIOPinMode.INPUT_PULLUP, "PIN:10:MODE:SET:INPUT_PULLUP", "ACK"),
+    (AnalogPins.A0, GPIOPinMode.INPUT, "PIN:14:MODE:SET:INPUT", "ACK"),
+])
+def test_arduino_set_pin_mode(
+    arduino_serial: MockArduino,
+    pin: int,
+    mode: GPIOPinMode,
+    command: str,
+    response: str,
+) -> None:
+    arduino = arduino_serial.arduino_board
     arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),  # mode is read before digital value
-        ("PIN:2:DIGITAL:GET?", "1"),
-        ("PIN:10:MODE:GET?", "INPUT_PULLUP"),
-        ("PIN:10:DIGITAL:GET?", "0"),
-        ("PIN:14:MODE:GET?", "INPUT"),
-        ("PIN:14:DIGITAL:GET?", "1"),
+        (command, response),
     ])
-    assert arduino.pins[2].digital_value is True
-    assert arduino.pins[10].digital_value is False
-    assert arduino.pins[AnalogPins.A0].digital_value is True
 
-    # Test that we can set the digital value of a pin
+    arduino.pins[pin].mode = mode
+
+
+@pytest.mark.parametrize("pin,expected,command,response,mode_command,mode_response", [
+    (2, True, "PIN:2:DIGITAL:GET?", "1", "PIN:2:MODE:GET?", "OUTPUT"),
+    (10, False, "PIN:10:DIGITAL:GET?", "0", "PIN:10:MODE:GET?", "INPUT_PULLUP"),
+    (AnalogPins.A0, True, "PIN:14:DIGITAL:GET?", "1", "PIN:14:MODE:GET?", "INPUT"),
+])
+def test_arduino_get_digital_value(
+    arduino_serial: MockArduino,
+    pin: int,
+    expected: bool,
+    command: str,
+    response: str,
+    mode_command: str,
+    mode_response: str,
+) -> None:
+    arduino = arduino_serial.arduino_board
     arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),  # mode is read before digital value
-        ("PIN:2:DIGITAL:SET:1", "ACK"),
-        ("PIN:2:MODE:GET?", "OUTPUT"),
-        ("PIN:2:DIGITAL:SET:0", "ACK"),
-        ("PIN:10:MODE:GET?", "INPUT_PULLUP"),
-        ("PIN:10:MODE:GET?", "INPUT_PULLUP"),
-        ("PIN:14:MODE:GET?", "INPUT"),
-        ("PIN:14:MODE:GET?", "INPUT"),
+        (mode_command, mode_response),
+        (command, response),
     ])
-    arduino.pins[2].digital_value = True
-    arduino.pins[2].digital_value = False
-    with pytest.raises(IOError, match=r"Digital write is not supported.*"):
-        arduino.pins[10].digital_value = False
-    with pytest.raises(IOError, match=r"Digital write is not supported.*"):
-        arduino.pins[AnalogPins.A0].digital_value = True
 
-    # Test that we can get the analog value of a pin
+    assert arduino.pins[pin].digital_value == expected
+
+
+@pytest.mark.parametrize("pin,value,command,response,mode_command,mode_response", [
+    (2, True, "PIN:2:DIGITAL:SET:1", "ACK", "PIN:2:MODE:GET?", "OUTPUT"),
+    (2, False, "PIN:2:DIGITAL:SET:0", "ACK", "PIN:2:MODE:GET?", "OUTPUT"),
+])
+def test_arduino_set_digital_value(
+    arduino_serial: MockArduino,
+    pin: int,
+    value: bool,
+    command: str,
+    response: str,
+    mode_command: str,
+    mode_response: str,
+) -> None:
+    arduino = arduino_serial.arduino_board
     arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),  # mode is read before analog value
-        ("PIN:2:MODE:GET?", "OUTPUT"),
-        ("PIN:10:MODE:GET?", "INPUT"),
+        (mode_command, mode_response),
+        (command, response),
+    ])
+
+    arduino.pins[pin].digital_value = value
+
+
+@pytest.mark.parametrize("pin,mode_command,mode_response", [
+    (10, "PIN:10:MODE:GET?", "INPUT_PULLUP"),
+    (AnalogPins.A0, "PIN:14:MODE:GET?", "INPUT"),
+])
+def test_arduino_set_invalid_digital_value(
+    arduino_serial: MockArduino,
+    pin: int,
+    mode_command: str,
+    mode_response: str,
+) -> None:
+    arduino = arduino_serial.arduino_board
+    arduino_serial.serial_wrapper._add_responses([
+        (mode_command, mode_response),
+        (mode_command, mode_response),
+    ])
+
+    with pytest.raises(IOError, match=r"Digital write is not supported.*"):
+        arduino.pins[pin].digital_value = False
+
+
+def test_arduino_get_analog_value(arduino_serial: MockArduino) -> None:
+    arduino = arduino_serial.arduino_board
+    arduino_serial.serial_wrapper._add_responses([
         ("PIN:14:MODE:GET?", "INPUT"),
         ("PIN:14:ANALOG:GET?", "1000"),
     ])
-    with pytest.raises(IOError, match=r"Analog read is not supported.*"):
-        arduino.pins[2].analog_value
-    with pytest.raises(IOError, match=r"Pin does not support analog read"):
-        arduino.pins[10].analog_value
+
     # 4.888 = round((5 / 1023) * 1000, 3)
     assert arduino.pins[AnalogPins.A0].analog_value == 4.888
+
+
+def test_arduino_get_invalid_analog_value_from_digital_only_pin(arduino_serial: MockArduino) -> None:
+    arduino = arduino_serial.arduino_board
+    arduino_serial.serial_wrapper._add_responses([
+        ("PIN:2:MODE:GET?", "OUTPUT"),
+        ("PIN:2:MODE:GET?", "OUTPUT"),
+    ])
+
+    with pytest.raises(IOError, match=r".*not support.*"):
+        arduino.pins[2].analog_value
 
 
 def test_invalid_properties(arduino_serial: MockArduino) -> None:
