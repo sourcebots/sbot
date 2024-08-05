@@ -209,10 +209,6 @@ def test_arduino_get_analog_value(arduino_serial: MockArduino) -> None:
 
 def test_arduino_get_invalid_analog_value_from_digital_only_pin(arduino_serial: MockArduino) -> None:
     arduino = arduino_serial.arduino_board
-    arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),
-        ("PIN:2:MODE:GET?", "OUTPUT"),
-    ])
 
     with pytest.raises(IOError, match=r".*not support.*"):
         arduino.pins[2].analog_value
