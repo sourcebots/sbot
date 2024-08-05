@@ -65,7 +65,7 @@ class MockSerialWrapper:
         """
         # Assert that we have not run out of responses
         # and that the request is the next one we expect
-        assert self.request_index < len(self.responses)
+        assert self.request_index < len(self.responses), f"Unexpected request: {request}"
         assert request == self.responses[self.request_index][0]
 
         # Fetch the response and increment the request index

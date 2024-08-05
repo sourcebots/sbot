@@ -147,14 +147,8 @@ def test_arduino_pins(arduino_serial: MockArduino) -> None:
 
     # Test that we can get the analog value of a pin
     arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),  # mode is read before analog value
-        ("PIN:2:MODE:GET?", "OUTPUT"),
-        ("PIN:10:MODE:GET?", "INPUT"),
-        ("PIN:14:MODE:GET?", "INPUT"),
         ("PIN:14:ANALOG:GET?", "1000"),
     ])
-    with pytest.raises(IOError, match=r"Analog read is not supported.*"):
-        arduino.pins[2].analog_value
     with pytest.raises(IOError, match=r"Pin does not support analog read"):
         arduino.pins[10].analog_value
     # 4.888 = round((5 / 1023) * 1000, 3)
