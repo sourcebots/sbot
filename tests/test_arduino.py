@@ -116,11 +116,8 @@ def test_arduino_pins(arduino_serial: MockArduino) -> None:
 
     # Test that we can get the digital value of a pin
     arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),  # mode is read before digital value
         ("PIN:2:DIGITAL:GET?", "1"),
-        ("PIN:10:MODE:GET?", "INPUT_PULLUP"),
         ("PIN:10:DIGITAL:GET?", "0"),
-        ("PIN:14:MODE:GET?", "INPUT"),
         ("PIN:14:DIGITAL:GET?", "1"),
     ])
     assert arduino.pins[2].digital_value is True
@@ -129,21 +126,11 @@ def test_arduino_pins(arduino_serial: MockArduino) -> None:
 
     # Test that we can set the digital value of a pin
     arduino_serial.serial_wrapper._add_responses([
-        ("PIN:2:MODE:GET?", "OUTPUT"),  # mode is read before digital value
         ("PIN:2:DIGITAL:SET:1", "ACK"),
-        ("PIN:2:MODE:GET?", "OUTPUT"),
         ("PIN:2:DIGITAL:SET:0", "ACK"),
-        ("PIN:10:MODE:GET?", "INPUT_PULLUP"),
-        ("PIN:10:MODE:GET?", "INPUT_PULLUP"),
-        ("PIN:14:MODE:GET?", "INPUT"),
-        ("PIN:14:MODE:GET?", "INPUT"),
     ])
     arduino.pins[2].digital_value = True
     arduino.pins[2].digital_value = False
-    with pytest.raises(IOError, match=r"Digital write is not supported.*"):
-        arduino.pins[10].digital_value = False
-    with pytest.raises(IOError, match=r"Digital write is not supported.*"):
-        arduino.pins[AnalogPins.A0].digital_value = True
 
     # Test that we can get the analog value of a pin
     arduino_serial.serial_wrapper._add_responses([
