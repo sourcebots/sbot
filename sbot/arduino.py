@@ -44,11 +44,6 @@ class AnalogPins(IntEnum):
     A5 = 19
 
 
-DIGITAL_READ_MODES = {GPIOPinMode.INPUT, GPIOPinMode.INPUT_PULLUP, GPIOPinMode.OUTPUT}
-DIGITAL_WRITE_MODES = {GPIOPinMode.OUTPUT}
-ANALOG_READ_MODES = {GPIOPinMode.INPUT}
-
-
 class Arduino(Board):
     """
     The Arduino board interface.
@@ -319,8 +314,6 @@ class Pin:
         :return: The digital value of the pin.
         """
         self._check_if_disabled()
-        if self.mode not in DIGITAL_READ_MODES:
-            raise IOError(f'Digital read is not supported in {self.mode}')
         response = self._serial.query(f'PIN:{self._index}:DIGITAL:GET?')
         return (response == '1')
 
@@ -335,12 +328,14 @@ class Pin:
         :raises IOError: If this pin cannot be controlled.
         """
         self._check_if_disabled()
-        if self.mode not in DIGITAL_WRITE_MODES:
-            raise IOError(f'Digital write is not supported in {self.mode}')
-        if value:
-            self._serial.write(f'PIN:{self._index}:DIGITAL:SET:1')
-        else:
-            self._serial.write(f'PIN:{self._index}:DIGITAL:SET:0')
+        try:
+            if value:
+                self._serial.write(f'PIN:{self._index}:DIGITAL:SET:1')
+            else:
+                self._serial.write(f'PIN:{self._index}:DIGITAL:SET:0')
+        except RuntimeError as e:
+            if 'is not supported in' in str(e):
+                raise IOError(str(e))
 
     @property
     @log_to_debug
@@ -358,11 +353,14 @@ class Pin:
         ADC_MIN = 0
 
         self._check_if_disabled()
-        if self.mode not in ANALOG_READ_MODES:
-            raise IOError(f'Analog read is not supported in {self.mode}')
         if not self._supports_analog:
             raise IOError('Pin does not support analog read')
-        response = self._serial.query(f'PIN:{self._index}:ANALOG:GET?')
+        try:
+            response = self._serial.query(f'PIN:{self._index}:ANALOG:GET?')
+        except RuntimeError as e:
+            # The firmware returns a NACK if the pin is not in INPUT mode
+            if 'is not supported in' in str(e):
+                raise IOError(str(e))
         # map the response from the ADC range to the voltage range
         return map_to_float(int(response), ADC_MIN, ADC_MAX, 0.0, 5.0)
 
