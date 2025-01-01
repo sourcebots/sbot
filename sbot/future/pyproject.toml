@@ -1,0 +1,68 @@
+# ### Linting Rules ###
+[tool.ruff]
+target-version = "py39"
+line-length = 95
+lint.select = [
+    "D",  # pydocstyle
+    "E",  # pycodestyle error
+    "F",  # pyflakes
+    "I",  # isort
+    "W",  # pycodestyle warning
+    "RUF",  # ruff-specific
+    "B006",  # mutable default argument
+    "B021",  # f-string docstring
+    "COM818",  # warn about implicitly creating a tuple
+    "SLF001",  # warn about accessing private members, these can be noqa'd when necessary
+]
+lint.preview = true  # Enable preview to get the rest of pycodestyle errors
+lint.ignore = [
+    "D104",  # Ignore missing docstring in public package
+    "D105",  # Ignore missing docstring in magic method
+    "D107",  # Ignore missing docstring in __init__
+    "D401",  # Ignore first line of docstring should be in imperative mood
+    "D203",  # Ignore 1 blank line required before class docstring
+    "D212",  # Ignore Multi-line docstring summary should start at the first line
+    "RUF005",  # Allow alternate iterable unpacking
+    "RUF015",  # Allow + concatenation
+]
+
+# ### Formatting Rules ###
+[tool.mypy]
+warn_unused_ignores = true
+warn_return_any = true
+show_error_codes = true
+
+strict_optional = true
+implicit_optional = true
+
+disallow_any_unimported = true
+disallow_subclassing_any = true
+#disallow_any_generics = true
+
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+
+check_untyped_defs = true
+
+
+# ### Tasks ###
+[tool.poe.env]
+PYFOLDERS = "classless/"
+
+[tool.poe.tasks.lint]
+help = "Run ruff against the project to check for linting errors."
+cmd = "ruff check $PYFOLDERS"
+
+[tool.poe.tasks.type]
+help = "Run mypy against the project to check for type errors."
+cmd = "python -m mypy $PYFOLDERS"
+
+[tool.poe.tasks.check]
+help = "Check the project for linting, type and test errors."
+sequence = ["lint", "type"]
+
+[tool.poe.tasks.fix]
+help = "Use ruff to fix any auto-fixable linting errors."
+cmd = "ruff check --fix-only $PYFOLDERS"
