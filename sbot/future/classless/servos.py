@@ -1,20 +1,22 @@
 """The interface for a single servo board output over serial."""
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from typing import NamedTuple
 
+from sbot.future.board_manager import BoardManager, DiscoveryTemplate
 from sbot.logging import log_to_debug
 from sbot.serial_wrapper import SerialWrapper
 from sbot.utils import float_bounds_check, map_to_float, map_to_int
-
-from .utils import BoardIdentifier, BoardManager
 
 DUTY_MIN = 300
 DUTY_MAX = 4000
 START_DUTY_MIN = 350
 START_DUTY_MAX = 1980
 NUM_SERVOS = 8
+
+logger = logging.getLogger(__name__)
 
 
 class ServoStatus(NamedTuple):
@@ -49,10 +51,22 @@ class Servo:
     :param boards: The BoardManager object containing the servo board references.
     """
 
-    __slots__ = ('_duty_limits', '_outputs')
+    __slots__ = ('_boards', '_duty_limits', '_identifier')
 
     def __init__(self, boards: BoardManager):
-        self._outputs = boards.servos
+        self._identifier = 'servo'
+        template = DiscoveryTemplate(
+            identifier=self._identifier,
+            name='servo board',
+            vid=0x1BDA,
+            pid=0x0011,
+            board_type='SBv4B',
+            num_outputs=NUM_SERVOS,
+            cleanup=self._cleanup,
+            sim_board_type='ServoBoard',
+        )
+        BoardManager.register_board(template)
+        self._boards = boards
 
         self._duty_limits: dict[int, tuple[int, int]] = defaultdict(
             lambda: (START_DUTY_MIN, START_DUTY_MAX),
@@ -72,7 +86,7 @@ class Servo:
         :raises ValueError: If the limits are not in the range 300 to 4000.
         """
         # Validate output exists
-        _output = self._find_output(id)
+        _output = self._boards.find_output(self._identifier, id)
 
         if not (isinstance(lower, int) and isinstance(upper, int)):
             raise TypeError(
@@ -95,6 +109,9 @@ class Servo:
         :param id: The ID of the servo.
         :return: A tuple of the lower and upper limits of the servo pulse in μs.
         """
+        # Validate output exists
+        _output = self._boards.find_output(self._identifier, id)
+
         return self._duty_limits[id]
 
     @log_to_debug
@@ -107,7 +124,7 @@ class Servo:
 
         :param position: The position of the servo as a float between -1.0 and 1.0
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         position = float_bounds_check(
             position, -1.0, 1.0,
             'Servo position is a float between -1.0 and 1.0')
@@ -126,7 +143,7 @@ class Servo:
 
         :return: The position of the servo as a float between -1.0 and 1.0 or None if disabled.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query(f'SERVO:{output.idx}:GET?')
         data = int(response)
         if data == 0:
@@ -143,7 +160,7 @@ class Servo:
 
         :param id: The ID of the servo.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         output.port.write(f'SERVO:{output.idx}:DISABLE')
 
     @log_to_debug
@@ -154,7 +171,7 @@ class Servo:
         :param id: The ID of the servo.
         :return: A named tuple of the watchdog fail and pgood status.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query('*STATUS?')
 
         return ServoStatus.from_status_response(response)
@@ -166,7 +183,7 @@ class Servo:
 
         This will disable all servos.
         """
-        for board in self._get_boards():
+        for board in self._boards.get_boards(self._identifier).values():
             board.write('*RESET')
 
     @log_to_debug
@@ -178,7 +195,7 @@ class Servo:
 
         :return: The current draw of the board in amps.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query('SERVO:I?')
         return float(response) / 1000
 
@@ -190,23 +207,17 @@ class Servo:
         :param id: The ID of the servo.
         :return: The voltage of the on-board regulator in volts.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query('SERVO:V?')
         return float(response) / 1000
 
-    def _find_output(self, id: int) -> BoardIdentifier:
+    @staticmethod
+    def _cleanup(port: SerialWrapper) -> None:
         try:
-            return self._outputs[id]
-        except IndexError:
-            raise ValueError(f"Output {id} does not exist")
-
-    def _get_boards(self) -> list[SerialWrapper]:
-        unique_boards = []
-        for output in self._outputs:
-            if output.port not in unique_boards:
-                unique_boards.append(output.port)
-        return unique_boards
+            port.write('*RESET')
+        except Exception:
+            logger.warning(f"Failed to cleanup servo board {port.identity.asset_tag}.")
 
     def __repr__(self) -> str:
-        board_ports = self._get_boards()
+        board_ports = ", ".join(self._boards.get_boards(self._identifier).keys())
         return f"<{self.__class__.__qualname__} {board_ports}>"

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import logging
 
 from ..exceptions import BoardDisconnectionError, IncorrectBoardError
@@ -48,7 +49,7 @@ class LedServer(Board):
         self._serial.write('*RESET')
 
     @classmethod
-    def initialise(cls) -> 'LedServer' | None:
+    def initialise(cls) -> LedServer | None:
         """Initialise the LED server using simulator discovery."""
         # The filter here is the name of the emulated board in the simulator
         boards = get_simulator_boards('LedBoard')

@@ -13,11 +13,27 @@ import logging
 import os
 from typing import Callable, ClassVar, NamedTuple
 
+from april_vision import (
+    FrameSource,
+    USBCamera,
+    calibrations,
+    find_cameras,
+    generate_marker_size_mapping,
+)
+from april_vision import Processor as AprilCamera
+from april_vision.helpers import Base64Sender
 from sbot.exceptions import BoardDisconnectionError
-from sbot.serial_wrapper import SerialWrapper
+from sbot.game_specific import MARKER_SIZES
+from sbot.serial_wrapper import BASE_TIMEOUT, SerialWrapper
 from sbot.utils import BoardIdentity, get_simulator_boards, get_USB_identity
 from serial.tools.list_ports import comports
 from serial.tools.list_ports_common import ListPortInfo
+
+try:
+    from sbot.mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
+except ImportError:
+    MQTT_VALID = False
+
 
 from .overrides import get_overrides
 
@@ -75,12 +91,14 @@ class DiscoveryTemplate(NamedTuple):
     board_type: str
     num_outputs: int = 0
     baud_rate: int = 115200
+    setup: Callable[[SerialWrapper], None] | None = None
     cleanup: Callable[[SerialWrapper], None] | None = None
     max_boards: int | None = None
     delay_after_connect: int = 0
     use_usb_serial: bool = False
     sim_board_type: str | None = None
     sim_only: bool = False
+    timeout: float | None = BASE_TIMEOUT
 
 
 class PortIdentity(NamedTuple):
@@ -112,6 +130,8 @@ class BoardManager:
         self._loaded: bool = False
         self.boards: dict[str, dict[str, SerialWrapper]] = {}
         self.outputs: dict[str, list[OutputIdentifier]] = {}
+        self.cameras: dict[str, AprilCamera] = {}
+        self.init_mqtt()
 
     @classmethod
     def register_board(cls, board: DiscoveryTemplate) -> None:
@@ -140,6 +160,25 @@ class BoardManager:
             self.boards[template.identifier] = {}
 
         if not IN_SIMULATOR:
+            # Load power boards first and enable all outputs
+            power_template = next(
+                filter(lambda x: x.identifier == 'power', self._regisered_templates),
+            )
+            for port in comports():
+                if not (port.vid == power_template.vid and port.pid == power_template.pid):
+                    continue
+                port_data = PortIdentity(port.device, port.serial_number or "", port)
+                if not self._inititalse_port(port_data, power_template, _DiscoveryMode.NORMAL):
+                    logger.debug(
+                        f"Found power board at {port.device!r}, "
+                        "but it could not be identified. Ignoring this device"
+                    )
+
+            if power_template.setup is not None:
+                for board in self.boards['power'].values():
+                    # Enable all outputs on the power board
+                    power_template.setup(board)
+
             # Do normal (USB) board loading
             for port in comports():
                 port_data = PortIdentity(port.device, port.serial_number or "", port)
@@ -162,6 +201,10 @@ class BoardManager:
         else:
             # Do simulator board loading
             for board_info in get_simulator_boards():
+                if board_info.type_str == 'CameraBoard':
+                    # Cameras are loaded separately
+                    continue
+
                 port_data = PortIdentity(board_info.url, board_info.serial_number)
                 possible_boards = filter(
                     lambda x: (
@@ -185,6 +228,9 @@ class BoardManager:
         # Do manual board loading, get list of ports from overrides
         for template in self._regisered_templates:
             manual_port_str = overrides.get(f'MANUAL_{template.identifier}_PORTS') or ""
+            if not manual_port_str:
+                continue
+
             manual_ports = manual_port_str.split(',')
             for port_str in manual_ports:
                 port_data = PortIdentity(port_str)
@@ -194,10 +240,22 @@ class BoardManager:
                         f"{port_str!r}, ignoring this device"
                     )
 
+        # Run startup commands on all boards
+        for template in self._regisered_templates:
+            if not IN_SIMULATOR and template.identifier == 'power':
+                # Power boards have already been setup
+                continue
+            for board in self.boards[template.identifier].values():
+                if template.setup is not None:
+                    template.setup(board)
+
         # Sort boards by asset tag
         for board_type in self.boards.keys():
             sort_override = overrides.get(f'SORT_{board_type}_ORDER') or ""
-            self._custom_sort(board_type, sort_override.split(','))
+            if sort_override:
+                self._custom_sort(board_type, sort_override.split(','))
+            else:
+                self._custom_sort(board_type, [])
 
         self._loaded = True
 
@@ -270,6 +328,7 @@ class BoardManager:
             template.baud_rate,
             identity=initial_identity,
             delay_after_connect=template.delay_after_connect,
+            timeout=template.timeout,
         )
         try:
             response = board_serial.query('*IDN?')
@@ -295,10 +354,9 @@ class BoardManager:
 
         identity = BoardIdentity(*response.split(':'))
         if template.use_usb_serial:
-            identity = BoardIdentity(
-                **identity._asdict(),
-                asset_tag=initial_identity.asset_tag,
-            )
+            prev_identity = identity._asdict()
+            prev_identity['asset_tag'] = initial_identity.asset_tag
+            identity = BoardIdentity(**prev_identity)
 
         if identity.board_type != template.board_type:
             logger.warning(
@@ -344,3 +402,210 @@ class BoardManager:
             }
 
         self.boards[identifier] = boards_sorted
+
+    def find_output(self, identifier: str, idx: int) -> OutputIdentifier:
+        """
+        Find an output on a board.
+
+        :param identifier: The identifier of the board.
+        :param idx: The index of the output on the board.
+        :return: The OutputIdentifier for the output.
+        :raises ValueError: If the output does not exist on the board.
+        :raises KeyError: If no board with the given identifier is registered.
+        """
+        try:
+            return self.outputs[identifier][idx]
+        except IndexError:
+            name = self._name_from_identifier(identifier)
+            raise ValueError(f"Output {idx} does not exist on {name}")
+        except KeyError:
+            raise KeyError(f"No board with identifier {identifier!r}")
+
+    def get_boards(self, identifier: str) -> dict[str, SerialWrapper]:
+        """
+        Get all boards of a given type.
+
+        :param identifier: The identifier of the board type.
+        :return: A dictionary of asset tags to SerialWrapper objects.
+        :raises KeyError: If no board with the given identifier is registered.
+        """
+        try:
+            return self.boards[identifier]
+        except KeyError:
+            raise KeyError(f"No board with identifier {identifier!r}")
+
+    def get_first_board(self, identifier: str) -> SerialWrapper:
+        """
+        Get the first board of a given type.
+
+        :param identifier: The identifier of the board type.
+        :return: The SerialWrapper object for the first board.
+        :raises KeyError: If no board with the given identifier is registered.
+        :raises ValueError: If no boards of the given type are connected.
+        """
+        try:
+            return next(iter(self.boards[identifier].values()))
+        except KeyError:
+            raise KeyError(f"No board with identifier {identifier!r}") from None
+        except StopIteration:
+            name = self._name_from_identifier(identifier)
+            raise ValueError(f"No {name}s connected") from None
+
+    def _name_from_identifier(self, identifier: str) -> str:
+        for template in self._regisered_templates:
+            if template.identifier == identifier:
+                return template.name
+        return identifier
+
+    def init_mqtt(self) -> None:
+        """Initialise the MQTT connection."""
+        if MQTT_VALID:
+            self.mqtt: MQTTClient | None = None
+            # get the config from env vars
+            mqtt_config = get_mqtt_variables()
+            self.mqtt = MQTTClient.establish(**mqtt_config)
+        else:
+            self.mqtt = None
+
+    def load_cameras(self) -> None:
+        """
+        Find all connected cameras with calibration and configure tag sizes.
+
+        Where MQTT is enabled, set up a frame sender to send annotated frames
+        as base64 encoded JPEG bytestreams of each image, detection is run on.
+
+        This method will attempt to identify all connected cameras and load them
+        into the cameras dictionary. Cameras will be indexed by their name.
+        """
+        if self.cameras:
+            raise RuntimeError("Cameras have already been loaded")
+
+        camera_source: FrameSource
+        # Unroll the tag ID iterables and convert the sizes to meters
+        expanded_tag_sizes = generate_marker_size_mapping(MARKER_SIZES)
+
+        if MQTT_VALID and self.mqtt:
+            frame_sender = Base64Sender(self.mqtt.wrapped_publish)
+        else:
+            frame_sender = None
+
+        if IN_SIMULATOR:
+            from sbot.simulator.camera import WebotsRemoteCameraSource
+
+            for camera_info in get_simulator_boards('CameraBoard'):
+                camera_source = WebotsRemoteCameraSource(camera_info)
+                # The processor handles the detection and pose estimation
+                camera = AprilCamera(
+                    camera_source,
+                    calibration=camera_source.calibration,
+                    name=camera_info.serial_number,
+                    mask_unknown_size_tags=True,
+                )
+
+                # Set the tag sizes in the camera
+                camera.set_marker_sizes(expanded_tag_sizes)
+
+                if frame_sender:
+                    camera.detection_hook = frame_sender.annotated_frame_hook
+
+                self.cameras[camera_info.serial_number] = camera
+        else:
+            for camera_data in find_cameras(calibrations):
+                cam_name = f"{camera_data.name} - {camera_data.index}"
+
+                # The camera source handles the connection between the camera and the processor
+                camera_source = USBCamera.from_calibration_file(
+                    camera_data.index,
+                    calibration_file=camera_data.calibration,
+                    vidpid=camera_data.vidpid,
+                )
+                # The processor handles the detection and pose estimation
+                camera = AprilCamera(
+                    camera_source,
+                    calibration=camera_source.calibration,
+                    name=camera_data.name,
+                    vidpid=camera_data.vidpid,
+                    mask_unknown_size_tags=True,
+                )
+
+                # Set the tag sizes in the camera
+                camera.set_marker_sizes(expanded_tag_sizes)
+
+                if frame_sender:
+                    camera.detection_hook = frame_sender.annotated_frame_hook
+
+                self.cameras[cam_name] = camera
+
+    def get_camera(self) -> AprilCamera:
+        """Get the first camera connected to the robot."""
+        if len(self.cameras) > 1:
+            camera_name = next(iter(self.cameras.keys()))
+            logger.warning(f"Multiple cameras connected, using {camera_name!r}")
+
+        try:
+            return next(iter(self.cameras.values()))
+        except StopIteration:
+            raise ValueError("No cameras connected") from None
+
+    def log_connected_boards(self, show_output_map: bool = False) -> None:
+        """
+        Log the board types and serial numbers of all the boards connected to the robot.
+
+        Firmware versions are also logged at debug level.
+        """
+        seen_identifiers: set[str] = set()
+        if show_output_map:
+            for template in self._regisered_templates:
+                if template.identifier in seen_identifiers:
+                    # Dedup template identifiers
+                    continue
+                seen_identifiers.add(template.identifier)
+                board_name = self._name_from_identifier(template.identifier)
+                board_outputs = self.outputs[template.identifier]
+                num_outputs = template.num_outputs
+                # Generate the mapping from the outputs to asset tags and ports on each board
+                if num_outputs == 0:
+                    for asset_tag in self.boards[template.identifier].keys():
+                        logger.info(f"Connected {board_name}, serial: {asset_tag}")
+                else:
+                    output_map = {
+                        idx: (port.identity.asset_tag, idx % num_outputs)
+                        for port, idx in board_outputs
+                    }
+                    if not output_map:
+                        # No outputs found
+                        continue
+
+                    output_boards = self.boards[template.identifier]
+                    logger.info(f"Connected {len(output_boards)} {board_name}s")
+                    for idx, (asset_tag, output_idx) in output_map.items():
+                        logger.info(
+                            f"Index: {idx}  =>  serial: {asset_tag}, output {output_idx}"
+                        )
+
+        for board_type, boards in self.boards.items():
+            board_name = self._name_from_identifier(board_type)
+            for asset_tag, board in boards.items():
+                if not show_output_map:
+                    logger.info(f"Connected {board_name}, serial: {asset_tag}")
+
+                # Always log the firmware version of each board
+                logger.debug(
+                    f"Firmware version of "
+                    f"{asset_tag}: {board.identity.sw_version}, "
+                    f"reported type: {board.identity.board_type}, "
+                    f"port: {board.serial.port}, "
+                )
+
+        # Log cameras
+        if self.cameras:
+            camera_names = ', '.join(self.cameras.keys())
+            if len(self.cameras) > 1:
+                logger.info(
+                    f"Connected cameras: {camera_names}, "
+                    f"using {next(iter(self.cameras.keys()))}"
+                )
+            else:
+                logger.info(f"Connected camera: {camera_names}")
+        else:
+            logger.info("No cameras connected")

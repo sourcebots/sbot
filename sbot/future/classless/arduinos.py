@@ -1,11 +1,9 @@
 """The Arduino module provides an interface to the Arduino firmware."""
 from enum import Enum, IntEnum
 
+from sbot.future.board_manager import BoardManager, DiscoveryTemplate
 from sbot.logging import log_to_debug
-from sbot.serial_wrapper import SerialWrapper
 from sbot.utils import map_to_float
-
-from .utils import BoardManager
 
 
 class GPIOPinMode(str, Enum):
@@ -33,6 +31,14 @@ AVAILABLE_PINS = range(0, max(AnalogPin) + 1)
 ADC_MAX = 1023  # 10 bit ADC
 ADC_MIN = 0
 
+SUPPORTED_VID_PIDS = {
+    (0x2341, 0x0043),  # Arduino Uno rev 3
+    (0x2A03, 0x0043),  # Arduino Uno rev 3
+    (0x1A86, 0x7523),  # Uno
+    (0x10C4, 0xEA60),  # Ruggeduino
+    (0x16D0, 0x0613),  # Ruggeduino
+}
+
 
 class Arduino:
     """
@@ -43,11 +49,25 @@ class Arduino:
     :param boards: The BoardManager object containing the arduino board references.
     """
 
-    __slots__ = ('_boards',)
+    __slots__ = ('_boards', '_identifier')
 
     def __init__(self, boards: BoardManager):
-        # Obtain a reference to the arduino
-        # This is contained in a list to allow for it to be populated later
+        self._identifier = 'arduino'
+        template = DiscoveryTemplate(
+            identifier=self._identifier,
+            name='Arduino',
+            vid=0,  # Populated later
+            pid=0,
+            board_type='Arduino',
+            sim_board_type='Arduino',
+            use_usb_serial=True,
+            delay_after_connect=2,
+            max_boards=1,
+        )
+        # Register all the possible Arduino USB IDs
+        for vid, pid in SUPPORTED_VID_PIDS:
+            BoardManager.register_board(template._replace(vid=vid, pid=pid))
+
         self._boards = boards
 
     @log_to_debug
@@ -63,7 +83,7 @@ class Arduino:
         :raises IOError: If the pin mode is not a GPIOPinMode.
         :raises IOError: If this pin cannot be controlled.
         """
-        port = self._get_port()
+        port = self._boards.get_first_board(self._identifier)
         self._validate_pin(pin)
         if not isinstance(mode, GPIOPinMode):
             raise IOError('Pin mode only supports being set to a GPIOPinMode')
@@ -79,7 +99,7 @@ class Arduino:
         :raises IOError: If this pin cannot be controlled.
         :return: The digital value of the pin.
         """
-        port = self._get_port()
+        port = self._boards.get_first_board(self._identifier)
         self._validate_pin(pin)
         response = port.query(f'PIN:{pin}:DIGITAL:GET?')
         return (response == '1')
@@ -94,7 +114,7 @@ class Arduino:
         :raises IOError: If the pin's current mode does not support digital write.
         :raises IOError: If this pin cannot be controlled.
         """
-        port = self._get_port()
+        port = self._boards.get_first_board(self._identifier)
         self._validate_pin(pin)
         try:
             if value:
@@ -118,7 +138,7 @@ class Arduino:
         :raises IOError: If this pin cannot be controlled.
         :return: The analog voltage on the pin, ranges from 0 to 5.
         """
-        port = self._get_port()
+        port = self._boards.get_first_board(self._identifier)
         self._validate_pin(pin)
         if pin not in AnalogPin:
             raise IOError('Pin does not support analog read')
@@ -143,7 +163,7 @@ class Arduino:
         :raises ValueError: If either of the pins are invalid
         :return: The distance measured by the ultrasound sensor in mm.
         """
-        port = self._get_port()
+        port = self._boards.get_first_board(self._identifier)
         try:  # bounds check
             self._validate_pin(pulse_pin)
         except (IndexError, IOError):
@@ -162,15 +182,10 @@ class Arduino:
         if pin not in AVAILABLE_PINS:
             raise IndexError(f'Pin {pin} is not available on the Arduino.')
 
-    def _get_port(self) -> SerialWrapper:
-        if self._boards.arduino is None:
-            raise RuntimeError("No Arduino connected")
-        return self._boards.arduino
-
     def __repr__(self) -> str:
         try:
-            port = self._get_port()
-        except RuntimeError:
+            port = self._boards.get_first_board(self._identifier)
+        except (ValueError, KeyError):
             return f"<{self.__class__.__qualname__} no arduino connected>"
         else:
             return f"<{self.__class__.__qualname__} {port}>"

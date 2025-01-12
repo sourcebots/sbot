@@ -1,12 +1,15 @@
 """The interface for a single power board output over serial."""
 from __future__ import annotations
 
+import logging
 from enum import IntEnum
 from typing import ClassVar, NamedTuple
 
+from sbot.future.board_manager import BoardManager, DiscoveryTemplate
 from sbot.logging import log_to_debug
+from sbot.serial_wrapper import SerialWrapper
 
-from .utils import BoardIdentifier, BoardManager
+logger = logging.getLogger(__name__)
 
 
 class PowerOutputPosition(IntEnum):
@@ -88,12 +91,24 @@ class Power:
     :param boards: The BoardManager object containing the power board.
     """
 
-    __slots__ = ('_outputs',)
+    __slots__ = ('_boards', '_identifier')
 
     def __init__(self, boards: BoardManager):
-        # Obtain a reference to the list of output ports
-        # This may not have been populated yet
-        self._outputs = boards.power
+        self._identifier = 'power'
+        template = DiscoveryTemplate(
+            identifier=self._identifier,
+            name='power board',
+            vid=0x1BDA,
+            pid=0x0010,
+            board_type='PBv4B',
+            num_outputs=len(PowerOutputPosition),
+            setup=self._enable_all,
+            cleanup=self._cleanup,
+            sim_board_type='PowerBoard',
+            max_boards=1,  # Only one power board can be connected
+        )
+        BoardManager.register_board(template)
+        self._boards = boards
 
     @log_to_debug
     def set_output(self, id: int, on: bool) -> None:
@@ -106,7 +121,7 @@ class Power:
         :param id: The ID of the output.
         :param value: Whether the output should be enabled.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         if id == BRAIN_OUTPUT:
             # Changing the brain output will also raise a NACK from the firmware
             raise RuntimeError("Brain output cannot be controlled via this API.")
@@ -126,7 +141,7 @@ class Power:
         :param id: The ID of the output.
         :return: Whether the output is enabled.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query(f'OUT:{output.idx}:GET?')
         return response == '1'
 
@@ -140,7 +155,7 @@ class Power:
         :param id: The ID of the output.
         :return: The current draw of the output, in amps.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query(f'OUT:{output.idx}:I?')
         return float(response) / 1000
 
@@ -154,9 +169,9 @@ class Power:
         :return: A BatteryData object containing the voltage and current of the battery.
         :raise RuntimeError: If no power boards are connected.
         """
-        output = self._get_power_board()
-        volt_response = output.port.query('BATT:V?')
-        curr_response = output.port.query('BATT:I?')
+        output = self._boards.get_first_board(self._identifier)
+        volt_response = output.query('BATT:V?')
+        curr_response = output.query('BATT:I?')
         return BatteryData(
             voltage=float(volt_response) / 1000,
             current=float(curr_response) / 1000
@@ -170,8 +185,8 @@ class Power:
         :return: The status of the power board.
         :raise RuntimeError: If no power boards are connected.
         """
-        output = self._get_power_board()
-        response = output.port.query('*STATUS?')
+        output = self._boards.get_first_board(self._identifier)
+        response = output.query('*STATUS?')
         return PowerStatus.from_status_response(response)
 
     @log_to_debug
@@ -182,26 +197,27 @@ class Power:
         This turns off all outputs except the brain output and stops any running tones.
         :raise RuntimeError: If no power boards are connected.
         """
-        if len(self._outputs) == 0:
-            raise RuntimeError("No power boards connected")
-        output = self._outputs[0]
-        output.port.write('*RESET')
+        output = self._boards.get_first_board(self._identifier)
+        output.write('*RESET')
 
-    def _find_output(self, id: int) -> BoardIdentifier:
+    @staticmethod
+    def _cleanup(port: SerialWrapper) -> None:
         try:
-            return self._outputs[id]
-        except IndexError:
-            raise ValueError(f"Output {id} does not exist")
+            port.write('*RESET')
+        except Exception:
+            logger.warning(f"Failed to cleanup power board {port.identity.asset_tag}.")
 
-    def _get_power_board(self) -> BoardIdentifier:
-        if len(self._outputs) == 0:
-            raise RuntimeError("No power boards connected")
-        return self._outputs[0]
+    @staticmethod
+    def _enable_all(port: SerialWrapper) -> None:
+        for output in PowerOutputPosition:
+            if output == BRAIN_OUTPUT:
+                continue
+            port.write(f'OUT:{output.value}:SET:1')
 
     def __repr__(self) -> str:
         try:
-            pb = self._get_power_board()
-        except RuntimeError:
+            pb = self._boards.get_first_board(self._identifier)
+        except (ValueError, KeyError):
             return f"<{self.__class__.__qualname__} no power board>"
         else:
-            return f"<{self.__class__.__qualname__} {pb.port}>"
+            return f"<{self.__class__.__qualname__} {pb.identity.asset_tag}>"

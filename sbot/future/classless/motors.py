@@ -1,14 +1,16 @@
 """The interface for a single motor board output over serial."""
 from __future__ import annotations
 
+import logging
 from enum import IntEnum
 from typing import ClassVar, NamedTuple
 
+from sbot.future.board_manager import BoardManager, DiscoveryTemplate
 from sbot.logging import log_to_debug
 from sbot.serial_wrapper import SerialWrapper
 from sbot.utils import float_bounds_check, map_to_float, map_to_int
 
-from .utils import BoardIdentifier, BoardManager
+logger = logging.getLogger(__name__)
 
 
 class MotorPower(IntEnum):
@@ -50,12 +52,24 @@ class Motor:
     :param boards: The BoardManager object containing the motor board references.
     """
 
-    __slots__ = ('_outputs',)
+    __slots__ = ('_boards', '_identifier')
 
     def __init__(self, boards: BoardManager):
+        self._identifier = 'motor'
+        template = DiscoveryTemplate(
+            identifier=self._identifier,
+            name='motor board',
+            vid=0x0403,
+            pid=0x6001,
+            board_type='MCv4B',
+            num_outputs=2,
+            cleanup=self._cleanup,
+            sim_board_type='MotorBoard',
+        )
+        BoardManager.register_board(template)
         # Obtain a reference to the list of output ports
         # This may not have been populated yet
-        self._outputs = boards.motors
+        self._boards = boards
 
     @log_to_debug
     def set_power(self, id: int, power: float) -> None:
@@ -69,7 +83,7 @@ class Motor:
         :param value: The power of the motor as a float between -1.0 and 1.0
             or the special values MotorPower.COAST and MotorPower.BRAKE.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         if power == MotorPower.COAST:
             output.port.write(f'MOT:{output.idx}:DISABLE')
             return
@@ -89,7 +103,7 @@ class Motor:
         :return: The power of the motor as a float between -1.0 and 1.0
             or the special value MotorPower.COAST.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query(f'MOT:{output.idx}:GET?')
 
         data = response.split(':')
@@ -108,7 +122,7 @@ class Motor:
         :param id: The ID of the motor.
         :return: The status of the board.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query('*STATUS?')
         return MotorStatus.from_status_response(response)
 
@@ -120,7 +134,7 @@ class Motor:
         This command disables the motors and clears all faults.
         :raise RuntimeError: If no motor boards are connected.
         """
-        boards = self._get_boards()
+        boards = self._boards.get_boards(self._identifier).values()
         for board in boards:
             board.write('*RESET')
 
@@ -132,7 +146,7 @@ class Motor:
         :param id: The ID of the motor.
         :return: The current draw of the motor in amps.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query(f'MOT:{output.idx}:I?')
         return float(response) / 1000
 
@@ -144,23 +158,17 @@ class Motor:
         :param id: The ID of the motor.
         :return: True if the motor is in a fault state, False otherwise.
         """
-        output = self._find_output(id)
+        output = self._boards.find_output(self._identifier, id)
         response = output.port.query('*STATUS?')
         return MotorStatus.from_status_response(response).output_faults[output.idx]
 
-    def _find_output(self, id: int) -> BoardIdentifier:
+    @staticmethod
+    def _cleanup(port: SerialWrapper) -> None:
         try:
-            return self._outputs[id]
-        except IndexError:
-            raise ValueError(f"Output {id} does not exist")
-
-    def _get_boards(self) -> list[SerialWrapper]:
-        unique_boards = []
-        for output in self._outputs:
-            if output.port not in unique_boards:
-                unique_boards.append(output.port)
-        return unique_boards
+            port.write('*RESET')
+        except Exception:
+            logger.warning(f"Failed to cleanup motor board {port.identity.asset_tag}.")
 
     def __repr__(self) -> str:
-        board_ports = self._get_boards()
+        board_ports = ", ".join(self._boards.get_boards(self._identifier).keys())
         return f"<{self.__class__.__qualname__} {board_ports}>"
