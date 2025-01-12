@@ -55,6 +55,7 @@ dependencies = [
     "pyserial >=3,<4",
     "april_vision==2.2.0",
     "typing-extensions; python_version<'3.10'",
+    "python-dotenv==1.0.1",
 ]
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
