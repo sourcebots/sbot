@@ -47,6 +47,8 @@ class Vision:
         markers = cam.see(frame=frame)
 
         if save:
+            if not frame.flags.writeable:
+                frame = frame.copy()
             cam.save(save, frame=frame, detections=markers)
         return [Marker.from_april_vision_marker(marker) for marker in markers]
 
