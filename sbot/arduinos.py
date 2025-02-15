@@ -140,8 +140,10 @@ class Arduino:
         """
         port = self._boards.get_first_board(self._identifier)
         self._validate_pin(pin)
-        if pin not in AnalogPin:
-            raise IOError('Pin does not support analog read')
+        try:
+            _ = AnalogPin(pin)
+        except ValueError:
+            raise IOError('Pin does not support analog read') from None
         try:
             response = port.query(f'PIN:{pin}:ANALOG:GET?')
         except RuntimeError as e:
