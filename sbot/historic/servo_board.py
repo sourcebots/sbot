@@ -8,12 +8,18 @@ from typing import NamedTuple
 
 from serial.tools.list_ports import comports
 
-from .exceptions import BoardDisconnectionError, IncorrectBoardError
-from .logging import log_to_debug
-from .serial_wrapper import SerialWrapper
+from ..internal.exceptions import BoardDisconnectionError, IncorrectBoardError
+from ..internal.logging import log_to_debug
+from ..internal.serial_wrapper import SerialWrapper
 from .utils import (
-    IN_SIMULATOR, Board, BoardIdentity, float_bounds_check,
-    get_simulator_boards, get_USB_identity, map_to_float, map_to_int,
+    IN_SIMULATOR,
+    Board,
+    BoardIdentity,
+    float_bounds_check,
+    get_simulator_boards,
+    get_USB_identity,
+    map_to_float,
+    map_to_int,
 )
 
 DUTY_MIN = 300
@@ -28,6 +34,7 @@ BAUDRATE = 115200  # Since the servo board is a USB device, this is ignored
 
 class ServoStatus(NamedTuple):
     """A named tuple containing the values of the servo status output."""
+
     watchdog_failed: bool
     power_good: bool
 
@@ -57,7 +64,8 @@ class ServoBoard(Board):
     :param serial_port: The serial port to connect to.
     :param initial_identity: The identity of the board, as reported by the USB descriptor.
     """
-    __slots__ = ('_serial', '_identity', '_servos')
+
+    __slots__ = ('_identity', '_serial', '_servos')
 
     @staticmethod
     def get_board_type() -> str:
@@ -118,7 +126,7 @@ class ServoBoard(Board):
                     f"Board returned type {err.returned_type!r}, "
                     f"expected {err.expected_type!r}. Ignoring this device")
                 continue
-            boards[board._identity.asset_tag] = board
+            boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @classmethod
@@ -157,7 +165,7 @@ class ServoBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
 
         # Add any manually specified boards
         if isinstance(manual_boards, list):
@@ -180,7 +188,7 @@ class ServoBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @property
@@ -269,7 +277,8 @@ class Servo:
     :param serial: The serial wrapper to use to communicate with the board.
     :param index: The index of the servo on the board.
     """
-    __slots__ = ('_serial', '_index', '_duty_min', '_duty_max')
+
+    __slots__ = ('_duty_max', '_duty_min', '_index', '_serial')
 
     def __init__(self, serial: SerialWrapper, index: int):
         self._serial = serial
@@ -285,18 +294,18 @@ class Servo:
 
         These limits are used to map the servo position to a pulse on-time.
 
-        :param lower: The lower limit of the servo pulse in µs.
-        :param upper: The upper limit of the servo pulse in µs.
+        :param lower: The lower limit of the servo pulse in μs.
+        :param upper: The upper limit of the servo pulse in μs.
         :raises TypeError: If the limits are not ints.
         :raises ValueError: If the limits are not in the range 500 to 4000.
         """
         if not (isinstance(lower, int) and isinstance(upper, int)):
             raise TypeError(
-                f'Servo pulse limits are ints in µs, in the range {DUTY_MIN} to {DUTY_MAX}'
+                f'Servo pulse limits are ints in μs, in the range {DUTY_MIN} to {DUTY_MAX}'
             )
         if not (DUTY_MIN <= lower <= DUTY_MAX and DUTY_MIN <= upper <= DUTY_MAX):
             raise ValueError(
-                f'Servo pulse limits are ints in µs, in the range {DUTY_MIN} to {DUTY_MAX}'
+                f'Servo pulse limits are ints in μs, in the range {DUTY_MIN} to {DUTY_MAX}'
             )
 
         self._duty_min = lower
@@ -307,9 +316,9 @@ class Servo:
         """
         Get the current pulse on-time limits of the servo.
 
-        The limits are specified in µs.
+        The limits are specified in μs.
 
-        :return: A tuple of the lower and upper limits of the servo pulse in µs.
+        :return: A tuple of the lower and upper limits of the servo pulse in μs.
         """
         return self._duty_min, self._duty_max
 
@@ -365,7 +374,7 @@ class Servo:
 
 
 if __name__ == '__main__':  # pragma: no cover
-    servoboards = ServoBoard._get_supported_boards()
+    servoboards = ServoBoard._get_supported_boards()  # noqa: SLF001
     for serial_num, board in servoboards.items():
         print(serial_num)
         print(board.identify())

@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 from typing import TypedDict
 
-from .exceptions import MetadataKeyError
+from .internal.exceptions import MetadataKeyError, MetadataNotReadyError
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ class Metadata(TypedDict):
     :param is_competition: Whether the robot is in competition mode
     :param zone: The zone that the robot is in
     """
+
     is_competition: bool
     zone: int
 
@@ -52,34 +53,70 @@ DEFAULT_METADATA: Metadata = {
 }
 
 
-def load() -> Metadata:
+class Comp:
     """
-    Search for a metadata file and load it.
+    A collection of the robot metadata.
 
-    Searches the path identified by SBOT_METADATA_PATH and its children for
-    metadata.json (set by METADATA_NAME) and reads it.
-
-    :raises FileNotFoundError: If no metadata file is found
-    :return: The metadata dictionary, either loaded from a file or the default
+    This class is used to load and access the metadata of the robot.
     """
-    search_path = os.environ.get(METADATA_ENV_VAR)
-    if search_path:
-        search_root = Path(search_path)
-        if not search_root.is_dir():
-            raise FileNotFoundError(f"Metaddata path {search_path} does not exist")
-        for item in Path(search_path).iterdir():
-            try:
-                if item.is_dir() and (item / METADATA_NAME).exists():
-                    return _load_metadata(item / METADATA_NAME)
-                elif item.name == METADATA_NAME:
-                    return _load_metadata(item)
-            except PermissionError:
-                logger.debug(f"Unable to read {item}")
+
+    def __init__(self) -> None:
+        self._metadata: Metadata | None = None
+
+    @property
+    def is_competition(self) -> bool:
+        """
+        Whether the robot is in a competition environment.
+
+        This value is not available until wait_start has been called.
+
+        :raises MetadataNotReadyError: If the metadata has not been loaded
+        """
+        if self._metadata is None:
+            raise MetadataNotReadyError()
+        return self._metadata["is_competition"]
+
+    @property
+    def zone(self) -> int:
+        """
+        The zone that the robot is in.
+
+        This value is not available until wait_start has been called.
+
+        :raises MetadataNotReadyError: If the metadata has not been loaded
+        """
+        if self._metadata is None:
+            raise MetadataNotReadyError()
+        return self._metadata["zone"]
+
+    def _load(self) -> None:
+        """
+        Search for a metadata file and load it.
+
+        Searches the path identified by SBOT_METADATA_PATH and its children for
+        metadata.json (set by METADATA_NAME) and reads it.
+        """
+        search_path = os.environ.get(METADATA_ENV_VAR)
+        if search_path:
+            search_root = Path(search_path)
+            if not search_root.is_dir():
+                logger.error(f"Metaddata path {search_path} does not exist")
+                return
+            for item in Path(search_path).iterdir():
+                try:
+                    if item.is_dir() and (item / METADATA_NAME).exists():
+                        self._metadata = _load_metadata(item / METADATA_NAME)
+                    elif item.name == METADATA_NAME:
+                        self._metadata = _load_metadata(item)
+                    return
+                except PermissionError:
+                    logger.debug(f"Unable to read {item}")
+            else:
+                logger.info(f"No JSON metadata files found in {search_path}")
         else:
-            logger.info(f"No JSON metadata files found in {search_path}")
-    else:
-        logger.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
-    return DEFAULT_METADATA
+            logger.info(f"{METADATA_ENV_VAR} not set, not loading metadata")
+
+        self._metadata = DEFAULT_METADATA
 
 
 def _load_metadata(path: Path) -> Metadata:

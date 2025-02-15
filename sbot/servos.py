@@ -5,10 +5,10 @@ import logging
 from collections import defaultdict
 from typing import NamedTuple
 
-from sbot.future.board_manager import BoardManager, DiscoveryTemplate
-from sbot.logging import log_to_debug
-from sbot.serial_wrapper import SerialWrapper
-from sbot.utils import float_bounds_check, map_to_float, map_to_int
+from .internal.board_manager import BoardManager, DiscoveryTemplate
+from .internal.logging import log_to_debug
+from .internal.serial_wrapper import SerialWrapper
+from .internal.utils import float_bounds_check, map_to_float, map_to_int
 
 DUTY_MIN = 300
 DUTY_MAX = 4000

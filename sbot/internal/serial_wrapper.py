@@ -42,8 +42,8 @@ def retry(
 ) -> Callable[[Callable[Param, RetType]], Callable[Param, RetType]]:
     """
     Decorator to retry a function a number of times on a given exception.
-    If the function fails on the last attempt the exception is raised.
 
+    If the function fails on the last attempt the exception is raised.
     This outer function is used to pass arguments to the decorator.
 
     :param times: The number of times to retry the function.
@@ -52,7 +52,7 @@ def retry(
     """
     def decorator(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
         """
-        This is the actual decorator function that is returned by the decorator.
+        The actual decorator function that is returned by the decorator.
 
         The decorator retries the function a number of times on a given exception.
         If the function fails on the last attempt the exception is raised.
@@ -82,6 +82,20 @@ def retry(
 
 
 class SerialWrapper:
+    """
+    Wrapper class for serial communication with boards.
+
+    This class is responsible for opening and closing the serial port,
+    and for handling port timeouts and disconnections.
+
+    :param port: The serial port to connect to.
+    :param baud: The baud rate to use for the serial connection.
+    :param timeout: The timeout for the serial connection.
+    :param identity: The identity of the board this serial wrapper is connected to.
+    :param delay_after_connect: The time to wait after connecting to the board before sending
+                                data.
+    """
+
     def __init__(
         self,
         port: str,

@@ -1,4 +1,6 @@
 """Start LED functionality for the KCH hat."""
+from __future__ import annotations
+
 import atexit
 
 from sbot.utils import IN_SIMULATOR

@@ -7,12 +7,16 @@ from types import MappingProxyType
 
 from serial.tools.list_ports import comports
 
-from .exceptions import BoardDisconnectionError, IncorrectBoardError
-from .logging import log_to_debug
-from .serial_wrapper import SerialWrapper
+from ..internal.exceptions import BoardDisconnectionError, IncorrectBoardError
+from ..internal.logging import log_to_debug
+from ..internal.serial_wrapper import SerialWrapper
 from .utils import (
-    IN_SIMULATOR, Board, BoardIdentity,
-    get_simulator_boards, get_USB_identity, map_to_float,
+    IN_SIMULATOR,
+    Board,
+    BoardIdentity,
+    get_simulator_boards,
+    get_USB_identity,
+    map_to_float,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,6 +33,7 @@ SUPPORTED_VID_PIDS = {
 
 class GPIOPinMode(str, Enum):
     """The possible modes for a GPIO pin."""
+
     INPUT = 'INPUT'
     INPUT_PULLUP = 'INPUT_PULLUP'
     OUTPUT = 'OUTPUT'
@@ -36,6 +41,7 @@ class GPIOPinMode(str, Enum):
 
 class AnalogPins(IntEnum):
     """The analog pins on the Arduino."""
+
     A0 = 14
     A1 = 15
     A2 = 16
@@ -53,7 +59,8 @@ class Arduino(Board):
     :param serial_port: The serial port to connect to.
     :param initial_identity: The identity of the board, as reported by the USB descriptor.
     """
-    __slots__ = ('_serial_num', '_serial', '_pins', '_identity')
+
+    __slots__ = ('_identity', '_pins', '_serial', '_serial_num')
 
     @staticmethod
     def get_board_type() -> str:
@@ -124,7 +131,7 @@ class Arduino(Board):
                     f"Board returned type {err.returned_type!r}, "
                     f"expected {err.expected_type!r}. Ignoring this device")
                 continue
-            boards[board._identity.asset_tag] = board
+            boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @classmethod
@@ -160,7 +167,7 @@ class Arduino(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
 
         # Add any manually specified boards
         if isinstance(manual_boards, list):
@@ -183,7 +190,7 @@ class Arduino(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @log_to_debug
@@ -233,11 +240,11 @@ class Arduino(Board):
         :return: The distance measured by the ultrasound sensor in mm.
         """
         try:  # bounds check
-            self.pins[pulse_pin]._check_if_disabled()
+            self.pins[pulse_pin]._check_if_disabled()  # noqa: SLF001
         except (IndexError, IOError):
             raise ValueError("Invalid pulse pin provided") from None
         try:
-            self.pins[echo_pin]._check_if_disabled()
+            self.pins[echo_pin]._check_if_disabled()  # noqa: SLF001
         except (IndexError, IOError):
             raise ValueError("Invalid echo pin provided") from None
 
@@ -256,7 +263,8 @@ class Pin:
     :param index: The index of the pin.
     :param supports_analog: Whether the pin supports analog reads.
     """
-    __slots__ = ('_serial', '_index', '_supports_analog', '_disabled')
+
+    __slots__ = ('_disabled', '_index', '_serial', '_supports_analog')
 
     def __init__(
         self,
@@ -389,7 +397,7 @@ class Pin:
 # ULTRASOUND:<pulse>:<echo>:MEASURE?
 
 if __name__ == '__main__':  # pragma: no cover
-    arduinos = Arduino._get_supported_boards()
+    arduinos = Arduino._get_supported_boards()  # noqa: SLF001
     for serial_num, board in arduinos.items():
         print(serial_num)
 

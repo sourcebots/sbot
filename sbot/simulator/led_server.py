@@ -1,9 +1,11 @@
+"""Interface to control user LEDs over a socket."""
 from __future__ import annotations
+
 import logging
 
-from ..exceptions import BoardDisconnectionError, IncorrectBoardError
-from ..serial_wrapper import SerialWrapper
-from ..utils import Board, BoardIdentity, get_simulator_boards
+from ..internal.exceptions import BoardDisconnectionError, IncorrectBoardError
+from ..internal.serial_wrapper import SerialWrapper
+from ..internal.utils import Board, BoardIdentity, get_simulator_boards
 
 logger = logging.getLogger(__name__)
 

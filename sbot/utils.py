@@ -1,273 +1,201 @@
-"""General utility functions and classes for the sbot package."""
+"""A collection of utility methods for general robot functions."""
 from __future__ import annotations
 
 import logging
-import os
-import signal
-import socket
-from abc import ABC, abstractmethod
-from types import FrameType
-from typing import Any, Mapping, NamedTuple, TypeVar
+import time
+from enum import IntEnum
 
-from serial.tools.list_ports_common import ListPortInfo
+from .comp import Comp
+from .game_specific import GAME_LENGTH
+from .internal.board_manager import IN_SIMULATOR, BoardManager, DiscoveryTemplate
+from .internal.overrides import get_overrides
+from .internal.start_led import flash_start_led, set_start_led
+from .internal.timeout import kill_after_delay
+from .internal.utils import float_bounds_check
 
-T = TypeVar('T')
+try:
+    from .internal.mqtt import MQTT_VALID, RemoteStartButton
+except ImportError:
+    MQTT_VALID = False
+
 logger = logging.getLogger(__name__)
 
-IN_SIMULATOR = os.environ.get('WEBOTS_SIMULATOR', '') == '1'
 
+class Utils:
+    """A collection of utility methods for general robot functions."""
 
-class BoardIdentity(NamedTuple):
-    """
-    A container for the identity of a board.
+    __slots__ = ('_boards', '_comp', '_remote_start')
 
-    All the board firmwares should return this information in response to
-    the *IDN? query.
-
-    :param manufacturer: The manufacturer of the board
-    :param board_type: The short name of the board, i.e. PBv4B
-    :param asset_tag: The asset tag of the board,
-        this should match what is printed on the board
-    :param sw_version: The firmware version of the board
-    """
-    manufacturer: str = ""
-    board_type: str = ""
-    asset_tag: str = ""
-    sw_version: str = ""
-
-
-class BoardInfo(NamedTuple):
-    """
-    A container for the information about a board connection.
-
-
-    """
-    url: str
-    serial_number: str
-    type_str: str
-
-
-class Board(ABC):
-    """
-    This is the base class for all boards.
-
-    Slots are used to prevent adding attributes to the class at runtime.
-    They must also be defined in subclasses.
-    """
-    __slots__ = ('_identity',)
-
-    @staticmethod
-    @abstractmethod
-    def get_board_type() -> str:
-        """
-        The string that is expected to be returned by the board's firmware.
-
-        This should match the value in the board_type field of the response to
-        the *IDN? query. This is implemented as a static method because class-level
-        attributes are not compatible with slots.
-
-        :return: The board type name
-        """
-        pass  # pragma: no cover
-
-    @abstractmethod
-    def identify(self) -> BoardIdentity:
-        """
-        Return the board's identity as reported by the firmware.
-
-        :return: The board's identity
-        """
-        pass  # pragma: no cover
-
-
-def map_to_int(
-        x: float,
-        in_min: float,
-        in_max: float,
-        out_min: int,
-        out_max: int,
-) -> int:
-    """
-    Map a value from the input range to the output range, returning the value as an int.
-
-    This is used to convert a float value to an integer value for sending to the board.
-
-    :param x: The value to map
-    :param in_min: The lower bound of the input range
-    :param in_max: The upper bound of the input range
-    :param out_min: The lower bound of the output range
-    :param out_max: The upper bound of the output range
-    :return: The mapped value
-    """
-    value = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-    return int(value)
-
-
-def map_to_float(
-        x: int,
-        in_min: int,
-        in_max: int,
-        out_min: float,
-        out_max: float,
-        precision: int = 3,
-) -> float:
-    """
-    Map a value from the input range to the output range, returning the value as a float.
-
-    This is used to convert an integer value from the board to a float value.
-
-    :param x: The value to map
-    :param in_min: The lower bound of the input range
-    :param in_max: The upper bound of the input range
-    :param out_min: The lower bound of the output range
-    :param out_max: The upper bound of the output range
-    :param precision: The number of decimal places to round the output to, defaults to 3
-    :return: The mapped value
-    """
-    value = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-    return round(value, precision)
-
-
-def singular(container: Mapping[str, T]) -> T:
-    """
-    Extract the single item from a container of one item.
-
-    This is used to access individual boards without needing their serial number.
-
-    :param container: A mapping of connected boards of a type
-    :raises RuntimeError: If there is not exactly one of this type of board connected
-    :return: _description_
-    """
-    length = len(container)
-
-    if length == 1:
-        return list(container.values())[0]
-    elif length == 0:
-        raise RuntimeError('No boards of this type found')
-    else:
-        raise RuntimeError(f'expected only one to be connected, but found {length}')
-
-
-def obtain_lock(lock_port: int = 10653) -> socket.socket:
-    """
-    Bind to a port to claim it and prevent another process using it.
-
-    We use this to prevent multiple robot instances running on the same machine,
-    as they would conflict with each other.
-
-    :param lock_port: The port to bind to, defaults to 10653 to be compatible with sr-robot3
-    :raises OSError: If the port failed to bind, indicating another robot instance is running
-    :return: The bound socket
-    """
-    lock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # We bind to a port to claim it and prevent another process using it
-    try:
-        lock.bind(("localhost", lock_port))
-    except OSError:
-        raise OSError('Unable to obtain lock, Is another robot instance already running?')
-
-    return lock
-
-
-def float_bounds_check(value: Any, min_val: float, max_val: float, err_msg: str) -> float:
-    """
-    Test that a value can be converted to a float and is within the given bounds.
-
-    Errors are caught and re-raised with a more descriptive message.
-
-    :param value: The value to test
-    :param min_val: The minimum allowed value
-    :param max_val: The maximum allowed value
-    :param err_msg: The error message to raise if the value is invalid or out of bounds
-    :raises TypeError: If the value cannot be converted to a float
-    :raises ValueError: If the value is out of bounds
-    :return: The input value converted to a float
-    """
-    try:
-        new_val = float(value)
-    except ValueError as e:
-        raise TypeError(err_msg) from e
-
-    if (new_val < min_val) or (new_val > max_val):
-        raise ValueError(err_msg)
-
-    return new_val
-
-
-def get_USB_identity(port: ListPortInfo) -> BoardIdentity:
-    """
-    Generate an approximate identity for a board using the USB descriptor.
-
-    This data will be overridden by the firmware once communication is established,
-    but is used for early logging messages and error handling.
-
-    :param port: The USB port information from pyserial
-    :return: An initial identity for the board
-    """
-    try:
-        return BoardIdentity(
-            manufacturer=port.manufacturer or "",
-            board_type=port.product or "",
-            asset_tag=port.serial_number or "",
+    def __init__(self, boards: BoardManager, comp: Comp):
+        self._boards = boards
+        template = DiscoveryTemplate(
+            identifier='time',
+            name='time server',
+            vid=0,  # Unused
+            pid=0,  # Unused
+            board_type='TimeServer',
+            sim_only=True,
+            sim_board_type='TimeServer',
+            max_boards=1,
+            timeout=None,  # Disable timeout
         )
-    except Exception:
-        logger.warning(
-            f"Failed to pull identifying information from serial device {port.device}")
-        return BoardIdentity()
+        BoardManager.register_board(template)
+        # We need to trigger loading the metadata when wait_start is called
+        self._comp = comp
 
+        if MQTT_VALID:
+            self._remote_start: RemoteStartButton | None = None
+            if boards.mqtt:
+                self._remote_start = RemoteStartButton(boards.mqtt)
+        else:
+            self._remote_start = None
 
-def ensure_atexit_on_term() -> None:
-    """
-    Ensure `atexit` triggers on `SIGTERM`.
-
-    > The functions registered via [`atexit`] are not called when the program is
-      killed by a signal not handled by Python
-    """
-
-    if signal.getsignal(signal.SIGTERM) != signal.SIG_DFL:
-        # If a signal handler is already present for SIGTERM,
-        # this is sufficient for `atexit` to trigger, so do nothing.
-        return
-
-    def handle_signal(handled_signum: int, frame: FrameType | None) -> None:
+    def sleep(self, duration: float) -> None:
         """
-        Handle the given signal by outputting some text and terminating the process.
+        Sleep for a number of seconds.
 
-        This will trigger `atexit`.
+        This is a convenience method that can be used instead of time.sleep().
+
+        :param secs: The number of seconds to sleep for
         """
-        logger.info(signal.strsignal(handled_signum))
-        exit(1)
+        if IN_SIMULATOR:
+            if duration < 0:
+                raise ValueError("sleep length must be non-negative")
+            time_server = self._boards.get_first_board('time')
+            # This command will block until the sleep is complete
+            time_server.write(f'SLEEP:{duration * 1000:.0f}')
+        else:
+            time.sleep(duration)
 
-    # Add the null-ish signal handler
-    signal.signal(signal.SIGTERM, handle_signal)
+    def wait_start(self) -> None:
+        """
+        Wait for the start button to be pressed.
+
+        The power board will beep once when waiting for the start button.
+        The power board's run LED will flash while waiting for the start button.
+        Once the start button is pressed, the metadata will be loaded and the timeout
+        will start if in competition mode.
+
+        Boards will be loaded if they have not already been loaded.
+        """
+        if not self._boards.loaded:
+            self.load_boards()
+
+        def null_button_pressed() -> bool:
+            return False
+
+        def check_physical_start_button() -> bool:
+            power_board = self._boards.get_first_board('power')
+            response: str = power_board.query('BTN:START:GET?')
+            internal, external = response.split(':')
+            return (internal == '1') or (external == '1')
+
+        overrides = get_overrides()
+        no_powerboard = overrides.get('NO_POWERBOARD', "0") == "1"
+
+        if self._remote_start is not None:
+            remote_start_pressed = self._remote_start.get_start_button_pressed
+        else:
+            remote_start_pressed = null_button_pressed
+
+        if not no_powerboard:
+            power_board = self._boards.get_first_board('power')
+            start_button_pressed = check_physical_start_button
+        else:
+            # null out the start button function
+            start_button_pressed = null_button_pressed
+
+        # Clear the physical and remote start button state
+        start_button_pressed()
+        remote_start_pressed()
+
+        logger.info('Waiting for start button.')
+        flash_start_led()
+        if not no_powerboard:
+            self.sound_buzzer(Note.C6, 0.1)
+            # enable flashing the run LED
+            power_board.write('LED:RUN:SET:F')
+
+        # wait for the start button to be pressed
+        while not start_button_pressed() and not remote_start_pressed():
+            self.sleep(0.1)
+        logger.info("Start button pressed.")
+
+        if not no_powerboard:
+            # disable flashing the run LED
+            power_board.write('LED:RUN:SET:0')
+
+        set_start_led(False)  # disable flashing the KCH start LED
+        self._comp._load()  # noqa: SLF001, load the metadata
+
+        # Simulator timeout is handled by the simulator supervisor
+        if self._comp.is_competition and not IN_SIMULATOR:
+            kill_after_delay(GAME_LENGTH)
+
+    def sound_buzzer(self, frequency: int, duration: float) -> None:
+        """
+        Produce a tone on the piezo buzzer.
+
+        This method is non-blocking, and sending another tone while one is
+        playing will cancel the first.
+
+        :param frequency: The frequency of the tone, in Hz.
+        :param duration: The duration of the tone, in seconds.
+        :raise RuntimeError: If no power boards are connected.
+        """
+        # Previously power_board.piezo.buzz
+        power_boards = self._boards.get_boards('power')
+        if len(power_boards) == 0:
+            raise RuntimeError("No power boards connected")
+        board = list(power_boards.values())[0]
+
+        frequency_int = int(float_bounds_check(
+            frequency, 8, 10_000, "Frequency is a float in Hz between 0 and 10000"))
+        duration_ms = int(float_bounds_check(
+            duration * 1000, 0, 2**31 - 1,
+            f"Duration is a float in seconds between 0 and {(2**31 - 1) / 1000:,.0f}"))
+
+        cmd = f'NOTE:{frequency_int}:{duration_ms}'
+        board.write(cmd)
+
+    def load_boards(self) -> None:
+        """
+        Trigger board discovery to run.
+
+        This is automatically called by wait_start, but can be called manually.
+
+        :raise RuntimeError: If boards have already been loaded.
+        """
+        if not self._boards.loaded:
+            self._boards.load_boards()
+            self._boards.populate_outputs()
+            self._boards.load_cameras()
+        else:
+            raise RuntimeError("Boards have already been loaded")
+
+        self._boards.log_connected_boards(True)
 
 
-def get_simulator_boards(board_filter: str = '') -> list[BoardInfo]:
+class Note(IntEnum):
     """
-    Get a list of all boards configured in the simulator.
+    An enumeration of notes.
 
-    This is used to support discovery of boards in the simulator environment.
-
-    :param board_filter: A filter to only return boards of a certain type
-    :return: A list of board connection information
+    An enumeration of notes from scientific pitch
+    notation and their related frequencies in Hz.
     """
-    if 'WEBOTS_ROBOT' not in os.environ:
-        return []
 
-    simulator_data = os.environ['WEBOTS_ROBOT'].splitlines()
-    simulator_boards = []
-
-    for board_data in simulator_data:
-        board_data = board_data.rstrip('/')
-        board_fragment, serial_number = board_data.rsplit('/', 1)
-        board_url, board_type = board_fragment.rsplit('/', 1)
-
-        board_info = BoardInfo(url=board_url, serial_number=serial_number, type_str=board_type)
-
-        if board_filter and board_info.type_str != board_filter:
-            continue
-
-        simulator_boards.append(board_info)
-
-    return simulator_boards
+    C6 = 1047
+    D6 = 1175
+    E6 = 1319
+    F6 = 1397
+    G6 = 1568
+    A6 = 1760
+    B6 = 1976
+    C7 = 2093
+    D7 = 2349
+    E7 = 2637
+    F7 = 2794
+    G7 = 3136
+    A7 = 3520
+    B7 = 3951
+    C8 = 4186

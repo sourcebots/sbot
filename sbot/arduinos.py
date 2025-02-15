@@ -1,9 +1,9 @@
 """The Arduino module provides an interface to the Arduino firmware."""
 from enum import Enum, IntEnum
 
-from sbot.future.board_manager import BoardManager, DiscoveryTemplate
-from sbot.logging import log_to_debug
-from sbot.utils import map_to_float
+from .internal.board_manager import BoardManager, DiscoveryTemplate
+from .internal.logging import log_to_debug
+from .internal.utils import map_to_float
 
 
 class GPIOPinMode(str, Enum):

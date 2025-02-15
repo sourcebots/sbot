@@ -1,3 +1,4 @@
+"""Looging utilities for the sbot package."""
 import functools
 import logging
 import sys

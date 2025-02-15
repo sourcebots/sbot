@@ -11,7 +11,7 @@ _OVERRIDES: dict[str, str | None] = {}
 def load_overrides() -> None:
     """Load the overrides from the .env file and environment variables."""
     # Load the .env file
-    config = dotenv_values(".env")
+    config = dotenv_values("override.env")
 
     # Load from environment variables prefixed with SBOT_
     config_from_env = {

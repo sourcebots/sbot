@@ -22,15 +22,17 @@ from april_vision import (
 )
 from april_vision import Processor as AprilCamera
 from april_vision.helpers import Base64Sender
-from sbot.exceptions import BoardDisconnectionError
-from sbot.game_specific import MARKER_SIZES
-from sbot.serial_wrapper import BASE_TIMEOUT, SerialWrapper
-from sbot.utils import BoardIdentity, get_simulator_boards, get_USB_identity
 from serial.tools.list_ports import comports
 from serial.tools.list_ports_common import ListPortInfo
 
+from sbot.game_specific import MARKER_SIZES
+
+from .exceptions import BoardDisconnectionError
+from .serial_wrapper import BASE_TIMEOUT, SerialWrapper
+from .utils import BoardIdentity, get_simulator_boards, get_USB_identity
+
 try:
-    from sbot.mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
+    from .mqtt import MQTT_VALID, MQTTClient, get_mqtt_variables
 except ImportError:
     MQTT_VALID = False
 

@@ -9,12 +9,16 @@ from typing import NamedTuple
 
 from serial.tools.list_ports import comports
 
-from .exceptions import BoardDisconnectionError, IncorrectBoardError
-from .logging import log_to_debug
-from .serial_wrapper import SerialWrapper
+from ..internal.exceptions import BoardDisconnectionError, IncorrectBoardError
+from ..internal.logging import log_to_debug
+from ..internal.serial_wrapper import SerialWrapper
 from .utils import (
-    IN_SIMULATOR, Board, BoardIdentity, float_bounds_check,
-    get_simulator_boards, get_USB_identity,
+    IN_SIMULATOR,
+    Board,
+    BoardIdentity,
+    float_bounds_check,
+    get_simulator_boards,
+    get_USB_identity,
 )
 
 logger = logging.getLogger(__name__)
@@ -27,6 +31,7 @@ class PowerOutputPosition(IntEnum):
 
     The numbers here are the same as used in communication protocol with the PowerBoard.
     """
+
     H0 = 0
     H1 = 1
     L0 = 2
@@ -38,11 +43,12 @@ class PowerOutputPosition(IntEnum):
 
 class PowerStatus(NamedTuple):
     """A named tuple containing the values of the power status output."""
+
     overcurrent: tuple[bool, ...]
     temperature: int
     fan_running: bool
     regulator_voltage: float
-    other: list[str] = []
+    other: list[str] = []  # noqa: RUF012
 
     @classmethod
     def from_status_response(cls, response: str) -> PowerStatus:
@@ -76,9 +82,10 @@ class PowerBoard(Board):
     :param serial_port: The serial port to connect to.
     :param initial_identity: The identity of the board, as reported by the USB descriptor.
     """
+
     __slots__ = (
-        '_serial', '_identity', '_outputs', '_battery_sensor',
-        '_piezo', '_run_led', '_error_led')
+        '_battery_sensor', '_error_led', '_identity', '_outputs', '_piezo', '_run_led',
+        '_serial')
 
     @staticmethod
     def get_board_type() -> str:
@@ -141,7 +148,7 @@ class PowerBoard(Board):
                     f"Board returned type {err.returned_type!r}, "
                     f"expected {err.expected_type!r}. Ignoring this device")
                 continue
-            boards[board._identity.asset_tag] = board
+            boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @classmethod
@@ -179,7 +186,7 @@ class PowerBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
 
         # Add any manually specified boards
         if isinstance(manual_boards, list):
@@ -202,7 +209,7 @@ class PowerBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @property
@@ -306,7 +313,8 @@ class Outputs:
 
     :param serial: The serial wrapper to use for communication.
     """
-    __slots__ = ('_serial', '_outputs')
+
+    __slots__ = ('_outputs', '_serial')
 
     def __init__(self, serial: SerialWrapper):
         self._serial = serial
@@ -323,7 +331,7 @@ class Outputs:
         This is also used to turn off the outputs when the board is reset.
         """
         for output in self._outputs:
-            if output._index == BRAIN_OUTPUT:
+            if output._index == BRAIN_OUTPUT:  # noqa: SLF001
                 continue
             output.is_enabled = False
 
@@ -331,7 +339,7 @@ class Outputs:
     def power_on(self) -> None:
         """Turn on all outputs."""
         for output in self._outputs:
-            if output._index == BRAIN_OUTPUT:
+            if output._index == BRAIN_OUTPUT:  # noqa: SLF001
                 continue
             output.is_enabled = True
 
@@ -346,7 +354,8 @@ class Output:
     :param serial: The serial wrapper to use for communication.
     :param index: The index of the output to represent.
     """
-    __slots__ = ('_serial', '_index')
+
+    __slots__ = ('_index', '_serial')
 
     def __init__(self, serial: SerialWrapper, index: int):
         self._serial = serial
@@ -423,7 +432,8 @@ class Led:
     :param serial: The serial wrapper to use for communication.
     :param led: The name of the LED to represent.
     """
-    __slots__ = ('_serial', '_led')
+
+    __slots__ = ('_led', '_serial')
 
     def __init__(self, serial: SerialWrapper, led: str):
         self._serial = serial
@@ -431,23 +441,17 @@ class Led:
 
     @log_to_debug
     def on(self) -> None:
-        """
-        Turn on the LED.
-        """
+        """Turn on the LED."""
         self._serial.write(f'LED:{self._led}:SET:1')
 
     @log_to_debug
     def off(self) -> None:
-        """
-        Turn off the LED.
-        """
+        """Turn off the LED."""
         self._serial.write(f'LED:{self._led}:SET:0')
 
     @log_to_debug
     def flash(self) -> None:
-        """
-        Set the LED to flash at 1Hz.
-        """
+        """Set the LED to flash at 1Hz."""
         self._serial.write(f'LED:{self._led}:SET:F')
 
     def __repr__(self) -> str:
@@ -462,6 +466,7 @@ class BatterySensor:
 
     :param serial: The serial wrapper to use for communication.
     """
+
     __slots__ = ('_serial',)
 
     def __init__(self, serial: SerialWrapper):
@@ -501,6 +506,7 @@ class Piezo:
 
     :param serial: The serial wrapper to use for communication.
     """
+
     __slots__ = ('_serial',)
 
     def __init__(self, serial: SerialWrapper):

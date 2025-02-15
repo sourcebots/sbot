@@ -3,12 +3,12 @@ from __future__ import annotations
 
 import logging
 from enum import IntEnum
-from typing import ClassVar, NamedTuple
+from typing import NamedTuple
 
-from sbot.future.board_manager import BoardManager, DiscoveryTemplate
-from sbot.logging import log_to_debug
-from sbot.serial_wrapper import SerialWrapper
-from sbot.utils import float_bounds_check, map_to_float, map_to_int
+from .internal.board_manager import BoardManager, DiscoveryTemplate
+from .internal.logging import log_to_debug
+from .internal.serial_wrapper import SerialWrapper
+from .internal.utils import float_bounds_check, map_to_float, map_to_int
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class MotorStatus(NamedTuple):
 
     output_faults: tuple[bool, ...]
     input_voltage: float
-    other: ClassVar[list[str]] = []
+    other: list[str] = []  # noqa: RUF012
 
     @classmethod
     def from_status_response(cls, response: str) -> MotorStatus:

@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Union
 
 from numpy.typing import NDArray
-from sbot.future.board_manager import BoardManager
-from sbot.marker import Marker
 
-PathLike = Path | str
+from .internal.board_manager import BoardManager
+from .marker import Marker
+
+PathLike = Union[Path, str]
 logger = logging.getLogger(__name__)
 
 

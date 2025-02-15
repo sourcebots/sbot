@@ -1,14 +1,12 @@
 """User LED Driver."""
 from __future__ import annotations
 
-import atexit
 import warnings
 from enum import Enum, IntEnum, unique
-from types import MappingProxyType
-from typing import Literal, Mapping, NamedTuple, Optional
+from typing import NamedTuple
 
-from .simulator.led_server import LedServer
-from .utils import IN_SIMULATOR
+from .internal.board_manager import BoardManager, DiscoveryTemplate
+from .internal.utils import IN_SIMULATOR
 
 try:
     import RPi.GPIO as GPIO  # isort: ignore
@@ -19,6 +17,7 @@ except ImportError:
 
 class RGBled(NamedTuple):
     """RGB LED."""
+
     red: int
     green: int
     blue: int
@@ -46,13 +45,13 @@ class RobotLEDs(IntEnum):
         return [c.value for c in cls if c.name != 'START']
 
     @classmethod
-    def user_leds(cls) -> dict[Literal['A', 'B', 'C'], RGBled]:
+    def user_leds(cls) -> list[RGBled]:
         """Get the user programmable LEDs."""
-        return {
-            'A': RGBled(cls.USER_A_RED, cls.USER_A_GREEN, cls.USER_A_BLUE),
-            'B': RGBled(cls.USER_B_RED, cls.USER_B_GREEN, cls.USER_B_BLUE),
-            'C': RGBled(cls.USER_C_RED, cls.USER_C_GREEN, cls.USER_C_BLUE),
-        }
+        return [
+            RGBled(cls.USER_A_RED, cls.USER_A_GREEN, cls.USER_A_BLUE),
+            RGBled(cls.USER_B_RED, cls.USER_B_GREEN, cls.USER_B_BLUE),
+            RGBled(cls.USER_C_RED, cls.USER_C_GREEN, cls.USER_C_BLUE),
+        ]
 
 
 class Colour(Enum):
@@ -68,48 +67,25 @@ class Colour(Enum):
     WHITE = (True, True, True)
 
 
-def get_user_leds() -> Mapping[Literal['A', 'B', 'C'], LED]:
-    """Get the user programmable LEDs."""
-    if HAS_HAT:
-        GPIO.setmode(GPIO.BCM)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+class Led:
+    """User LED Driver."""
 
-            # If this is not the first time the code is run this init will
-            # cause a warning as the gpio are already initialized, we can
-            # suppress this as we know the reason behind the warning
-            GPIO.setup(RobotLEDs.all_user_leds(), GPIO.OUT, initial=GPIO.LOW)
-        return MappingProxyType({
-            k: PhysicalLED(v) for k, v in RobotLEDs.user_leds().items()
-        })
-    elif IN_SIMULATOR:
-        led_server = LedServer.initialise()
-        if led_server is not None:
-            return MappingProxyType({
-                k: SimulationLED(v, led_server)
-                for v, k in enumerate(RobotLEDs.user_leds().keys())
-            })
-        else:
-            return MappingProxyType({
-                k: LED(v) for k, v in RobotLEDs.user_leds().items()
-            })
-    else:
-        return MappingProxyType({
-            k: LED(v) for k, v in RobotLEDs.user_leds().items()
-        })
+    def __init__(self, boards: BoardManager):
+        # Register led proxy
+        template = DiscoveryTemplate(
+            identifier='led',
+            name='led server',
+            vid=0,  # Unused
+            pid=0,  # Unused
+            board_type='KCHv1B',
+            sim_only=True,
+            sim_board_type='LedBoard',
+            max_boards=1,
+        )
+        BoardManager.register_board(template)
+        self._boards = boards
 
-
-class StartLed:
-    """
-    Start LED.
-
-    This is an internal class and should only be used by the Robot class.
-    """
-    __slots__ = ('_pwm',)
-
-    def __init__(self) -> None:
         if HAS_HAT:
-            self._pwm: Optional[GPIO.PWM] = None
             GPIO.setmode(GPIO.BCM)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -117,112 +93,53 @@ class StartLed:
                 # If this is not the first time the code is run this init will
                 # cause a warning as the gpio are already initialized, we can
                 # suppress this as we know the reason behind the warning
-                GPIO.setup(RobotLEDs.START, GPIO.OUT, initial=GPIO.LOW)
+                GPIO.setup(RobotLEDs.all_user_leds(), GPIO.OUT, initial=GPIO.LOW)
 
-            # Cleanup just the start LED to turn it off when the code exits
-            # Mypy isn't aware of the version of atexit.register(func, *args)
-            atexit.register(GPIO.cleanup, RobotLEDs.START)  # type: ignore[call-arg]
+    def set_colour(self, id: int, colour: Colour) -> None:
+        """
+        Set the colour of the user LED.
 
-    def set_state(self, state: bool) -> None:
-        """Set the start LED to on or off."""
-        if HAS_HAT:
-            if self._pwm:
-                # stop any flashing the LED is doing
-                self._pwm.stop()
-                self._pwm = None
-            GPIO.output(RobotLEDs.START, GPIO.HIGH if state else GPIO.LOW)
+        :param id: The ID of the user LED.
+        :param colour: The colour to set the LED to.
+        """
+        self._validate_id(id)
+        red = colour.value[0]
+        green = colour.value[1]
+        blue = colour.value[2]
 
-    def flash_start(self) -> None:
-        """Enable flashing the start LED."""
-        if HAS_HAT:
-            self._pwm = GPIO.PWM(RobotLEDs.START, 1)
-            self._pwm.start(50)
+        if IN_SIMULATOR:
+            led_proxy = self._boards.get_first_board('led')
+            led_proxy.write(f'LED:{id}:SET:{red:d}:{green:d}:{blue:d}')
+        elif HAS_HAT:
+            GPIO.output(RobotLEDs.user_leds()[id], colour.value)
 
-    def get_state(self) -> bool:
-        """Get the state of the start LED."""
-        return GPIO.input(RobotLEDs.START) if HAS_HAT else False
+    def get_colour(self, id: int) -> Colour:
+        """
+        Get the colour of the user LED.
 
-
-class LED:
-    """
-    User programmable LED.
-
-    This is a dummy class to handle the case where this is run on neither the
-    Raspberry Pi nor the simulator.
-    As such, this class does nothing.
-    """
-    __slots__ = ('_led',)
-
-    def __init__(self, led: RGBled) -> None:
-        self._led = led
-
-    @property
-    def colour(self) -> Colour:
-        """Get the colour of the user LED."""
-        return Colour.OFF
-
-    @colour.setter
-    def colour(self, value: Colour) -> None:
-        """Set the colour of the user LED."""
-        pass
-
-
-class PhysicalLED(LED):
-    """
-    User programmable LED.
-
-    Used when running on the Raspberry Pi to control the actual LEDs.
-    """
-    __slots__ = ('_led',)
-
-    def __init__(self, led: RGBled) -> None:
-        self._led = led
-
-    @property
-    def colour(self) -> Colour:
-        """Get the colour of the user LED."""
-        return Colour((
-            GPIO.input(self._led.red),
-            GPIO.input(self._led.green),
-            GPIO.input(self._led.blue),
-        ))
-
-    @colour.setter
-    def colour(self, value: Colour) -> None:
-        """Set the colour of the user LED."""
-        GPIO.output(
-            self._led,
-            tuple(
-                GPIO.HIGH if v else GPIO.LOW for v in value.value
-            ),
-        )
-
-
-class SimulationLED(LED):
-    """
-    User programmable LED.
-
-    Used when running in the simulator to control the simulated LEDs.
-    """
-    __slots__ = ('_led_num', '_server')
-
-    def __init__(self, led_num: int, server: LedServer) -> None:
-        self._led_num = led_num
-        self._server = server
-
-    @property
-    def colour(self) -> Colour:
-        """Get the colour of the user LED."""
-        return Colour(self._server.get_leds(self._led_num))
-
-    @colour.setter
-    def colour(self, value: Colour) -> None:
-        """Set the colour of the user LED."""
-        self._server.set_leds(
-            self._led_num,
-            (
-                bool(value.value[0]),
-                bool(value.value[1]),
-                bool(value.value[2]),
+        :param id: The ID of the user LED.
+        :return: The colour of the LED.
+        """
+        self._validate_id(id)
+        if IN_SIMULATOR:
+            led_proxy = self._boards.get_first_board('led')
+            response = led_proxy.query(f'LED:{id}:GET?')
+            red, green, blue = response.split(':')
+            return Colour(
+                # Convert string to bool
+                (red != '0', green != '0', blue != '0')
             )
-        )
+        elif HAS_HAT:
+            led = RobotLEDs.user_leds()[id]
+            Colour((
+                GPIO.input(led.red),
+                GPIO.input(led.green),
+                GPIO.input(led.blue),
+            ))
+            return Colour.OFF
+        else:
+            return Colour.OFF
+
+    def _validate_id(self, id: int) -> None:
+        if id not in range(3):
+            raise ValueError(f'Invalid LED ID: {id}')

@@ -1,3 +1,5 @@
+"""A virtual frame source for a camera connected over a socket connection."""
+
 import struct
 
 import cv2
@@ -6,13 +8,22 @@ from april_vision import FrameSource
 from numpy.typing import NDArray
 from serial import serial_for_url
 
-from ..utils import BoardInfo
+from ..internal.utils import BoardInfo
 
 HEADER_SIZE = 5  # 1 byte for the type, 4 bytes for the length
 IMAGE_TAG_ID = 0
 
 
 class WebotsRemoteCameraSource(FrameSource):
+    """
+    A virtual frame source for a camera connected to a Webots robot.
+
+    This class communicates with the camera over a socket connection.
+    Both the calibration data and the image data is read over this socket.
+
+    :param camera_info: The information about the camera to connect to.
+    """
+
     # Webots cameras include an alpha channel, this informs april_vision of how to handle it
     COLOURSPACE = cv2.COLOR_BGRA2GRAY
 

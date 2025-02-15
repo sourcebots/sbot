@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import logging
 from enum import IntEnum
-from typing import ClassVar, NamedTuple
+from typing import NamedTuple
 
-from sbot.future.board_manager import BoardManager, DiscoveryTemplate
-from sbot.logging import log_to_debug
-from sbot.serial_wrapper import SerialWrapper
+from .internal.board_manager import BoardManager, DiscoveryTemplate
+from .internal.logging import log_to_debug
+from .internal.serial_wrapper import SerialWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class PowerStatus(NamedTuple):
     temperature: int
     fan_running: bool
     regulator_voltage: float
-    other: ClassVar[list[str]] = []
+    other: list[str] = []  # noqa: RUF012
 
     @classmethod
     def from_status_response(cls, response: str) -> PowerStatus:
