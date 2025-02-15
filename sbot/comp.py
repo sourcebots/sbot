@@ -100,15 +100,15 @@ class Comp:
         if search_path:
             search_root = Path(search_path)
             if not search_root.is_dir():
-                logger.error(f"Metaddata path {search_path} does not exist")
-                return
+                raise FileNotFoundError(f"Metaddata path {search_path} does not exist")
             for item in Path(search_path).iterdir():
                 try:
                     if item.is_dir() and (item / METADATA_NAME).exists():
                         self._metadata = _load_metadata(item / METADATA_NAME)
+                        return
                     elif item.name == METADATA_NAME:
                         self._metadata = _load_metadata(item)
-                    return
+                        return
                 except PermissionError:
                     logger.debug(f"Unable to read {item}")
             else:

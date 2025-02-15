@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from sbot.utils import BoardIdentity
+from os import environ
+
+# Disable trying to run any discovery or robot code when sbot is imported
+environ['SBOT_PYTEST'] = '1'
+environ.pop('SBOT_MQTT_URL', None)
+
+from sbot.internal.utils import BoardIdentity
+from sbot.internal.board_manager import BoardManager
 
 
 def pytest_addoption(parser):
@@ -26,12 +33,12 @@ def pytest_runtest_setup(item):
 
 class MockSerialWrapper:
     """
-    A class that mocks the sbot.serial_wrapper.SerialWrapper class.
+    A class that mocks the sbot.internal.serial_wrapper.SerialWrapper class.
 
     Takes a list of 2-tuples of request and response strings.
     Asserts that each request is sent in order and returns the matching response.
 
-    Implements the same interface as sbot.serial_wrapper.SerialWrapper.
+    Implements the same interface as sbot.internal.serial_wrapper.SerialWrapper.
     """
 
     def __init__(self, responses: list[tuple[str, str]]) -> None:
@@ -94,3 +101,16 @@ class MockAtExit:
             self._callbacks.remove(callback)
         except ValueError:
             pass
+
+def setup_mock_board_manager():
+    board_manager = BoardManager()
+    board_manager._loaded = True
+
+    def preload_boards(self):
+        # Prepare the boards dictionary so every board key exists
+        for template in self._regisered_templates:
+            self.boards[template.identifier] = {}
+
+    board_manager.preload_boards = preload_boards
+
+    return board_manager

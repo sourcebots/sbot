@@ -48,6 +48,11 @@ disallow_untyped_decorators = true
 
 check_untyped_defs = true
 
+[[tool.mypy.overrides]]
+# Ignore type checking for the tests
+module = ["tests.*"]
+ignore_errors = true
+
 [tool.isort]
 atomic = true
 balanced_wrapping = true
@@ -117,10 +122,11 @@ mqtt = ["paho-mqtt >=2,<3"]
 # ### Tasks ###
 [tool.poe.env]
 PYMODULE = "sbot"
+PYFOLDERS = "sbot tests"
 
 [tool.poe.tasks.lint]
 help = "Run ruff against the project to check for linting errors."
-cmd = "ruff check $PYMODULE"
+cmd = "ruff check $PYFOLDERS"
 
 [tool.poe.tasks.type]
 help = "Run mypy against the project to check for type errors."
@@ -140,7 +146,7 @@ sequence = ["lint", "type", "test"]
 
 [tool.poe.tasks.fix]
 help = "Use ruff to fix any auto-fixable linting errors."
-cmd = "ruff check --fix-only $PYMODULE"
+cmd = "ruff check --fix-only $PYFOLDERS"
 
 [tool.poe.tasks.build]
 help = "Build the wheel and source distributions."
