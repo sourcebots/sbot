@@ -1,10 +1,10 @@
 from os import environ as _environ
 
-from .arduinos import AnalogPin, GPIOPinMode
-from .leds import Colour
-from .motors import MotorPower
-from .power import PowerOutputPosition
-from .utils import Note
+from ._arduinos import AnalogPin, GPIOPinMode
+from ._leds import Colour
+from ._motors import MotorPower
+from ._power import PowerOutputPosition
+from ._utils import Note
 
 if 'SBOT_PYTEST' not in _environ:
     from .robot import arduino, comp, leds, motors, power, servos, utils, vision

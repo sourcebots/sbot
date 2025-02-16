@@ -9,7 +9,7 @@ from typing import NamedTuple, Generator
 
 import pytest
 
-from sbot.motors import Motor, MotorPower
+from sbot._motors import Motor, MotorPower
 from sbot.internal.utils import BoardIdentity
 
 from .conftest import MockSerialWrapper, setup_mock_board_manager

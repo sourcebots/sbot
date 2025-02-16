@@ -5,7 +5,7 @@ import logging
 import time
 from enum import IntEnum
 
-from .comp import Comp
+from ._comp import Comp
 from .game_specific import GAME_LENGTH
 from .internal.board_manager import IN_SIMULATOR, BoardManager, DiscoveryTemplate
 from .internal.overrides import get_overrides

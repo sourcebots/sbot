@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import atexit
 
-from sbot.utils import IN_SIMULATOR
+from sbot._utils import IN_SIMULATOR
 
-from ..leds import RobotLEDs
+from .._leds import RobotLEDs
 
 try:
     import RPi.GPIO as GPIO  # isort: ignore

@@ -9,7 +9,7 @@ from typing import NamedTuple, Generator
 
 import pytest
 
-from sbot.servos import Servo
+from sbot._servos import Servo
 from sbot.internal.utils import BoardIdentity
 
 from .conftest import MockSerialWrapper, setup_mock_board_manager

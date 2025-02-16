@@ -9,7 +9,7 @@ from typing import NamedTuple, Generator
 
 import pytest
 
-from sbot.arduinos import AnalogPin, Arduino, GPIOPinMode
+from sbot._arduinos import AnalogPin, Arduino, GPIOPinMode
 from sbot.internal.utils import BoardIdentity
 
 from .conftest import MockSerialWrapper, setup_mock_board_manager

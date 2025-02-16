@@ -5,19 +5,19 @@ Contains instances of all the classes needed to interact with the robot hardware
 """
 import logging
 
+from ._arduinos import Arduino
+from ._comp import Comp
+from ._leds import Led
+from ._motors import Motor
+from ._power import Power
+from ._servos import Servo
+from ._utils import Utils
 from ._version import __version__
-from .arduinos import Arduino
-from .comp import Comp
+from ._vision import Vision
 from .internal.board_manager import BoardManager
 from .internal.logging import setup_logging
 from .internal.overrides import get_overrides
 from .internal.utils import ensure_atexit_on_term
-from .leds import Led
-from .motors import Motor
-from .power import Power
-from .servos import Servo
-from .utils import Utils
-from .vision import Vision
 
 logger = logging.getLogger(__name__)
 

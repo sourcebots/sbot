@@ -10,8 +10,8 @@ from typing import NamedTuple, Generator
 import pytest
 
 from sbot.internal.utils import BoardIdentity
-from sbot.power import Power, PowerOutputPosition, BatteryData
-from sbot.utils import Utils, Note
+from sbot._power import Power, PowerOutputPosition, BatteryData
+from sbot._utils import Utils, Note
 
 from .conftest import MockSerialWrapper, setup_mock_board_manager
 
