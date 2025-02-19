@@ -250,3 +250,14 @@ class SerialWrapper:
         return (
             f"<{self.__class__.__qualname__} {self.serial.port!r} {self.identity.asset_tag!r}>"
         )
+
+    def __lt__(self, other: SerialWrapper) -> bool:
+        return self.identity.asset_tag.lower() < other.identity.asset_tag.lower()
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SerialWrapper):
+            return False
+        if self.identity.asset_tag != "":
+            return self.identity.asset_tag == other.identity.asset_tag
+        else:
+            return self.serial.port == other.serial.port
