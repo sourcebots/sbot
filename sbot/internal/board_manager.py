@@ -571,8 +571,8 @@ class BoardManager:
                         logger.info(f"Connected {board_name}, serial: {asset_tag}")
                 else:
                     output_map = {
-                        idx: (port.identity.asset_tag, idx % num_outputs)
-                        for port, idx in board_outputs
+                        idx: (port.identity.asset_tag, port_idx)
+                        for idx, (port, port_idx) in enumerate(board_outputs)
                     }
                     if not output_map:
                         # No outputs found
