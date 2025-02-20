@@ -5,18 +5,28 @@ import logging
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Union
 
-from april_vision import CalibratedCamera, Frame, FrameSource
-from april_vision import Marker as AprilMarker
 from april_vision import (
-    Processor, USBCamera, __version__, calibrations,
-    find_cameras, generate_marker_size_mapping,
+    CalibratedCamera,
+    Frame,
+    FrameSource,
+    Processor,
+    USBCamera,
+    __version__,
+    calibrations,
+    find_cameras,
+    generate_marker_size_mapping,
 )
+from april_vision import Marker as AprilMarker
 from april_vision.helpers import Base64Sender
 from numpy.typing import NDArray
 
-from .marker import Marker
+from ..marker import Marker
 from .utils import (
-    IN_SIMULATOR, Board, BoardIdentity, BoardInfo, get_simulator_boards,
+    IN_SIMULATOR,
+    Board,
+    BoardIdentity,
+    BoardInfo,
+    get_simulator_boards,
 )
 
 PathLike = Union[Path, str]
@@ -37,7 +47,8 @@ class AprilCamera(Board):
     :param name: The name of the camera.
     :param vidpid: The VID:PID of the camera.
     """
-    __slots__ = ('_serial_num', '_cam')
+
+    __slots__ = ('_cam', '_serial_num')
 
     @staticmethod
     def get_board_type() -> str:
@@ -97,7 +108,7 @@ class AprilCamera(Board):
                             including the url to connect to.
         :return: The camera object.
         """
-        from .simulator.camera import WebotsRemoteCameraSource
+        from sbot.simulator.camera import WebotsRemoteCameraSource
 
         camera_source = WebotsRemoteCameraSource(camera_info)
         return cls(
@@ -180,6 +191,8 @@ class AprilCamera(Board):
         markers = self._cam.see(frame=frame)
 
         if save:
+            if not frame.flags.writeable:
+                frame = frame.copy()
             self._cam.save(save, frame=frame, detections=markers)
         return [Marker.from_april_vision_marker(marker) for marker in markers]
 
@@ -247,12 +260,12 @@ def _setup_cameras(
     if publish_func:
         frame_sender = Base64Sender(publish_func)
 
-    cameras = AprilCamera._discover()
+    cameras = AprilCamera._discover()  # noqa: SLF001
 
     for camera in cameras.values():
         # Set the tag sizes in the camera
-        camera._set_marker_sizes(expanded_tag_sizes)
+        camera._set_marker_sizes(expanded_tag_sizes)  # noqa: SLF001
         if publish_func:
-            camera._set_detection_hook(frame_sender.annotated_frame_hook)
+            camera._set_detection_hook(frame_sender.annotated_frame_hook)  # noqa: SLF001
 
     return cameras

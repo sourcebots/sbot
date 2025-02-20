@@ -9,12 +9,18 @@ from typing import NamedTuple
 
 from serial.tools.list_ports import comports
 
-from .exceptions import BoardDisconnectionError, IncorrectBoardError
-from .logging import log_to_debug
-from .serial_wrapper import SerialWrapper
+from ..internal.exceptions import BoardDisconnectionError, IncorrectBoardError
+from ..internal.logging import log_to_debug
+from ..internal.serial_wrapper import SerialWrapper
 from .utils import (
-    IN_SIMULATOR, Board, BoardIdentity, float_bounds_check,
-    get_simulator_boards, get_USB_identity, map_to_float, map_to_int,
+    IN_SIMULATOR,
+    Board,
+    BoardIdentity,
+    float_bounds_check,
+    get_simulator_boards,
+    get_USB_identity,
+    map_to_float,
+    map_to_int,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,15 +29,17 @@ BAUDRATE = 115200
 
 class MotorPower(IntEnum):
     """Special values for motor power."""
+
     BRAKE = 0
     COAST = -1024  # A value outside the allowable range
 
 
 class MotorStatus(NamedTuple):
     """A tuple representing the status of the motor board."""
+
     output_faults: tuple[bool, ...]
     input_voltage: float
-    other: list[str] = []
+    other: list[str] = []  # noqa: RUF012
 
     @classmethod
     def from_status_response(cls, response: str) -> MotorStatus:
@@ -58,7 +66,8 @@ class MotorBoard(Board):
     :param serial_port: The serial port to connect to.
     :param initial_identity: The identity of the board, as reported by the USB descriptor.
     """
-    __slots__ = ('_serial', '_identity', '_motors')
+
+    __slots__ = ('_identity', '_motors', '_serial')
 
     @staticmethod
     def get_board_type() -> str:
@@ -121,7 +130,7 @@ class MotorBoard(Board):
                     f"Board returned type {err.returned_type!r}, "
                     f"expected {err.expected_type!r}. Ignoring this device")
                 continue
-            boards[board._identity.asset_tag] = board
+            boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @classmethod
@@ -161,7 +170,7 @@ class MotorBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
 
         # Add any manually specified boards
         if isinstance(manual_boards, list):
@@ -184,7 +193,7 @@ class MotorBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board
+                boards[board._identity.asset_tag] = board  # noqa: SLF001
         return MappingProxyType(boards)
 
     @property
@@ -252,7 +261,8 @@ class Motor:
     :param serial: The serial wrapper to use to communicate with the board.
     :param index: The index of the motor on the board.
     """
-    __slots__ = ('_serial', '_index')
+
+    __slots__ = ('_index', '_serial')
 
     def __init__(self, serial: SerialWrapper, index: int):
         self._serial = serial
@@ -326,7 +336,7 @@ class Motor:
 
 
 if __name__ == '__main__':  # pragma: no cover
-    motorboards = MotorBoard._get_supported_boards()
+    motorboards = MotorBoard._get_supported_boards()  # noqa: SLF001
     for serial_num, board in motorboards.items():
         print(serial_num)
         print(board.identify())

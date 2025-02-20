@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 from typing import TypedDict
 
-from .exceptions import MetadataKeyError
+from ..internal.exceptions import MetadataKeyError
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ class Metadata(TypedDict):
     :param is_competition: Whether the robot is in competition mode
     :param zone: The zone that the robot is in
     """
+
     is_competition: bool
     zone: int
 

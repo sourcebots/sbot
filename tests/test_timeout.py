@@ -1,18 +1,19 @@
 """Test the timeout function."""
-from time import sleep, time
-
 import os
-from pathlib import Path
 import signal
 import subprocess
 import sys
-import pytest
+from pathlib import Path
+from time import sleep, time
 from unittest.mock import Mock
 
-from sbot.timeout import kill_after_delay
+import pytest
+
+from sbot.internal.timeout import kill_after_delay
 
 TEST_FILES = list((Path(__file__).parent / 'test_data/timeout_scripts').iterdir())
 EXTRA_TEST_FILES_DIR = Path(__file__).parent / 'test_data/timeout_scripts_extra'
+
 
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on Windows")
 def test_kill_after_delay() -> None:

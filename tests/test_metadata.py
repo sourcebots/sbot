@@ -4,7 +4,14 @@ from pathlib import Path
 
 from pytest import raises
 
-from sbot.metadata import METADATA_ENV_VAR, MetadataKeyError, load
+from sbot._comp import METADATA_ENV_VAR, Comp, MetadataKeyError, Metadata
+
+
+def load() -> Metadata:
+    """Load the metadata."""
+    comp = Comp()
+    comp._load()
+    return comp._metadata
 
 
 def test_metadata_env_var() -> None:

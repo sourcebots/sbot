@@ -27,6 +27,7 @@ class MetadataNotReadyError(RuntimeError):
 
 class BoardDisconnectionError(IOError):
     """Raised when communication to a board fails and cannot be reestablished."""
+
     pass
 
 
@@ -39,6 +40,7 @@ class IncorrectBoardError(IOError):
     :param board_type: The board type returned by the board
     :param expected_type: The board type expected by the class
     """
+
     def __init__(self, board_type: str, expected_type: str):
         self.returned_type = board_type
         self.expected_type = expected_type

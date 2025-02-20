@@ -1,6 +1,5 @@
-"""
-Classes for marker detections and various axis representations.
-"""
+"""Classes for marker detections and various axis representations."""
+
 from math import atan2, hypot
 from typing import NamedTuple, Tuple, cast
 
@@ -88,7 +87,7 @@ class Marker(NamedTuple):
         if marker.rvec is None or marker.tvec is None:
             raise ValueError("Marker lacks pose information")
 
-        _cartesian = cls._standardise_tvec(marker.tvec.flatten())
+        cartesian = cls._standardise_tvec(marker.tvec.flatten())
 
         return cls(
             id=marker.id,
@@ -99,9 +98,9 @@ class Marker(NamedTuple):
             pixel_centre=PixelCoordinates(*marker.pixel_centre),
 
             position=Position(
-                distance=int(hypot(*_cartesian) * 1000),
-                horizontal_angle=atan2(-_cartesian.y, _cartesian.x),
-                vertical_angle=atan2(_cartesian.z, _cartesian.x),
+                distance=int(hypot(*cartesian) * 1000),
+                horizontal_angle=atan2(-cartesian.y, cartesian.x),
+                vertical_angle=atan2(cartesian.z, cartesian.x),
             ),
 
             orientation=Orientation.from_rvec_matrix(marker.rvec),

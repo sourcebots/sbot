@@ -1,3 +1,4 @@
+"""MQTT client for sbot remote communication."""
 from __future__ import annotations
 
 import atexit
@@ -18,6 +19,13 @@ MQTT_VALID = 'SBOT_MQTT_URL' in os.environ
 
 
 class MQTTClient:
+    """
+    Wrapper around the Paho MQTT client.
+
+    Runs the client in a background thread and handles subscriptions and
+    message callbacks.
+    """
+
     def __init__(
         self,
         client_name: str | None = None,
@@ -174,7 +182,7 @@ class MQTTClient:
     ) -> None:
         if reason_code.is_failure:
             LOGGER.warning(
-                f"Failed to connect to MQTT broker. Return code: {reason_code.getName()}"  # type: ignore[no-untyped-call] # noqa: E501
+                f"Failed to connect to MQTT broker. Return code: {reason_code.getName()}"  # type: ignore[no-untyped-call]
             )
             return
 
@@ -185,6 +193,8 @@ class MQTTClient:
 
 
 class MQTTVariables(TypedDict):
+    """Variables for connecting to an MQTT broker."""
+
     host: str
     port: int
     topic_prefix: str
@@ -218,6 +228,8 @@ def get_mqtt_variables() -> MQTTVariables:
 
 
 class RemoteStartButton:
+    """MQTT client for the remote start button."""
+
     def __init__(self, mqtt_client: MQTTClient) -> None:
         self._mqtt_client = mqtt_client
         self._start_pressed = Event()

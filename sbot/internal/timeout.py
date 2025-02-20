@@ -47,7 +47,7 @@ def timeout_handler(signal_type: int, stack_frame: Optional[FrameType]) -> None:
         signal.signal(signal.SIGALRM, signal.SIG_DFL)
         signal.alarm(2)  # Allow 2 seconds for cleanup
 
-        atexit._run_exitfuncs()
+        atexit._run_exitfuncs()  # noqa: SLF001
         exit(0)
 
 
@@ -72,7 +72,6 @@ def kill_after_delay(timeout_seconds: int) -> None:
 
     :param timeout_seconds: The number of seconds to wait before killing the robot
     """
-
     if sys.platform == "win32":
         # Windows doesn't have SIGALRM,
         # so we approximate its functionality using a delayed SIGTERM

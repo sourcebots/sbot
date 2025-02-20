@@ -1,0 +1,6 @@
+[tool.ruff.lint]
+extend-ignore = [
+    "SLF001",  # Allow accessing private members
+    "D103",  # Allow missing docstring in public function
+    "D100",  # Allow missing docstring in module
+]

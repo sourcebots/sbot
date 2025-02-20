@@ -4,14 +4,12 @@ from __future__ import annotations
 import logging
 import os
 import signal
-import socket
 from abc import ABC, abstractmethod
 from types import FrameType
-from typing import Any, Mapping, NamedTuple, TypeVar
+from typing import Any, NamedTuple
 
 from serial.tools.list_ports_common import ListPortInfo
 
-T = TypeVar('T')
 logger = logging.getLogger(__name__)
 
 IN_SIMULATOR = os.environ.get('WEBOTS_SIMULATOR', '') == '1'
@@ -30,6 +28,7 @@ class BoardIdentity(NamedTuple):
         this should match what is printed on the board
     :param sw_version: The firmware version of the board
     """
+
     manufacturer: str = ""
     board_type: str = ""
     asset_tag: str = ""
@@ -37,11 +36,8 @@ class BoardIdentity(NamedTuple):
 
 
 class BoardInfo(NamedTuple):
-    """
-    A container for the information about a board connection.
+    """A container for the information about a board connection."""
 
-
-    """
     url: str
     serial_number: str
     type_str: str
@@ -49,11 +45,12 @@ class BoardInfo(NamedTuple):
 
 class Board(ABC):
     """
-    This is the base class for all boards.
+    The base class for all boards.
 
     Slots are used to prevent adding attributes to the class at runtime.
     They must also be defined in subclasses.
     """
+
     __slots__ = ('_identity',)
 
     @staticmethod
@@ -128,48 +125,6 @@ def map_to_float(
     return round(value, precision)
 
 
-def singular(container: Mapping[str, T]) -> T:
-    """
-    Extract the single item from a container of one item.
-
-    This is used to access individual boards without needing their serial number.
-
-    :param container: A mapping of connected boards of a type
-    :raises RuntimeError: If there is not exactly one of this type of board connected
-    :return: _description_
-    """
-    length = len(container)
-
-    if length == 1:
-        return list(container.values())[0]
-    elif length == 0:
-        raise RuntimeError('No boards of this type found')
-    else:
-        raise RuntimeError(f'expected only one to be connected, but found {length}')
-
-
-def obtain_lock(lock_port: int = 10653) -> socket.socket:
-    """
-    Bind to a port to claim it and prevent another process using it.
-
-    We use this to prevent multiple robot instances running on the same machine,
-    as they would conflict with each other.
-
-    :param lock_port: The port to bind to, defaults to 10653 to be compatible with sr-robot3
-    :raises OSError: If the port failed to bind, indicating another robot instance is running
-    :return: The bound socket
-    """
-    lock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # We bind to a port to claim it and prevent another process using it
-    try:
-        lock.bind(("localhost", lock_port))
-    except OSError:
-        raise OSError('Unable to obtain lock, Is another robot instance already running?')
-
-    return lock
-
-
 def float_bounds_check(value: Any, min_val: float, max_val: float, err_msg: str) -> float:
     """
     Test that a value can be converted to a float and is within the given bounds.
@@ -224,7 +179,6 @@ def ensure_atexit_on_term() -> None:
     > The functions registered via [`atexit`] are not called when the program is
       killed by a signal not handled by Python
     """
-
     if signal.getsignal(signal.SIGTERM) != signal.SIG_DFL:
         # If a signal handler is already present for SIGTERM,
         # this is sufficient for `atexit` to trigger, so do nothing.

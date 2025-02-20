@@ -1,3 +1,32 @@
+# ### Linting Rules ###
+[tool.ruff]
+target-version = "py39"
+line-length = 95
+lint.select = [
+    "D",  # pydocstyle
+    "E",  # pycodestyle error
+    "F",  # pyflakes
+    "I",  # isort
+    "W",  # pycodestyle warning
+    "RUF",  # ruff-specific
+    "B006",  # mutable default argument
+    "B021",  # f-string docstring
+    "COM818",  # warn about implicitly creating a tuple
+    "SLF001",  # warn about accessing private members, these can be noqa'd when necessary
+]
+lint.preview = true  # Enable preview to get the rest of pycodestyle errors
+lint.ignore = [
+    "D104",  # Ignore missing docstring in public package
+    "D105",  # Ignore missing docstring in magic method
+    "D107",  # Ignore missing docstring in __init__
+    "D401",  # Ignore first line of docstring should be in imperative mood
+    "D203",  # Ignore 1 blank line required before class docstring
+    "D212",  # Ignore Multi-line docstring summary should start at the first line
+    "RUF005",  # Allow alternate iterable unpacking
+    "RUF015",  # Allow + concatenation
+]
+
+# ### Formatting Rules ###
 [tool.mypy]
 mypy_path = "stubs"
 
@@ -18,6 +47,11 @@ disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 
 check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+# Ignore type checking for the tests
+module = ["tests.*"]
+ignore_errors = true
 
 [tool.isort]
 atomic = true
@@ -50,11 +84,12 @@ authors = [{name = "SourceBots", email =  "hello@sourcebots.co.uk"}]
 readme = "README.md"
 license = {file = "LICENSE"}
 dynamic = ["version"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "pyserial >=3,<4",
     "april_vision==2.2.0",
     "typing-extensions; python_version<'3.10'",
+    "python-dotenv==1.0.1",
 ]
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -71,8 +106,8 @@ Documentation = "https://docs.sourcebots.co.uk"
 
 [project.optional-dependencies]
 dev = [
-    "flake8",
-    "isort",
+    "poethepoet >=0.0.1,<1",
+    "ruff >=0.9,<1",
     "mypy==1.10.0; python_version<'3.9'",
     "mypy>=1.7,<2; python_version>='3.9'",
     "build",
@@ -83,3 +118,44 @@ dev = [
 ]
 vision = ["opencv-python-headless >=4,<5"]
 mqtt = ["paho-mqtt >=2,<3"]
+
+# ### Tasks ###
+[tool.poe.env]
+PYMODULE = "sbot"
+PYFOLDERS = "sbot tests"
+
+[tool.poe.tasks.lint]
+help = "Run ruff against the project to check for linting errors."
+cmd = "ruff check $PYFOLDERS"
+
+[tool.poe.tasks.type]
+help = "Run mypy against the project to check for type errors."
+cmd = "python -m mypy $PYMODULE"
+
+[tool.poe.tasks.test]
+help = "Run pytest against the project to check for test errors."
+cmd = "python -m pytest --cov=$PYMODULE --cov-report=term --cov-report=xml tests"
+
+[tool.poe.tasks.test-html]
+help = "Run pytest against the project to check for test errors."
+cmd = "python -m pytest --cov=$PYMODULE --cov-report=html tests"
+
+[tool.poe.tasks.check]
+help = "Check the project for linting, type and test errors."
+sequence = ["lint", "type", "test"]
+
+[tool.poe.tasks.fix]
+help = "Use ruff to fix any auto-fixable linting errors."
+cmd = "ruff check --fix-only $PYFOLDERS"
+
+[tool.poe.tasks.build]
+help = "Build the wheel and source distributions."
+cmd = "python -m build"
+
+[tool.poe.tasks.clean]
+help = "Clean the project of any build artifacts."
+sequence = [
+    "shutil:rmtree('dist', ignore_errors=1)",
+    "shutil:rmtree('build', ignore_errors=1)",
+]
+default_item_type = "script"

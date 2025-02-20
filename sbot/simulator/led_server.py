@@ -1,24 +1,23 @@
-"""A virtual clock source connected over a socket connection."""
-
+"""Interface to control user LEDs over a socket."""
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 
 from ..internal.exceptions import BoardDisconnectionError, IncorrectBoardError
 from ..internal.serial_wrapper import SerialWrapper
-from ..internal.utils import BoardIdentity, get_simulator_boards
+from ..internal.utils import Board, BoardIdentity, get_simulator_boards
 
 logger = logging.getLogger(__name__)
 
+# This value is not actually used since the serial port is a TCP socket
 BAUDRATE = 115200
 
 
-class TimeServer:
+class LedServer(Board):
     """
-    A virtual clock source connected over a socket connection.
+    LED control over a socket.
 
-    :param serial_port: The URL of the serial port to connect to.
+    Used when running in the simulator to control the simulated LEDs.
     """
 
     @staticmethod
@@ -26,9 +25,9 @@ class TimeServer:
         """
         Return the type of the board.
 
-        :return: The literal string 'TimeServer'.
+        :return: The literal string 'KCHv1B'.
         """
-        return 'TimeServer'
+        return 'KCHv1B'
 
     def __init__(
         self,
@@ -41,8 +40,6 @@ class TimeServer:
             serial_port,
             BAUDRATE,
             identity=initial_identity,
-            # Disable the timeout so sleep works properly
-            timeout=None,
         )
 
         self._identity = self.identify()
@@ -50,15 +47,14 @@ class TimeServer:
             raise IncorrectBoardError(self._identity.board_type, self.get_board_type())
         self._serial.set_identity(self._identity)
 
-    @classmethod
-    def initialise(cls) -> 'TimeServer' | None:
-        """
-        Initialise the board.
+        # Reset the board to a known state
+        self._serial.write('*RESET')
 
-        :return: The initialised board, or None if no board is found.
-        """
+    @classmethod
+    def initialise(cls) -> LedServer | None:
+        """Initialise the LED server using simulator discovery."""
         # The filter here is the name of the emulated board in the simulator
-        boards = get_simulator_boards('TimeServer')
+        boards = get_simulator_boards('LedBoard')
 
         if not boards:
             return None
@@ -76,7 +72,7 @@ class TimeServer:
             board = cls(board_info.url, initial_identity)
         except BoardDisconnectionError:
             logger.warning(
-                f"Simulator specified time server at port {board_info.url!r}, "
+                f"Simulator specified LED board at port {board_info.url!r}, "
                 "could not be identified. Ignoring this device")
             return None
         except IncorrectBoardError as err:
@@ -96,22 +92,12 @@ class TimeServer:
         response = self._serial.query('*IDN?')
         return BoardIdentity(*response.split(':'))
 
-    def get_time(self) -> float:
-        """
-        Get the current time from the board.
+    def set_leds(self, led_num: int, value: tuple[bool, bool, bool]) -> None:
+        """Set the colour of the LED."""
+        self._serial.write(f'LED:{led_num}:SET:{value[0]:d}:{value[1]:d}:{value[2]:d}')
 
-        :return: The current time in seconds since the epoch.
-        """
-        time_str = self._serial.query('TIME?')
-        return datetime.fromisoformat(time_str).timestamp()
-
-    def sleep(self, duration: float) -> None:
-        """
-        Sleep for a specified duration.
-
-        :param duration: The duration to sleep for in seconds.
-        """
-        if duration < 0:
-            raise ValueError("sleep length must be non-negative")
-
-        self._serial.query(f'SLEEP:{int(duration * 1000)}')
+    def get_leds(self, led_num: int) -> tuple[bool, bool, bool]:
+        """Get the colour of the LED."""
+        response = self._serial.query(f'LED:{led_num}:GET?')
+        red, green, blue = response.split(':')
+        return bool(int(red)), bool(int(green)), bool(int(blue))

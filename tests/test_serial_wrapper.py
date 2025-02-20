@@ -2,9 +2,9 @@ import logging
 
 import pytest
 
-from sbot.exceptions import BoardDisconnectionError
-from sbot.serial_wrapper import SerialWrapper, retry
-from sbot.utils import BoardIdentity
+from sbot.internal.exceptions import BoardDisconnectionError
+from sbot.internal.serial_wrapper import SerialWrapper, retry
+from sbot.internal.utils import BoardIdentity
 
 
 def test_retry_exception() -> None:
@@ -96,9 +96,9 @@ def test_serial_wrapper(caplog) -> None:
     assert serial_wrapper.query("Echo test") == "Echo test"
     assert serial_wrapper.serial.is_open
     assert caplog.record_tuples == [
-        ('sbot.serial_wrapper', logging.INFO, 'Connected to board Test board:5678'),
-        ('sbot.serial_wrapper', 5, "Serial write - 'Echo test'"),
-        ('sbot.serial_wrapper', 5, "Serial read  - 'Echo test'"),
+        ('sbot.internal.serial_wrapper', logging.INFO, 'Connected to board Test board:5678'),
+        ('sbot.internal.serial_wrapper', 5, "Serial write - 'Echo test'"),
+        ('sbot.internal.serial_wrapper', 5, "Serial read  - 'Echo test'"),
     ]
 
     # Test that an exception is raised if a NACK is received
@@ -144,30 +144,30 @@ def test_serial_wrapper_message_timeout(caplog, monkeypatch) -> None:
         serial_wrapper.query("Echo test")
 
     assert caplog.record_tuples == [
-        ('sbot.serial_wrapper', 5, "Serial write - 'Echo test'"),
-        ('sbot.serial_wrapper', 5, "Serial read  - ''"),
-        ('sbot.serial_wrapper', logging.WARNING,
+        ('sbot.internal.serial_wrapper', 5, "Serial write - 'Echo test'"),
+        ('sbot.internal.serial_wrapper', 5, "Serial read  - ''"),
+        ('sbot.internal.serial_wrapper', logging.WARNING,
          'Connection to board : timed out waiting for response'),
-        ('sbot.serial_wrapper', logging.WARNING, 'Board : disconnected'),
+        ('sbot.internal.serial_wrapper', logging.WARNING, 'Board : disconnected'),
 
-        ('sbot.serial_wrapper', logging.INFO, 'Connected to board :'),
-        ('sbot.serial_wrapper', 5, "Serial write - 'Echo test'"),
-        ('sbot.serial_wrapper', 5, "Serial read  - ''"),
-        ('sbot.serial_wrapper', logging.WARNING,
+        ('sbot.internal.serial_wrapper', logging.INFO, 'Connected to board :'),
+        ('sbot.internal.serial_wrapper', 5, "Serial write - 'Echo test'"),
+        ('sbot.internal.serial_wrapper', 5, "Serial read  - ''"),
+        ('sbot.internal.serial_wrapper', logging.WARNING,
          'Connection to board : timed out waiting for response'),
-        ('sbot.serial_wrapper', logging.WARNING, 'Board : disconnected'),
+        ('sbot.internal.serial_wrapper', logging.WARNING, 'Board : disconnected'),
 
-        ('sbot.serial_wrapper', logging.INFO, 'Connected to board :'),
-        ('sbot.serial_wrapper', 5, "Serial write - 'Echo test'"),
-        ('sbot.serial_wrapper', 5, "Serial read  - ''"),
-        ('sbot.serial_wrapper', logging.WARNING,
+        ('sbot.internal.serial_wrapper', logging.INFO, 'Connected to board :'),
+        ('sbot.internal.serial_wrapper', 5, "Serial write - 'Echo test'"),
+        ('sbot.internal.serial_wrapper', 5, "Serial read  - ''"),
+        ('sbot.internal.serial_wrapper', logging.WARNING,
          'Connection to board : timed out waiting for response'),
-        ('sbot.serial_wrapper', logging.WARNING, 'Board : disconnected'),
+        ('sbot.internal.serial_wrapper', logging.WARNING, 'Board : disconnected'),
 
-        ('sbot.serial_wrapper', logging.INFO, 'Connected to board :'),
-        ('sbot.serial_wrapper', 5, "Serial write - 'Echo test'"),
-        ('sbot.serial_wrapper', 5, "Serial read  - ''"),
-        ('sbot.serial_wrapper', logging.WARNING,
+        ('sbot.internal.serial_wrapper', logging.INFO, 'Connected to board :'),
+        ('sbot.internal.serial_wrapper', 5, "Serial write - 'Echo test'"),
+        ('sbot.internal.serial_wrapper', 5, "Serial read  - ''"),
+        ('sbot.internal.serial_wrapper', logging.WARNING,
          'Connection to board : timed out waiting for response'),
-        ('sbot.serial_wrapper', logging.WARNING, 'Board : disconnected'),
+        ('sbot.internal.serial_wrapper', logging.WARNING, 'Board : disconnected'),
     ]
