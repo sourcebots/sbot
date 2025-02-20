@@ -13,6 +13,9 @@ def load_overrides() -> None:
     # Load the .env file
     config = dotenv_values("override.env")
 
+    # Make config keys uppercase
+    config = {key.upper(): value for key, value in config.items()}
+
     # Load from environment variables prefixed with SBOT_
     config_from_env = {
         name.replace("SBOT_", "", 1): value

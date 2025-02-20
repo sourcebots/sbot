@@ -229,7 +229,8 @@ class BoardManager:
 
         # Do manual board loading, get list of ports from overrides
         for template in self._regisered_templates:
-            manual_port_str = overrides.get(f'MANUAL_{template.identifier}_PORTS') or ""
+            board_type = template.identifier.upper()
+            manual_port_str = overrides.get(f'MANUAL_{board_type}_PORTS') or ""
             if not manual_port_str:
                 continue
 
@@ -253,7 +254,7 @@ class BoardManager:
 
         # Sort boards by asset tag
         for board_type in self.boards.keys():
-            sort_override = overrides.get(f'SORT_{board_type}_ORDER') or ""
+            sort_override = overrides.get(f'SORT_{board_type.upper()}_ORDER') or ""
             if sort_override:
                 self._custom_sort(board_type, sort_override.split(','))
             else:
