@@ -130,7 +130,7 @@ class MotorBoard(Board):
                     f"Board returned type {err.returned_type!r}, "
                     f"expected {err.expected_type!r}. Ignoring this device")
                 continue
-            boards[board._identity.asset_tag] = board  # noqa: SLF001
+            boards[board._identity.asset_tag] = board
         return MappingProxyType(boards)
 
     @classmethod
@@ -170,7 +170,7 @@ class MotorBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board  # noqa: SLF001
+                boards[board._identity.asset_tag] = board
 
         # Add any manually specified boards
         if isinstance(manual_boards, list):
@@ -193,7 +193,7 @@ class MotorBoard(Board):
                         f"Board returned type {err.returned_type!r}, "
                         f"expected {err.expected_type!r}. Ignoring this device")
                     continue
-                boards[board._identity.asset_tag] = board  # noqa: SLF001
+                boards[board._identity.asset_tag] = board
         return MappingProxyType(boards)
 
     @property
