@@ -87,7 +87,7 @@ dynamic = ["version"]
 requires-python = ">=3.9"
 dependencies = [
     "pyserial >=3,<4",
-    "april_vision==2.2.0",
+    "april_vision==3.0.0",
     "typing-extensions; python_version<'3.10'",
     "python-dotenv==1.0.1",
 ]
@@ -116,7 +116,7 @@ dev = [
     "pytest-cov",
     "paho-mqtt >=2,<3"
 ]
-vision = ["opencv-python-headless >=4,<5"]
+vision = ["opencv-python-headless >=4.10,<5"]
 mqtt = ["paho-mqtt >=2,<3"]
 
 # ### Tasks ###
