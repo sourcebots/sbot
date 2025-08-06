@@ -416,6 +416,7 @@ class BoardManager:
         :raises ValueError: If the output does not exist on the board.
         :raises KeyError: If no board with the given identifier is registered.
         """
+        assert idx >= 0, "Output identifiers must be positive"
         try:
             return self.outputs[identifier][idx]
         except IndexError:
