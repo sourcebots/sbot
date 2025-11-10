@@ -64,7 +64,7 @@ class WebotsRemoteCameraSource(FrameSource):
         rgb_frame_raw: NDArray[np.uint8] = np.frombuffer(img_data, np.uint8)
 
         # Height is first, then width, then channels
-        return rgb_frame_raw.reshape((self.image_size[1], self.image_size[0], 4))
+        return rgb_frame_raw.reshape((self.image_size[1], self.image_size[0], 4), copy=True)
 
     def close(self) -> None:
         """Close the underlying socket on exit."""
