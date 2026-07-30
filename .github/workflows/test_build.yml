@@ -15,7 +15,7 @@ jobs:
           - os: windows-latest
             py_version: "3.9"
           - os: windows-latest
-            py_version: "3.12"  # WinSDK doesn't support 3.13, need to update april-vision
+            py_version: "3.13"
           - os: macos-latest
             py_version: "3.9"
           - os: macos-latest
