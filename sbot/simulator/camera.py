@@ -1,5 +1,6 @@
 """A virtual frame source for a camera connected over a socket connection."""
 
+import atexit
 import struct
 
 import cv2
@@ -49,6 +50,8 @@ class WebotsRemoteCameraSource(FrameSource):
         response = self._make_request("CAM:RESOLUTION?")
         self.image_size = tuple(map(int, response.split(b":")))
         assert len(self.image_size) == 2, f"Invalid image dimensions: {self.image_size}"
+
+        atexit.register(self.close)
 
     def read(self, fresh: bool = True) -> NDArray:
         """
