@@ -117,7 +117,7 @@ dev = [
     "pytest-cov",
     "paho-mqtt >=2,<3"
 ]
-vision = ["opencv-python-headless >=4.10,<5"]
+vision = ["opencv-python-headless >=4.10,<6"]
 mqtt = ["paho-mqtt >=2,<3"]
 
 # ### Tasks ###
